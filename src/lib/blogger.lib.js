@@ -108,14 +108,14 @@ async function convertBloggerPosts(exportedData, extractConfig) {
         if (extractConfig) {
           if (!extractConfig.enabled) return
           // update image sources
-          const hostURL = extractConfig.hostPath + bloggerPost.author.displayName;
+          const hostURL = extractConfig.hostPath + bloggerPost.author.displayName + '/' + index;
           img.setAttribute('src', encodeURI(hostURL + '/' + filename));
 
           // update new image urls
           bloggerPost.content = document.toString();
 
           // configure paths
-          const folderPath = extractConfig.uploadPath + bloggerPost.author.displayName;
+          const folderPath = extractConfig.uploadPath + bloggerPost.author.displayName + '/' + index;
           const savePath = path.resolve(folderPath, filename);
           await fs.mkdir(folderPath, { recursive: true });
 

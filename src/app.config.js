@@ -17,7 +17,7 @@ const CONFIG = {
       uploadPath: './public/content/',
       hostPath: 'http://127.0.0.1:3000/content/',
       errorLog: path.resolve('./public/dist', 'missing_images.txt'),
-      inspectLog: path.resolve('./public/dist', 'manual_download.json')
+      inspectLog: path.resolve('./public/dist', 'manual_download.json'),
     },
   },
 

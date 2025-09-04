@@ -10,7 +10,7 @@
   ><sup><%= posts.length %></sup>
   <div id="dropDown<%= index %>" class="dropdown-content">
     <% posts.forEach((post) => { %>
-    <a href="/post/<%=post.postId%>"><%=post.title%></a>
+    <a href="/posts/<%=post.postId%>"><%=post.title%></a>
     <% }); %>
   </div>
   <% });%> 

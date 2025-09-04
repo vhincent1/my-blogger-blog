@@ -11,11 +11,12 @@ const CONFIG = {
     exported: './public/dist/blogger-export.json',
     new: './public/dist/new.json',
 
-    // where to save/display exported media
+    // where to save/display exported media (updates <img src> tags)
     exportConfig: {
+      enabled: true,
       uploadPath: './public/content/',
       hostPath: 'http://127.0.0.1:3000/content/',
-      errorLog: path.resolve('./public/dist', 'missing_images.json'),
+      errorLog: path.resolve('./public/dist', 'missing_images.txt'),
       inspectLog: path.resolve('./public/dist', 'manual_download.json')
     },
   },
@@ -23,11 +24,8 @@ const CONFIG = {
   database: {
     type: 'json', // storage type
     file: './public/dist/new.json', // blog posts data
-
     // uploaded media path
-    // uploadPath: process.cwd() + '/public/content/',
-    uploadPath: '/public/content/',
-
+    uploadPath: process.cwd() + '/public/content/',
     // host: 'http://127.0.0.1:3000', // host
   },
 

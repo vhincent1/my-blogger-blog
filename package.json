@@ -26,7 +26,6 @@
     "express-session": "^1.18.2",
     "googleapis": "^159.0.0",
     "jsonwebtoken": "^9.0.2",
-    "my-blogger-api": "../my-blogger-api",
     "node-fetch": "^3.3.2",
     "perf_hooks": "^0.0.1"
   },

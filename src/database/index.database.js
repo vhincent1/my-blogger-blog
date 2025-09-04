@@ -17,8 +17,14 @@ class Database {
   async load() {
     switch (this.config.type) {
       case 'json':
+        // if (!fs.existsSync(this.config.file)) {
+        //   this.blogPosts = []
+        //   this.sizeTable = []
+        //   return
+        // }
         this.blogPosts = await readJsonFile(this.config.file);
         this.sizeTable = await this.loadSizeTable();
+
         this.blogPosts.forEach(async (post) => {
           const size = await this.getSizeTable(post.id);
           if (size) post.size = size;
@@ -36,14 +42,22 @@ class Database {
     this.blogPosts.forEach(async (post) => {
       // size of images
       let totalImageSize = 0;
-      if (post.media)
+      if (post.media) {
+        // console.log(post.media)
         for (const filename of post.media.images) {
-          const imagePath = this.config.uploadPath + post.author + '/' + filename;
+          // console.log(decodeURIComponent(filename))
+          const imagePath = this.config.uploadPath + post.author + '/' + decodeURIComponent(filename);
           if (fs.existsSync(imagePath)) {
             const size = fs.statSync(imagePath).size;
             totalImageSize += size;
+          } else {
+            // console.log('doesnt exist: '+imagePath)
           }
         }
+      }
+
+      // if(totalImageSize>0) console.log(post.id)
+
 
       // size of post
       const jsonString = JSON.stringify(post, (key, value) => {

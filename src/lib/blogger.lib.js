@@ -71,6 +71,7 @@ async function downloadImage(imageUrl, savePath) {
 async function convertBloggerPosts(exportedData, extractConfig) {
   const bloggerData = exportedData.reverse();
   const convertedPosts = [];
+  const errorLog = [];
   for (let index = 0; index < bloggerData.length; index++) {
     const bloggerPost = bloggerData[index];
 
@@ -101,10 +102,11 @@ async function convertBloggerPosts(exportedData, extractConfig) {
     if (imgElement.length > 0) {
       imgElement.forEach(async (img) => {
         const originalSource = img.getAttribute('src');
-        const filename = path.basename(new URL(originalSource).pathname);
+        const filename = decodeURIComponent(path.basename(new URL(originalSource).pathname));
         imageFiles.push(filename);
 
         if (extractConfig) {
+          if (!extractConfig.enabled) return
           // update image sources
           const hostURL = extractConfig.hostPath + bloggerPost.author.displayName;
           img.setAttribute('src', encodeURI(hostURL + '/' + filename));
@@ -128,8 +130,7 @@ async function convertBloggerPosts(exportedData, extractConfig) {
           // }
 
           // download images
-          const ifExists = await checkFileExistence(savePath)
-          if (!ifExists) {
+          if (!await checkFileExistence(savePath)) {
             const error = await downloadImage(originalSource, savePath);
             if (error) await fs.appendFile(extractConfig.errorLog, JSON.stringify({
               postId: index,

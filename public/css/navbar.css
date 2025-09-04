@@ -1,0 +1,22 @@
+.drop-button {
+padding: 0;
+border: none;
+background: none;
+}
+
+.drop-button:focus {
+  /* background-color: #0e07d2; */
+  text-decoration: underline;
+}
+
+.dropdown {
+}
+
+.dropdown-content {
+  display: none;
+}
+
+.dropdown-content a {
+  display: block;
+}
+.show {display: block;}

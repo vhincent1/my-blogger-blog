@@ -1,0 +1,7 @@
+.DS_Store
+.env
+node_modules
+yarn.lock
+
+public/dist/*
+public/content/*

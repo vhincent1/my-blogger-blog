@@ -1,0 +1,10 @@
+<!-- Search labels -->
+<div class="labels">
+  <% navbar.getSortedLabels().forEach(label => { %>
+  <!-- <a href="/search/label/<%=encodeURIComponent(label.name)%>"> -->
+    <a href="/?search=<%=encodeURIComponent(label.name)%>&type=labels">
+    <%=label.name%></a
+  ><sup><%=label.count%></sup>
+  <% }); %>
+  <br />
+</div>

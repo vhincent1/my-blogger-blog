@@ -1,0 +1,66 @@
+To prevent unwanted newlines when using forEach loops in EJS templates, specifically within the EJS tags, you can utilize the "newline slurp" feature. This feature allows you to trim the following newline character and any subsequent whitespace.
+Using the "Newline Slurp" Feature:
+The key to achieving this is to use the hyphen (-) within the closing EJS tag.
+For control flow tags (e.g., <% ... %>):
+Append a hyphen before the closing % like this: -%>.
+Code
+
+    <% items.forEach(function(item) { -%>
+        <span><%= item.name %></span>
+    <% }); -%>
+In this example, the newline after the forEach opening tag and after the closing tag of the loop will be suppressed, preventing unwanted blank lines in the rendered HTML output.
+For output tags (e.g., <%= ... %> or <%- ... %>):
+Append a hyphen before the closing % like this: -%> or <%- ... -%>.
+Code
+
+    <ul>
+        <% items.forEach(function(item) { -%>
+            <li><%= item.name -%></li>
+        <% }); -%>
+    </ul>
+Here, the newline after each <li> element will be removed, resulting in a more compact HTML output.
+By strategically placing the hyphen within your EJS tags, you can control the whitespace and prevent automatic newlines from appearing in your rendered HTML, leading to cleaner and more predictable output.
+
+
+
+Explanation of EJS Tags:
+<%= variableName %>:
+Used to output the value of a variable. This escapes HTML characters, preventing cross-site scripting (XSS) vulnerabilities.
+<%- variableName %>:
+Used to output the unescaped (raw) value of a variable. Use with caution, especially when rendering user-generated content.
+<% JavaScript code %>:
+Used to execute JavaScript code within the template, such as if statements, for loops, or function calls, without outputting anything directly to the HTML.
+This example demonstrates how to pass data from a Node.js application to an EJS template and use that data to dynamically generate HTML content, including conditional rendering and looping through arrays.
+<% /* Scriptlet tag: for control flow, no output */ %>
+<% if (userLoggedIn) { %>
+  <p>Welcome, <%= username %>!</p>
+<% } else { %>
+  <p>Please log in.</p>
+<% } %>
+
+<%= /* Output tag: outputs the value into the template (escaped for HTML safety) */ %>
+<p>User name: <%= username %></p>
+
+<%- /* Unescaped output tag: outputs the unescaped value into the template (use with caution for HTML) */ %>
+<div><%- rawHtmlContent %></div>
+
+<%# /* Comment tag: no execution, no output */ %>
+<%# This is a comment and will not appear in the output %>
+
+<%% /* Literal <% tag: outputs a literal "<%" */ %>
+<p>This shows a literal tag: <%%</p>
+
+%%> /* Literal %> tag: outputs a literal "%>" */ %>
+<p>This shows a literal tag: %%></p>
+
+%> /* Plain ending tag */ %>
+
+-%> /* Trim-mode (newline slurp) tag: trims the following newline */ %>
+Line 1<%- include('partial'); -%>
+Line 2
+
+_%> /* Whitespace Slurping ending tag: removes all whitespace after it */ %>
+Some text _%>
+Another line
+
+https://nodejs.org/en/learn/getting-started/profiling

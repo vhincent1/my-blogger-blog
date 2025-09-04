@@ -1,0 +1,26 @@
+window.onload = function () {
+  document.querySelectorAll(`nsfw`).forEach((element) => {
+    const warningBox = document.createElement("div");
+    const warningText = document.createElement("div");
+    warningText.textContent = "18+";
+    warningText.style.fontFamily = "Arial, sans-serif";
+    warningBox.appendChild(warningText);
+
+    const createButton = (text, answer) => {
+      const button = document.createElement("button");
+      button.textContent = text;
+      button.onclick = () =>
+        (element.style.display = answer ? "block" : "none");
+      warningBox.appendChild(button);
+    };
+
+    const YES = createButton("YES", true);
+    const NO = createButton("NO", false);
+
+    // display warning box
+    element.insertAdjacentElement("beforebegin", warningBox);
+
+    // hide nsfw content
+    element.style.display = "none";
+  });
+};

@@ -1,0 +1,40 @@
+<script>
+  let currentPage = 1;
+  let isLoading = false;
+  let hasMoreData = true; // Set based on server response
+
+  window.addEventListener("scroll", () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (
+      scrollTop + clientHeight >= scrollHeight - 100 &&
+      !isLoading &&
+      hasMoreData
+    ) {
+      isLoading = true;
+      currentPage++;
+      loadMoreItems();
+    }
+  });
+
+  async function loadMoreItems() {
+    try {
+      const response = await fetch(`/items?page=${currentPage}&limit=10`);
+      const data = await response.json();
+
+      // Append new items to the container
+      const itemContainer = document.getElementById("item-container");
+      data.items.forEach((item) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("item");
+        itemDiv.textContent = item.name;
+        itemContainer.appendChild(itemDiv);
+      });
+
+      hasMoreData = data.hasMore;
+      isLoading = false;
+    } catch (error) {
+      console.error("Error loading more items:", error);
+      isLoading = false;
+    }
+  }
+</script>

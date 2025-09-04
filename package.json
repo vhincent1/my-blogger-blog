@@ -1,0 +1,38 @@
+{
+  "name": "simpblog",
+  "version": "1.0.0",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env src/app.js",
+    "dev": "node --watch --env-file=.env src/app.js",
+    "api": "curl -H \"Accept: application/json\" -X GET http://localhost:3000/api/v1",
+    "api:blogger": "node --env-file=.env src/lib/blogger.lib.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vhincent",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
+    "chalk": "^5.6.0",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "express-session": "^1.18.2",
+    "googleapis": "^159.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "my-blogger-api": "../my-blogger-api",
+    "node-fetch": "^3.3.2",
+    "perf_hooks": "^0.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^11.7.1",
+    "supertest": "^7.1.4",
+    "terser": "^5.43.1"
+  }
+}

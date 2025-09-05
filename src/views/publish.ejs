@@ -1,114 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-  <!-- Header -->
-  <%- include('partials/header') -%>
-  <head>
-    <!-- WYSIWYG editor -->
-    <link rel="stylesheet" type="text/css" href="/js/pell/pell.min.css" />
-    <style>
-      /* override styles here */
-      .pell-content {
-        background-color: pink;
-      }
-      /* .pell-content p {
+<!-- Header -->
+<%- include('partials/header') -%>
+
+<head>
+  <!-- WYSIWYG editor -->
+  <link rel="stylesheet" type="text/css" href="/js/pell/pell.min.css" />
+  <style>
+    /* override styles here */
+    .pell-content {
+      background-color: pink;
+    }
+
+    /* .pell-content p {
         margin: 0px;
       } */
-      textarea {
-        width: 100vw; /* Sets width to 100% of viewport width */
-        /* height: 100vh; /* Sets height to 100% of viewport height */
-        box-sizing: border-box; /* Ensures padding and border are included in the total width/height */
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Navigation bar -->
-    <%- include('partials/navbar') -%> 
-    <!-- EDIT/CREATE -->
-    <h1>Edit/Create a Post</h1>
-    <div id="rss-feed-container">
-      <!-- RSS feed items will be dynamically inserted here -->
+    textarea {
+      width: 100vw;
+      /* Sets width to 100% of viewport width */
+      /* height: 100vh; /* Sets height to 100% of viewport height */
+      box-sizing: border-box;
+      /* Ensures padding and border are included in the total width/height */
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation bar -->
+  <%- include('partials/navbar') -%>
+  <!-- EDIT/CREATE -->
+  <h1>Edit/Create a Post</h1>
+  <div id="rss-feed-container">
+    <!-- RSS feed items will be dynamically inserted here -->
+  </div>
+  <div class="feed-item">
+    <textarea id="title" name="edit-title" placeholder="Blog Title" rows="1"><%= post.title %></textarea>
+    <textarea id="labels" name="edit-labels" placeholder="Blog Labels" rows="1"><%= post.labels %></textarea>
+    <div id="editor" class="pell"></div>
+    <div id="simpedit">
+      <b>Code:</b>
+      <textarea id="content" name="edit-content" rows="5" cols="40"><%= post.content %></textarea>
+      <button onclick="previewButton()">Preview</button>
     </div>
-    <div class="feed-item">
-      <textarea
-        id="title"
-        name="edit-title"
-        placeholder="Blog Title"
-        rows="1"
-      ></textarea>
-      <textarea
-        id="labels"
-        name="edit-labels"
-        placeholder="Blog Labels"
-        rows="1"
-      ></textarea>
-      <div id="editor" class="pell"></div>
-      <div id="simpedit">
-        <b>Code:</b>
-        <textarea
-          id="content"
-          name="edit-content"
-          rows="5"
-          cols="40"
-        ></textarea>
-        <button onclick="previewButton()">Preview</button>
-      </div>
-      <div style="margin-top: 20px">
-        <h3>Preview:</h3>
-        <pre id="live-preview"></pre>
-      </div>
+    <div style="margin-top: 20px">
+      <h3>Preview:</h3>
+      <pre id="live-preview"></pre>
     </div>
-  
-    <!-- Pagination -->
-    <%- //include('widgets/pagination') -%>
-    <!-- Footer -->
-    <%- include('partials/footer') -%>
-    <!-- WYSIWYG Editor -->
-    <script src="/pell/pell.min.js"></script>
-    <!-- Beautifier -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.4/beautify-html.min.js"></script>
+  </div>
 
-    <script>
-      const title = "<%= post.title -%>";
-      const labels = "<%= post.labels -%>";
-      document.getElementById("title").value = title;
-      document.getElementById("labels").value = labels;
+  <!-- Pagination -->
+  <%- //include('widgets/pagination') -%>
+  <!-- Footer -->
+  <%- include('partials/footer') -%>
+  <!-- WYSIWYG Editor -->
+  <script src="/pell/pell.min.js"></script>
+  <!-- Beautifier -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.4/beautify-html.min.js"></script>
 
-      var htmlContent = "<%= post.content -%>";
+  <script>
 
-      const unescapeHtml = (escapedString) => {
-        const temp = document.createElement("textarea"); // or 'div'
-        temp.innerHTML = escapedString;
-        return temp.value; // or tempElement.innerText for div
-      };
+    const unescapeHtml = (escapedString) => {
+      const temp = document.createElement("textarea"); // or 'div'
+      temp.innerHTML = escapedString;
+      return temp.value; // or tempElement.innerText for div
+    };
 
-      const simpedit = document.getElementById("simpedit");
-      const simpEditor = simpedit.querySelector("textarea");
-      simpEditor.value += unescapeHtml(htmlContent);
+    const simpedit = document.getElementById("simpedit");
+    const simpEditor = simpedit.querySelector("textarea");
 
-      var editor = window.pell.init({
-        element: document.getElementById("editor"),
-        defaultParagraphSeparator: "p",
-        onChange: function (html) {
-          simpEditor.value = html_beautify(unescapeHtml(html));
-        },
-      });
+    var editor = window.pell.init({
+      element: document.getElementById("editor"),
+      defaultParagraphSeparator: "p",
+      onChange: function(html) {
+        simpEditor.value = html_beautify(unescapeHtml(html));
+      },
+    });
 
-      // myTextarea.oninput = function () {
-      //   const parser = new DOMParser();
-      //   const doc = parser.parseFromString(event.target.value, "text/html");
-      //   console.log("Textarea value changed:", event.target.value);
-      //   document.getElementById("html-output").innerHTML = event.target.value;
-      // };
+    // myTextarea.oninput = function () {
+    //   const parser = new DOMParser();
+    //   const doc = parser.parseFromString(event.target.value, "text/html");
+    //   console.log("Textarea value changed:", event.target.value);
+    //   document.getElementById("html-output").innerHTML = event.target.value;
+    // };
 
-      // update the placeholders
-      editor.content.innerHTML = htmlContent;
-      simpEditor.value = unescapeHtml(htmlContent);
+    function previewButton() {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(simpEditor.value, "text/html");
+      document.getElementById("live-preview").innerHTML = simpEditor.value;
+    }
+  </script>
+</body>
 
-      function previewButton() {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(simpEditor.value, "text/html");
-        document.getElementById("live-preview").innerHTML = simpEditor.value;
-      }
-    </script>
-  </body>
 </html>

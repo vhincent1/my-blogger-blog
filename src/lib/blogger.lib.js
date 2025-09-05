@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import crypto from 'crypto'
 import { google } from 'googleapis';
 import fetch from 'node-fetch';
 import parser from 'node-html-parser';
@@ -62,6 +63,65 @@ async function downloadImage(imageUrl, savePath) {
   }
 }
 
+async function downloadImage2(imageUrl, destPath) {
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    async function getImageHash(buffer, algorithm = 'md5') {
+      try {
+        // const fileBuffer = await fs.readFile(imagePath); // Asynchronously read the image file
+        const fileBuffer = buffer;
+        const hash = crypto.createHash(algorithm);
+        hash.update(fileBuffer);
+        return hash.digest('hex');
+      } catch (error) {
+        console.error(`Error generating hash for ${imagePath}:`, error);
+        throw error;
+      }
+    }
+
+    const hash = await getImageHash(buffer)
+    const savePath = path.resolve(destPath, hash)
+
+    // dup
+    if (await checkFileExistence(savePath)) {
+      // const __dirname = path.resolve()
+      // const fileExtension = path.extname(fileName) || '';
+      // const fileNameWithoutExt = fileName.replace(fileExtension, '')
+      // // const hash = await getImageHash(savePath)
+
+      // // console.log('hash: ', hash)
+      // const oldFilePath = path.join(__dirname, 'public', fileName);
+
+      // //const newFileName = fileNameWithoutExt + '_' + hash + fileExtension
+      // const newFileName = hash
+      // const newFilePath = path.join(__dirname, 'public', newFileName);
+
+      // fs.rename(oldFilePath, newFilePath, (err) => {
+      //   if (err) {
+      //     console.error('Error renaming file:', err);
+      //     return;
+      //   }
+      //   console.log('File renamed successfully!');
+      // })
+
+      // result = { hash: hash, fileName: fileName }
+    } else {
+      await fs.writeFile(savePath, buffer);
+    }
+    const fileName = decodeURIComponent(path.basename(new URL(imageUrl).pathname));
+    return { status: 'OK', hash, fileName, savePath };
+  } catch (error) {
+    return { status: 'ERROR', error };
+    // console.error('Error downloading the image with fetch:', error);
+    // throw error;
+  }
+}
+
 /*
  * config = {
  * uploadPath: './public/content/',
@@ -72,6 +132,8 @@ async function convertBloggerPosts(exportedData, extractConfig) {
   const bloggerData = exportedData.reverse();
   const convertedPosts = [];
   const errorLog = [];
+  const imageDatabase = []
+  let author;
   for (let index = 0; index < bloggerData.length; index++) {
     const bloggerPost = bloggerData[index];
 
@@ -107,16 +169,16 @@ async function convertBloggerPosts(exportedData, extractConfig) {
 
         if (extractConfig) {
           if (!extractConfig.enabled) return
-          // update image sources
-          const hostURL = extractConfig.hostPath + bloggerPost.author.displayName + '/' + index;
-          img.setAttribute('src', encodeURI(hostURL + '/' + filename));
 
+          // // update image sources
+          const hostURL = extractConfig.hostPath + bloggerPost.author.displayName + '/' + index;  //TODO change this
+          img.setAttribute('src', encodeURI(hostURL + '/' + filename));
           // update new image urls
           bloggerPost.content = document.toString();
 
           // configure paths
-          const folderPath = extractConfig.uploadPath + bloggerPost.author.displayName + '/' + index;
-          const savePath = path.resolve(folderPath, filename);
+          const folderPath = extractConfig.uploadPath + bloggerPost.author.displayName + '/' + index;  //TODO change this
+          // const savePath = path.resolve(folderPath, filename);
           await fs.mkdir(folderPath, { recursive: true });
 
           // if (bloggerPost.index == 522) {
@@ -129,6 +191,23 @@ async function convertBloggerPosts(exportedData, extractConfig) {
           //   }
           // }
 
+          const savePath = path.resolve(folderPath, filename);
+
+          // const response = await downloadImage2(originalSource, folderPath)
+          // if (response.status == 'OK') {
+          //   const imageFile = response.result.hash
+
+          //   const hostURL = extractConfig.hostPath + bloggerPost.author.displayName;
+          //   img.setAttribute('src', encodeURI(hostURL + '/' + imageFile));
+
+          //   console.log(img.getAttribute('src'))
+          //   // update new image urls
+          //   bloggerPost.content = document.toString();
+          //   // console.log(imageFile)
+
+          //   // imageDatabase.push(result)
+          // }
+
           // download images
           if (!await checkFileExistence(savePath)) {
             const error = await downloadImage(originalSource, savePath);
@@ -139,6 +218,7 @@ async function convertBloggerPosts(exportedData, extractConfig) {
               error: error.toString()
             }, null, 2))
           }
+
         }
       });
     }
@@ -156,8 +236,15 @@ async function convertBloggerPosts(exportedData, extractConfig) {
     if (imageFiles.length > 0) post.media = { images: imageFiles, };
     post.source = { url: bloggerPost.url, };
     convertedPosts.push(post);
+
+    author = post.author
   }
-  return convertedPosts;
+  // return {
+  //   convertedPosts: convertedPosts.reverse(),
+  //   imageDatabase: imageDatabase,
+  //   author: author
+  // };
+  return convertedPosts
 }
 
 async function checkFileExistence(folderPath) {
@@ -181,12 +268,6 @@ async function inspectPosts(jsonData, id) {
     // if (post.index != 5) { // 2 cat pics
     //   return;
     // }
-    // if (post.index != 496) {
-    //   //has a video
-    //   return;
-    // }
-    // const dom = new JSDOM(post.content);
-    // const document = dom.window.document;
     const document = parser.parse(post.content);
 
     // posts that has an Image
@@ -250,9 +331,8 @@ async function inspectPosts(jsonData, id) {
   videoPosts.forEach((v) => {
     // console.log(v.title)
     //exclude uploaded videos
-    if (!uploadedVideos.includes(v)) {
-      unique.push(v);
-    }
+    if (!uploadedVideos.includes(v))  unique.push(v);
+    
   });
 
   //incorrect amount
@@ -271,8 +351,13 @@ switch (command) {
       let data = await fs.readFile(exportFile, 'utf8');
       const convertedData = await convertBloggerPosts(JSON.parse(data), parameters.exportConfig);
       data = JSON.stringify(convertedData.reverse(), null, 2);
+
       await fs.writeFile(convertedFile, data, 'utf8');
       console.log('Saved to: ', convertedFile);
+
+      // image database
+      // console.log('author: ' + result.author)
+      // await fs.writeFile('./public/db.json', JSON.stringify(result.imageDatabase, null, 2), 'utf8');
     } else {
       console.log('no data found');
     }
@@ -317,5 +402,12 @@ switch (command) {
 // const p = './public/dist/export/519/AVvXsEjyqrsSeni9-Ky9ewM6sYPXAf7ZkpXfIF6z7-pNBlVPug7bzBpa3EqB7WoGRW7ZkscI2ledPSpXJD6UM-q5X1upzOPAUF_uC0a6Lpq7BCkn6KWzwzKBY08hfkFliXYPcAM0mbnOueJkaKOeZXEuTU38MuQh-zAN_c3iK9TlaVCw8mfwrbCVyPU7SWfnkyfw';
 // console.log(path.extname(p).length == 0);
 
-// const image = 'https://images.vestiairecollective.com/images/resized/w=1024,q=75,f=auto,/produit/blue-cotton-true-religion-jeans-43835798-1_2.jpg';
-// await downloadImage(image, './public/f');
+// const image = 'https://www.google.com/logos/fnbx/ingenuity/heli_dark.gif'
+// // const image = 'https://images.vestiairecollective.com/images/resized/w=1024,q=75,f=auto,/produit/blue-cotton-true-religion-jeans-43835798-1_2.jpg';
+// const filename = decodeURIComponent(path.basename(new URL(image).pathname));
+// const result = await downloadImage2(image, './public/', filename);
+// // if (result.error) console.log(result.error)
+// // if (result.hash) console.log('ok')
+// console.log(result)
+// imageDatabase.push(result)
+// await fs.writeFile('./public/db.json', JSON.stringify(imageDatabase, null, 2))

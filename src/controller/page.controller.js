@@ -1,4 +1,4 @@
-import database from '../database/index.database.js';
+import PostService from '../services/post.service.js';
 
 const handlePagination = async (req, defaults) => {
   const page = parseInt(req.query.page) || defaults.page;
@@ -14,38 +14,16 @@ const handlePagination = async (req, defaults) => {
     limit: limit,
   };
 
-  //   if (override) Object.keys(override).forEach(key => {
-  //   // console.log("O "+key +" : "+override[key])
-  //   parameters[key] = override[key]
-  // })
-
-  // pagination
+  //---------------------- pagination ----------------------
   const safePage = Math.max(0, parameters.page);
   const startIndex = safePage * parameters.limit;
   const endIndex = startIndex + parameters.limit;
-  // const startIndex = (parameters.page - 1) * parameters.limit;
-  // const endIndex = parameters.page * parameters.limit;
 
-  let items = await database.getAllBlogPosts();
-
-  if (parameters)
-    switch (parameters.type) {
-      case 'content':
-        items = items.filter((post) => post.content.includes(parameters.query));
-        break;
-      case 'labels':
-        items = items.filter((post) => post.labels.includes(parameters.query));
-        break;
-      case 'title':
-        items = items.filter((post) => post.title.includes(parameters.query));
-        break;
-      default: //all
-    }
-
+  let items = await PostService.getPosts(parameters);
   const paginatedResults = items.slice(startIndex, endIndex);
   const totalItems = items.length;
-  const totalPages = Math.ceil(totalItems / parameters.limit);
-  //---------------------- pagination
+  const totalPages = Math.ceil(totalItems / parameters.limit) - 1; //todo cheapfix (last page is blank page)
+  //---------------------- pagination ----------------------
 
   // console.log("Current page query: " + req.query.page);
   // console.log("Current Page: " + search.page);
@@ -116,21 +94,8 @@ const handlePagination = async (req, defaults) => {
 const pageController = {
   pagination: handlePagination,
 
+  //show
   getFrontPage: async (req, res) => {
-    // const page = parseInt(req.query.page) || 0;
-    // const limit = parseInt(req.query.limit) || 5;
-
-    // // search query
-    // const query = req.query.search;
-    // const type = req.query.type;
-
-    // const response = {
-    //   query: query,
-    //   type: type,
-    //   page: page,
-    //   limit: limit,
-    // };
-
     const pagination = await handlePagination(req, { page: 0, limit: 5 });
     if (pagination.currentPage > pagination.totalPages) {
       res.status(404).render('404', { pagination: pagination });
@@ -139,11 +104,9 @@ const pageController = {
     }
   },
 
+  //list
   getIndex: async (req, res) => {
     const pagination = await handlePagination(req, { page: 0, limit: 100 });
-    // res.render('index-list', {
-    //   pagination: pagination,
-    // });
     if (pagination.currentPage > pagination.totalPages) {
       res.status(404).render('404', { pagination: pagination });
     } else {

@@ -8,12 +8,14 @@
     "dev": "node --watch --env-file=.env src/app.js",
     "api": "curl -H \"Accept: application/json\" -X GET http://localhost:3000/api/v1",
     "api:blogger": "node --env-file=.env src/lib/blogger.lib.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:database": "node --env-file=.env src/database/index.database.js",
+    "test": "yarn mocha ./src/tests/*.js --reporter spec"
   },
   "author": "vhincent",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "async-mutex": "^0.5.0",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "chalk": "^5.6.0",
@@ -32,6 +34,7 @@
     "perf_hooks": "^0.0.1"
   },
   "devDependencies": {
+    "chai": "^6.0.1",
     "mocha": "^11.7.1",
     "supertest": "^7.1.4",
     "terser": "^5.43.1"

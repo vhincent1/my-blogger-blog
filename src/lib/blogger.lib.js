@@ -48,8 +48,8 @@ async function fetchAllBloggerPosts() {
 }
 // -----------------------------------------------------------
 
-async function downloadImage(imageUrl, savePath) {
-  try {
+async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
+  for (let i = 0; i < retries; i++) try {
     const response = await fetch(imageUrl);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const blob = await response.blob();
@@ -57,7 +57,13 @@ async function downloadImage(imageUrl, savePath) {
     const buffer = Buffer.from(arrayBuffer);
     await fs.writeFile(savePath, buffer);
   } catch (error) {
-    return error;
+    if (i < retries - 1) {
+      await new Promise(resolve => setTimeout(resolve, delay)); // Wait before retrying
+    } else {
+      console.error(`Failed to download image after ${retries} attempts.`);
+      // throw error; // Re-throw if all retries fail
+      return error;
+    }
     // console.error('Error downloading the image with fetch:', error);
     // throw error;
   }
@@ -128,15 +134,14 @@ async function downloadImage2(imageUrl, destPath) {
  * hostPath:   'http://127.0.0.1:3000/images/'
  * }
  */
-async function convertBloggerPosts(exportedData, extractConfig) {
+async function convertBloggerPosts(exportedData, config) {
   const bloggerData = exportedData.reverse();
   const convertedPosts = [];
-  const errorLog = [];
   const imageDatabase = []
+  const errors = [];
   let author;
   for (let index = 0; index < bloggerData.length; index++) {
     const bloggerPost = bloggerData[index];
-
     //insert post id
     // bloggerPost.index = index;
 
@@ -167,20 +172,17 @@ async function convertBloggerPosts(exportedData, extractConfig) {
         const filename = decodeURIComponent(path.basename(new URL(originalSource).pathname));
         imageFiles.push(filename);
 
-        if (extractConfig) {
-          if (!extractConfig.enabled) return
-
-          // // update image sources
-          const hostURL = extractConfig.hostPath + bloggerPost.author.displayName + '/' + index;  //TODO change this
+        if (config) {
+          if (!config.enabled) return
+          // update image sources
+          const hostURL = config.storageDir(config.hostPath, bloggerPost, index)
           img.setAttribute('src', encodeURI(hostURL + '/' + filename));
           // update new image urls
           bloggerPost.content = document.toString();
 
           // configure paths
-          const folderPath = extractConfig.uploadPath + bloggerPost.author.displayName + '/' + index;  //TODO change this
-          // const savePath = path.resolve(folderPath, filename);
-          await fs.mkdir(folderPath, { recursive: true });
-
+          const storagePath = config.storageDir(config.uploadPath, bloggerPost, index)
+          await fs.mkdir(storagePath, { recursive: true });
           // if (bloggerPost.index == 522) {
           //   const ifExists = await checkFileExistence(savePath)
           //   if (!ifExists) {
@@ -190,8 +192,7 @@ async function convertBloggerPosts(exportedData, extractConfig) {
           //     }
           //   }
           // }
-
-          const savePath = path.resolve(folderPath, filename);
+          const savePath = path.resolve(storagePath, filename);
 
           // const response = await downloadImage2(originalSource, folderPath)
           // if (response.status == 'OK') {
@@ -211,14 +212,21 @@ async function convertBloggerPosts(exportedData, extractConfig) {
           // download images
           if (!await checkFileExistence(savePath)) {
             const error = await downloadImage(originalSource, savePath);
-            if (error) await fs.appendFile(extractConfig.errorLog, JSON.stringify({
-              postId: index,
-              author: bloggerPost.author.displayName,
-              imageSource: originalSource,
-              error: error.toString()
-            }, null, 2))
-          }
+            if (config.errorLog) {
+              if (error) await fs.appendFile(config.errorLog, JSON.stringify({
+                postId: index,
+                author: bloggerPost.author.displayName,
+                imageSource: originalSource,
+                error: error.toString()
+              }, null, 2))
 
+              if (error) {
+                console.log('ERROR')
+                console.log('error ' + error)
+                // errors.push(1)
+              }
+            }
+          }
         }
       });
     }
@@ -229,12 +237,9 @@ async function convertBloggerPosts(exportedData, extractConfig) {
     post.title = bloggerPost.title;
     post.content = bloggerPost.content;
     post.labels = bloggerPost.labels;
-    post.date = {
-      published: bloggerPost.published,
-      updated: bloggerPost.updated,
-    };
-    if (imageFiles.length > 0) post.media = { images: imageFiles, };
-    post.source = { url: bloggerPost.url, };
+    post.date = { published: bloggerPost.published, updated: bloggerPost.updated };
+    if (imageFiles.length > 0) post.media = { images: imageFiles };
+    post.source = { url: bloggerPost.url };
     convertedPosts.push(post);
 
     author = post.author
@@ -244,7 +249,7 @@ async function convertBloggerPosts(exportedData, extractConfig) {
   //   imageDatabase: imageDatabase,
   //   author: author
   // };
-  return convertedPosts
+  return { convertedPosts, errors }
 }
 
 async function checkFileExistence(folderPath) {
@@ -320,19 +325,21 @@ async function inspectPosts(jsonData, id) {
   // needs to be downloaded manually
   console.log('Total Uploaded Media Posts : ' + uploadedVideos.length);
 
-  let manualDownloadInfo = []
-  uploadedVideos.forEach(post => {
-    manualDownloadInfo.push({ postId: post.id, author: post.author, sourceUrl: post.source })
-  });
-  await fs.writeFile(parameters.exportConfig.inspectLog, JSON.stringify(manualDownloadInfo, null, 1))
-
+  const exportInspect = parameters.exportConfig.inspectLog
+  if (exportInspect) {
+    let manualDownloadInfo = []
+    uploadedVideos.forEach(post => {
+      manualDownloadInfo.push({ postId: post.id, author: post.author, sourceUrl: post.source })
+    });
+    //todo toggle
+    await fs.writeFile(exportInspect.inspectLog, JSON.stringify(manualDownloadInfo, null, 1))
+  }
   // misc
   let unique = [];
   videoPosts.forEach((v) => {
     // console.log(v.title)
     //exclude uploaded videos
-    if (!uploadedVideos.includes(v))  unique.push(v);
-    
+    if (!uploadedVideos.includes(v)) unique.push(v);
   });
 
   //incorrect amount
@@ -349,11 +356,14 @@ switch (command) {
   case 'convert':
     if (await checkFileExistence(exportFile)) {
       let data = await fs.readFile(exportFile, 'utf8');
-      const convertedData = await convertBloggerPosts(JSON.parse(data), parameters.exportConfig);
+      const result = await convertBloggerPosts(JSON.parse(data), parameters.exportConfig);
+
+      const convertedData = result.convertedPosts
       data = JSON.stringify(convertedData.reverse(), null, 2);
 
       await fs.writeFile(convertedFile, data, 'utf8');
       console.log('Saved to: ', convertedFile);
+      console.log('errors: ' + Object.keys(result.errors))
 
       // image database
       // console.log('author: ' + result.author)
@@ -366,11 +376,9 @@ switch (command) {
     console.log('Fetching from Blogger...');
     const data = await fetchAllBloggerPosts();
     console.log('Total posts: ' + data.length);
-
     // await writeJsonFile(parameters.exported, data);
     const jsonString = JSON.stringify(data, null, 2);
     await fs.writeFile(exportFile, jsonString, 'utf8');
-
     console.log('Saved to ' + exportFile);
     break;
   case 'inspect':

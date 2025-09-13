@@ -18,6 +18,7 @@
   <select id="type" name="type">
     <option value="title">Title</option>
     <option value="content">Content</option>
+    <option value="labels">Labels</option>
   </select>
   <button>Submit</button>
 </form>
@@ -30,7 +31,7 @@
     const currentUrl = new URL(window.location.href);
     const newURL = new URL(window.location.href);
 
-    newURL.searchParams.set("page", <%=pagination.currentPage %>);
+    newURL.searchParams.set("page", <%=pagination.currentPage%>);
     // newURL.searchParams.set("page", 0); // reset page
     newURL.searchParams.set("limit", selectedValue);
     // If you want to transfer existing parameters from the current URL
@@ -39,7 +40,6 @@
       console.log("KEY:" + key + " V:" + value);
       //   console.log(newURL.toString())
     });
-
     window.location.href = newURL.toString();
   }
 </script>

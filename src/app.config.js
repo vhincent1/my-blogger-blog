@@ -16,8 +16,11 @@ const CONFIG = {
       enabled: true,
       uploadPath: './public/content/',
       hostPath: 'http://127.0.0.1:3000/content/',
+      // hostPath: 'http://192.168.40.220:3000/content/',
+      storageDir: (hostPath, bloggerPost, index) => hostPath + bloggerPost.author.displayName + '/' + index, // SAME THING
       errorLog: path.resolve('./public/dist', 'missing_images.txt'),
       inspectLog: path.resolve('./public/dist', 'manual_download.json'),
+      //   uploadPath: (path, post, index)=> path + post.author.displayName + '/' + index,
     },
   },
 
@@ -27,12 +30,12 @@ const CONFIG = {
     // uploaded media path
     uploadPath: process.cwd() + '/public/content/',
     // host: 'http://127.0.0.1:3000', // host
+    // where content is stored (./public/content/AUTHOR/POST_ID)
+    contentPath: (uploadPath, post) => uploadPath + post.author + '/' + post.id + '/', // SAME THING
   },
 
   // express config
-  server: {
-    port: process.env.PORT,
-  },
+  server: { port: process.env.PORT },
 };
 
 export default CONFIG;

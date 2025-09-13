@@ -1,64 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- Header -->
-<%- include('partials/header') -%>
-
-<body>
-  <!-- Navigation bar -->
-  <%- include('partials/navbar') -%>
-  <!-- Body -->
-  <h1>Latest Articles from RSS Feed</h1>
-  <div id="rss-feed-container">
-    <!-- RSS feed items will be dynamically inserted here -->
-  </div>
-  <!-- Index view -->
-  <% if(viewIndex){  %>
-  <style>
-    table {
-      /* width: 100%; */
-    }
-
-    td,
-    th {
-      /* border: 1px solid #dddddd; */
-      text-align: left;
-    }
-  </style>
-  <div class="feed-item">
-    <table style="width:100%">
-      <tr>
-        <th>Title</th>
-        <th style="width:5%">Published</th>
-        <th style="width:1%">Size</th>
-        <th style="width:40%">Links</th>
-      </tr>
-      <% pagination.posts.forEach(post => { %>
-      <tr>
-        <td><%= post.title%></td>
-        <td><%= new Date(post.date.published).toLocaleDateString()%></td>
-        <td><%-post.size.total %></td>
-        <td>[<a href="/posts/<%= post.id%>">view</a>][<a href="/posts/<%= post.id%>/edit">edit</a>]</td>
-      </tr>
-      <% }); %>
-    </table>
-  </div>
-  <% } else { %>
-  <!-- Posts view -->
-  <% pagination.posts.forEach((post) => { %>
-  <div class="feed-item">
-    <a href="/posts/<%= post.id %>">
-      <h2><%= post.title %></h2>
-    </a>
-    <!-- <p>This is a summary of the first example article.</p>
-      <p>Published: <%= post.date.published %></p> -->
-    <%- post.content -%>
-  </div>
-  <% }); %>
-  <% } %>
-  <!-- Pagination -->
-  <%- include('widgets/pagination') -%>
-  <!-- Footer -->
-  <%- include('partials/footer') -%>
-</body>
-
-</html>
+<%- include('partials/header', {title: 'RSS Feed'}) -%>
+<!-- Body -->
+<h1>Latest Articles from RSS Feed</h1>
+<div id="rss-feed-container">
+  <!-- RSS feed items will be dynamically inserted here -->
+</div>
+<!-- Index view -->
+<% if(viewIndex){  %>
+<style>
+  table {
+    /* width: 100%; */
+  }
+  td, th {
+    /* border: 1px solid #dddddd; */
+    text-align: left;
+  }
+</style>
+<div class="feed-item">
+  <table style="width:100%">
+    <tr>
+      <th>Title</th>
+      <th style="width:5%">Published</th>
+      <th style="width:1%">Size</th>
+      <th style="width:40%">Links</th>
+    </tr>
+    <% pagination.posts.forEach(post => { %>
+    <tr>
+      <td><%= post.title%></td>
+      <td><%= new Date(post.date.published).toLocaleDateString() %></td>
+      <td><%= post.size.total %><sup>(<%= post.size.format %>)</sup></td>
+      <td>[<a href="/posts/<%= post.id%>">view</a>][<a href="/posts/<%= post.id%>/edit">edit</a>]</td>
+    </tr>
+    <% }); %>
+  </table>
+</div>
+<% } else { %>
+<!-- Posts view -->
+<% pagination.posts.forEach((post) => { %>
+<div class="feed-item">
+  <a href="/posts/<%= post.id %>"><h2><%= post.title %></h2></a>
+  <!-- <p>This is a summary of the first example article.</p>
+    <p>Published: <%= //post.date.published %></p> -->
+  <%- post.content -%>
+</div>
+<% }); %>
+<% } %>
+<!-- Pagination -->
+<%- include('widgets/pagination') -%>
+<!-- Footer -->
+<%- include('partials/footer') -%>

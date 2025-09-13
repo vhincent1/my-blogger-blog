@@ -1,13 +1,16 @@
 import express from 'express';
 
+import authController from '../../controller/auth.controller.js';
 import { dashboardController } from '../../controller/dashboard.controller.js';
+import galleryController from '../../controller/gallery.controller.js';
 import { pageController } from '../../controller/page.controller.js';
 
 const route = express.Router();
 
 route.get('/', pageController.getFrontPage);
 route.get('/index', pageController.getIndex);
-route.get('/dashboard', dashboardController.index);
+route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
+route.get('/gallery', galleryController.index)
 
 import jwt from 'jsonwebtoken';
 

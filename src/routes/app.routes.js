@@ -20,7 +20,6 @@ app.use((req, res, next) => {
 
 app.use('/', indexRouter);
 app.use('/login', authRouter);
-
 app.use('/posts', postsRouter);
 
 app.use('/api/v1', apiLimiter, apiRouter);

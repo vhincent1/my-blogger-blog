@@ -1,13 +1,12 @@
-import fs from 'fs';
-import { readJsonFile } from './json.database.js';
-import { fileFormat } from '../utils/io.utils.js';
-
 import appConfig from '../app.config.js'
+import { Mutex } from 'async-mutex';
+import { readJsonFile, writeJsonFile } from './json.database.js';
+
+const dbMutex = new Mutex();
 
 class Database {
   config; //type,file,host
   blogPosts;
-  sizeTable; //id,content,images
   // users;
   // comments;
   constructor(config) {
@@ -15,82 +14,44 @@ class Database {
   }
 
   async load() {
-    switch (this.config.type) {
-      case 'json':
-        // if (!fs.existsSync(this.config.file)) {
-        //   this.blogPosts = []
-        //   this.sizeTable = []
-        //   return
-        // }
+    const release = await dbMutex.acquire()
+    try {
+      if (this.config.type == 'json')
         this.blogPosts = await readJsonFile(this.config.file);
-        this.sizeTable = await this.loadSizeTable();
-
-        this.blogPosts.forEach(async (post) => {
-          const size = await this.getSizeTable(post.id);
-          if (size) post.size = size;
-        });
-        break;
-      case 'mongo':
-        break;
-      default:
-        break;
+    } catch (error) {
+      console.log('Database error: ', error)
+    } finally {
+      release();
     }
-  }
-
-  async loadSizeTable() {
-    let sizes = [];
-    this.blogPosts.forEach(async (post) => {
-      // size of images
-      let totalImageSize = 0;
-      if (post.media) {
-        // console.log(post.media)
-        for (const filename of post.media.images) {
-          // console.log(decodeURIComponent(filename))
-          const imagePath = this.config.uploadPath + post.author + '/' + decodeURIComponent(filename);
-          if (fs.existsSync(imagePath)) {
-            const size = fs.statSync(imagePath).size;
-            totalImageSize += size;
-          } else {
-            // console.log('doesnt exist: '+imagePath)
-          }
-        }
-      }
-
-      // if(totalImageSize>0) console.log(post.id)
-
-
-      // size of post
-      const jsonString = JSON.stringify(post, (key, value) => {
-        if (key === 'media') return undefined; //ignore media field
-        return value;
-      });
-      const byteSize = Buffer.byteLength(jsonString, 'utf8');
-
-      sizes.push({
-        id: post.id,
-        content: fileFormat.fileSizeInKb(byteSize) + '(Kb)',
-        images: fileFormat.fileSizeInKb(totalImageSize) + '(Kb)',
-        total: fileFormat.fileSizeInKb(byteSize + totalImageSize) + '<sup>(Kb)</sup>',
-      });
-    });
-    return sizes;
-    // console.log(this.getSizeTable(521))
   }
 
   async getAllBlogPosts() {
     return this.blogPosts;
   }
 
-  async getSizeTable(id) {
-    return this.sizeTable.find((table) => table.id == id);
+  async createPost(post) {
+    const release = await dbMutex.acquire()
+    try {
+      this.blogPosts.push(post)
+    } catch (error) {
+      console.log('Database error: ', error)
+    } finally {
+      release();
+    }
   }
 
-  async getBlogPostById(id) {
-    const post = this.blogPosts.find((post) => post.id === id);
-    return post;
+  async savePosts() {
+    const release = await dbMutex.acquire()
+    try {
+      await writeJsonFile(appConfig.database.file, this.blogPosts, (err) => {
+        if (err) console.log('Error saving posts')
+      })
+    } catch (error) {
+      console.log('Database error: ', error)
+    } finally {
+      release();
+    }
   }
-
-  async create() { }
 
   // // Filter posts by the target tag
   // const targetTag = "art";
@@ -109,7 +70,6 @@ class Database {
 }
 
 const database = new Database(appConfig.database);
-
 await database.load();
 
 // console.log( database.getSizeTable(521));

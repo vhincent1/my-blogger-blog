@@ -1,36 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- Header -->
- <head>
-  <title><%= post.title %></title>
- </head>
-<%- include('partials/header') -%>
-
-<body>
-  <!-- Navigation bar -->
-  <%- include('partials/navbar') -%>
-  <h1><%= post.title %></h1>
-  <!-- <br /> -->
-  <div id="rss-feed-container">
-    <!-- RSS feed items will be dynamically inserted here -->
-  </div>
-  <div class="feed-item">
-    <!-- <h2><%= post.title %></h2> -->
-    <%- post.content %>
-  </div>
-  <div class="feed-info">
-    <p>Labels: <% post.labels.forEach((label) => {%><%=label%> <% });%></p>
-    <p>Published: <%= new Date(post.date.published).toLocaleDateString() %> <%= new
-       Date(post.date.published).toTimeString() %></p>
-    <p>Updated: <%= new Date(post.date.updated).toLocaleDateString() %> <%= new
-       Date(post.date.updated).toTimeString() %></p>
-    <p>Text: <%= post.size.content %> Images: <%= post.size.images %></p>
-    <p>Original URL: <a href="<%= post.source.url %>"><%= post.source.url %></a></p>
-  </div>
-  <!-- Pagination -->
-  <a href="<%- previousUrl -%>">Back</a>
-  <!-- Footer -->
-  <%- include('partials/footer') -%>
-</body>
-
-</html>
+<%- include('partials/header', { title : post.title}) %>
+<h1><%= post.title %></h1>
+<div id="rss-feed-container">
+  <!-- RSS feed items will be dynamically inserted here -->
+</div>
+<div class="feed-item"><%- post.content %></div>
+<div class="feed-info">
+  <p>Labels: <%let labels = '';
+    post.labels.forEach((item, index) => { 
+    labels += `\<a href='/?search=${item}&type=labels'>${item}\</a>`; 
+    if (index < post.labels.length - 1) { labels += ', '; }
+  }); %> <%- labels %></p>
+  <p>Published: <%= new Date(post.date.published).toLocaleDateString() %> <%= new Date(post.date.published).toTimeString() %></p>
+  <p>Updated: <%= new Date(post.date.updated).toLocaleDateString() %> <%= new Date(post.date.updated).toTimeString() %></p>
+  <p>Text: <%= post.size.content %>(<%= post.size.format %>) Images: <%=post.size.images%>(<%= post.size.format %>)</p>
+  <% if(post.source) {%>
+  <p>Original URL: <a href="<%=post.source.url%>"><%=post.source.url%></a></p>
+  <% } %>
+</div>
+<!-- Pagination -->
+<a href="<%= previousUrl%>">Back</a>
+<!-- Footer -->
+<%- include('partials/footer') -%>

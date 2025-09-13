@@ -1,19 +1,9 @@
-import { navbarController } from "../controller/navbar.controller.js";
+import { navbarController } from '../controller/navbar.controller.js';
 function notFound(req, res, next) {
   res.format({
-    html: function () {
-      // res.render("404", { url: req.url });
-      //   res.status(404).send("Sorry, the page you're looking for cannot be found!");
-      res.render("404", {
-        navbar: navbarController,
-      });
-    },
-    json: function () {
-      res.json({ error: "Not found" });
-    },
-    default: function () {
-      res.type("txt").send("Not found");
-    },
+    html: () => res.render('404', { navbar: navbarController }),
+    json: () => res.json({ error: 'Not found' }),
+    default: () => res.type('txt').send('Not found'),
   });
 }
 
@@ -29,7 +19,7 @@ function errorHandler(err, req, res, next) {
 
   // respond with 500 "Internal Server Error".
   res.status(500);
-  res.send("Internal Server Error");
+  res.send('Internal Server Error');
 }
 
 export { notFound, errorHandler };

@@ -1,5 +1,6 @@
 import express from 'express';
 
+import authController from '../controller/auth.controller.js';
 import { postsController } from '../controller/posts.controller.js';
 
 
@@ -11,7 +12,7 @@ const route = express.Router();
 // PUT /posts/:id: To update an existing blog post.
 // DELETE /posts/:id: To delete a blog post.
 
-route.get('/:postId/edit', postsController.getEditPost);
+route.get('/:postId/edit', /*authController.isAuthenticated,*/ postsController.getEditPost);
 route.get('/:postId', postsController.getViewPost);
 
 export default route;

@@ -1,32 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- Header -->
+<%- include('partials/header', {title: 'Dashboard'}) -%>
+<style>
+  /* profile */
+  .img-with-text {
+    text-align: center;
+    width: 200px;
+  }
 
-<head>
-  <title>Dashboard</title>
-</head>
-<%- include('partials/header') -%>
+  .img-with-text img {
+    display: block;
+    margin: 0 auto;
+  }
 
-<body>
-  <!-- Navigation bar -->
-  <%- include('partials/navbar') -%>
-  <!-- Body -->
-  <h1>Dashboard</h1>
-  <div id="rss-feed-container">
-    <!-- RSS feed items will be dynamically inserted here -->
+  /* box */
+  .wrapper {
+    display: flex;
+    /* Magic begins */
+  }
+
+  .left,
+  .right {
+    flex: 1;
+    /* Distribute width equally */
+  }
+
+  .right {
+    flex-wrap: wrap;
+    /* Allow multiple lines */
+  }
+
+  .box {
+    display: flex;
+    /* align-items: center; Center content vertically */
+    /* justify-content: center; Center content horizontally */
+    width: calc(50% - 4px);
+    margin: 1px 2px;
+    /* background: #000;
+    color: #fff; */
+  }
+</style>
+<!-- Body -->
+<h1>Dashboard</h1>
+<div id="rss-feed-container">
+  <!-- RSS feed items will be dynamically inserted here -->
+</div>
+<div class="feed-item">
+  <div class="wrapper">
+    <div class="leftbox">
+      <div id="profile" class="img-with-text">
+        <img src="./images/avatars/NFTS/Butt%20%23103.png" alt="Avatar" style="border-radius: 50%; width:200px">
+        <font face="Weddingday Personal Use" style="font-size: -webkit-xxx-large">Vhincent</font>
+      </div>
+    </div>
+    <div class="right wrapper">
+      <div class="box">Box 2
+        <!-- <h2>Total Posts: 1</h2>
+        <h3>Total Posts</h3>
+        <h4>Total Posts</h4>
+        <h5>Total Posts</h5>
+        <h6>Total Posts</h6> -->
+      </div>
+      <div class="box">Box 3</div>
+      <div class="box">Box 4</div>
+      <div class="box">Box 5</div>
+    </div>
   </div>
-  <div class="feed-item">
-    <h2>Total Posts: 1</h2>
-    <h3>Total Posts</h3>
-    <h4>Total Posts</h4>
-    <h5>Total Posts</h5>
-    <h6>Total Posts</h6>
-  </div>
-  
-  <!-- Pagination -->
-  <!-- <%- //include('widgets/pagination') -%> -->
-  <!-- Footer -->
-  <%- include('partials/footer') -%>
-</body>
+</div>
 
-</html>
+<!-- Pagination -->
+<!-- <%- //include('widgets/pagination') -%> -->
+<!-- Footer -->
+<%- include('partials/footer') -%>

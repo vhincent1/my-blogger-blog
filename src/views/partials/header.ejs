@@ -1,9 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Header -->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- <title>RSS Feed Display</title> -->
-  <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+  <title><%=title%></title>
+  <link rel="stylesheet" type="text/css" href="/css/fonts.css" />
   <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+  <link rel="stylesheet" type="text/css" href="/css/styles.css" />
   <!-- Scripts -->
-  <script src="/js/nsfw.js"></script>
+  <script type="speculationrules">{"prerender": [{ "where": { "href_matches": "/*" }, "eagerness": "moderate" }],
+  "prefetch": [{ "where": { "href_matches": "/*" }, "eagerness": "moderate" }]}</script>
+  <!-- Widgets -->
+  <%- //include('../widgets/nsfw-modal') -%>
 </head>
+<body>
+<%- include('../widgets/sorted-labels') -%>
+<%- include('../widgets/archive-menu') -%>

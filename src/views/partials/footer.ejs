@@ -1,2 +1,15 @@
-<!-- Links -->
-<a href="/">Home</a> <a href="/index">Index</a>  <a href="/login">Login</a>
+<!-- Nav links -->
+<%const links = {
+    "/" : "Home",
+    "/index" : "Index",
+    "/login" : "Login",
+    "/dashboard" : "Dashboard"
+}%>
+<%for (const [route, label] of Object.entries(links)) {%>
+<a href="<%=route%>"><%=label%></a>
+<%}%>
+
+</body>
+<!-- Widgets -->
+<%- //include('widgets/image-modal') -%>
+</html>

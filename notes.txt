@@ -64,3 +64,7 @@ Some text _%>
 Another line
 
 https://nodejs.org/en/learn/getting-started/profiling
+
+
+# curl json response
+curl -H "Accept: application/json" -X GET "http://localhost:3000/protected-data"

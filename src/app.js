@@ -11,9 +11,11 @@ import routes from './routes/app.routes.js';
 import * as middlewares from './middleware/errorhandler.middleware.js';
 // color text
 import chalk from 'chalk';
+
 const app = express();
 const port = process.env.PORT;
 const __dirname = path.resolve();
+
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src', 'views'));
@@ -23,6 +25,7 @@ app.use(compress());
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 // sessions
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -30,6 +33,8 @@ app.use(session({
     saveUninitialized: false, // don't create session until something stored
 }));
 app.use('/', routes);
+
+// log ip addresses
 app.use((req, res, next) => {
     // Get the remote IP address
     let remoteIp = req.ip || req.connection.remoteAddress; // Use req.ip if trust proxy is enabled
@@ -58,6 +63,7 @@ app.use((req, res, next) => {
 //   // default to plain-text. send()
 //   res.type('txt').send('Not found');
 // });
+
 // 404 Not Found Middleware (ALWAYS keep this as the last route/middleware)
 // app.use((req, res, next) => {
 // respond with html page
@@ -98,6 +104,7 @@ const server = app.listen(port, () => {
     console.log(`Listening: ` + chalk.bgBlue.white(`http://localhost:${port}`));
     /* eslint-enable no-console */
 });
+
 server.on('error', (err) => {
     switch (err.code) {
         case 'EADDRINUSE':

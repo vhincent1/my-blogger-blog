@@ -1,9 +1,9 @@
 import PostService from '../services/post.service.js';
 
+//defaults = {page, limit, type(gallery, null)}
 const handlePagination = async (req, defaults) => {
   const page = parseInt(req.query.page) || defaults.page;
   const limit = parseInt(req.query.limit) || defaults.limit;
-
   // search query
   const query = req.query.search;
   const type = req.query.type;
@@ -13,13 +13,18 @@ const handlePagination = async (req, defaults) => {
     page: page,
     limit: limit,
   };
-
   //---------------------- pagination ----------------------
   const safePage = Math.max(0, parameters.page);
   const startIndex = safePage * parameters.limit;
   const endIndex = startIndex + parameters.limit;
 
-  let items = await PostService.getPosts(parameters);
+  let items
+  if (defaults.type == 'gallery') {
+    items = await PostService.getGallery(parameters);
+  } else {
+    items = await PostService.getPosts(parameters);
+  }
+
   const paginatedResults = items.slice(startIndex, endIndex);
   const totalItems = items.length;
   const totalPages = Math.ceil(totalItems / parameters.limit) - 1; //todo cheapfix (last page is blank page)
@@ -82,8 +87,8 @@ const handlePagination = async (req, defaults) => {
     totalPages: totalPages,
     limit: parameters.limit,
     // pages prev,next
-    hasPrevPage: parameters.page > 1, //unused
-    hasNextPage: parameters.page < totalPages, //unused
+    hasPrevPage: parameters.page > 0, 
+    hasNextPage: parameters.page < totalPages, 
     nextPageURL: nextPageURL,
     previousPageURL: previousPageURL,
     // original URL

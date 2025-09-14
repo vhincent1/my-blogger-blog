@@ -6,16 +6,23 @@ import fs from 'fs';
 import { fileFormat } from '../utils/io.utils.js';
 import appConfig from '../app.config.js';
 
+// content formatting
+import parser from 'node-html-parser';
+import path from 'path'
+
 class PostService {
   blogPosts;
   postSizes;
+  gallery;
 
   constructor(database) {
     this.blogPosts = database.getAllBlogPosts();
     this.generateIds();
-    this.postSizes = this.loadSizeTable();
+    this.postSizes = this.buildSizeTable();
+    this.gallery = this.buildGallery()
   }
 
+  //filter={type, query}
   async getPosts(filter) {
     let posts = await this.blogPosts;
     if (filter)
@@ -39,6 +46,15 @@ class PostService {
     return posts.find((post) => post.id === id);
   }
 
+  async getGallery(filter) {
+    const targetIds = []
+    const posts = await this.getPosts(filter)
+    for (const post of posts)
+      targetIds.push(post.id)
+    const gallery = await this.gallery
+    return gallery.filter(result => targetIds.includes(result.postId))
+  }
+
   async create(post) {
     try {
       const result = await database.createPost(post);
@@ -48,6 +64,7 @@ class PostService {
     }
   }
 
+  // generates post ids
   async generateIds() {
     let posts = await this.blogPosts;
     posts = posts.reverse();
@@ -58,7 +75,8 @@ class PostService {
     posts = posts.reverse();
   }
 
-  async loadSizeTable() {
+  // generates size of post
+  async buildSizeTable() {
     const posts = await this.getPosts();
     // console.log(this.blogPosts.length)
     let sizes = [];
@@ -90,7 +108,7 @@ class PostService {
         id: post.id,
         content: fileFormat.fileSizeInKb(byteSize),
         images: fileFormat.fileSizeInKb(totalImageSize),
-        total: fileFormat.fileSizeInKb(byteSize + totalImageSize) ,
+        total: fileFormat.fileSizeInKb(byteSize + totalImageSize),
         format: 'Kb',
       };
     });
@@ -98,8 +116,67 @@ class PostService {
     // console.log(this.getSizeTable(521))
   }
 
-  async ccccc(){
+  //image sources
+  async buildGallery() {
+    const gallery = []
+    const posts = await this.getPosts()
+    for (let index = 0; index < posts.length; index++) {
+      const post = posts[index];
+      const document = parser.parse(post.content);
+      const imagesInPost = []
+      const img = document.querySelectorAll('img');
+      if (img.length > 0) {
+        img.forEach(element => {
+          const originalSource = element.getAttribute('src');
+          const base = new URL(originalSource).pathname
+          //decodeURIComponent
+          const fileName = path.basename(base);
+
+          const localPath = base.replace(fileName, '')
+
+          // console.log(filename)
+          imagesInPost.push(originalSource)
+        })
+        gallery.push({ postId: post.id, images: imagesInPost })
+      }
+    }
+    return gallery
+  }
+
+  async formatPosts() {
+    const posts = await this.blogPosts
     //modify img tags
+    for (let index = 0; index < posts.length; index++) {
+      const post = posts[index];
+      const document = parser.parse(post.content);
+
+      // <img> tags
+      const img = document.querySelectorAll('img');
+      img.forEach(element => {
+        const originalSource = element.getAttribute('src');
+        const base = new URL(originalSource).pathname
+        //decodeURIComponent
+        const filename = path.basename(base);
+        // console.log(filename)
+      })
+
+      // <a> tags
+      const a = document.querySelectorAll('a')
+      a.forEach(element => {
+        const href = element.getAttribute('href')
+        const isValidUrl = (url) => {
+          try {
+            new URL(url);
+            return true;
+          } catch (err) {
+            return false;
+          }
+        };
+        if (isValidUrl(href)) {
+          // console.log(href)
+        }
+      })
+    }
   }
 
   /*
@@ -128,5 +205,20 @@ const posts = await service.getPosts();
 // await service.generateIds();
 // const post = await service.getPostById(521)
 // console.log(post.title)
+
+// const gallery = await service.gallery()
+// for (const [index, data] of Object.entries(gallery)) {
+
+// console.log(index, data)
+// }
+// gallery.forEach(data => {
+//   const postId = data.postId
+//   const images = data.images
+//   for (const img of images) {
+//     // console.log(img)
+//   }
+// })
+
+
 
 export default service;

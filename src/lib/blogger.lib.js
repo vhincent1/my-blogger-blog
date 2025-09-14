@@ -169,7 +169,11 @@ async function convertBloggerPosts(exportedData, config) {
     if (imgElement.length > 0) {
       imgElement.forEach(async (img) => {
         const originalSource = img.getAttribute('src');
-        const filename = decodeURIComponent(path.basename(new URL(originalSource).pathname));
+        const imagePath = new URL(originalSource).pathname
+        const baseFileName = path.basename(imagePath)
+        const filename = decodeURIComponent(baseFileName);
+        // imageFiles.push({ path: imagePath.replace(baseFileName, ''), filename });
+
         imageFiles.push(filename);
 
         if (config) {

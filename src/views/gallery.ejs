@@ -1,15 +1,23 @@
-<%- include('header', {title: 'Gallery'}) -%>
-<!-- Navigation bar -->
-<%- include('../partials/navbar') -%>
+<%- include('partials/header', {title: 'Gallery'}) -%>
 <!-- Body -->
 <h1>Gallery</h1>
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
 <div class="feed-item">
+  <h2>images/avatars/NFTs</h2>
   <% images.forEach(image => {%>
   <img class="myImages" id="myImg" src="<%=image.path%>" alt="<%=image.fileName%>" style="width:150px">
   <%});%>
 </div>
-<%- include('footer') -%>
-<%- include('widgets/image-modal')-%>
+<div class="feed-item">
+  <h2>Index</h2>
+  <%pagination.posts.forEach(result => {
+     for(const image of result.images){%>
+  <img class="myImages" id="myImg" src="<%=image%>" alt="<%=result.postId%>" style="width:150px">
+  <%}%>
+  <%});%>
+</div>
+<%-include('widgets/pagination')-%>
+<%-include('partials/footer')-%>
+<%-include('widgets/image-modal')-%>

@@ -1,8 +1,8 @@
 <!-- Pagination -->
 <form>
+  <%if(pagination.hasPrevPage){%><a href="<%= pagination.previousPageURL %>">Previous</a> |<%}%>
+  <%if(pagination.hasNextPage){%><a href="<%= pagination.nextPageURL %>">Next</a> | <%}%>
   Page: <%=pagination.currentPage %> |
-  <a href="<%= pagination.previousPageURL %>">Previous</a> |
-  <a href="<%= pagination.nextPageURL %>">Next</a> |
   Total: <%=pagination.totalPages %> |
   <label for="limit">Limit:</label>
   <select name="limit" id="limit" onchange="setLimit()">

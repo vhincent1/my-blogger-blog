@@ -4,16 +4,14 @@
   <!-- YEAR -->
   <b><%= YTD.year -%></b><sup><%= YTD.total %></sup>
   <!-- MONTHS -->
-  <% YTD.MTD.forEach((MTD) => { index++; const posts =
-  navbar.getPostsByDate(MTD.month, YTD.year)%>
-  <button onclick="dropDownMonth(<%= index %>)" class="drop-button"><%= MTD.month.toUpperCase() %></button
-  ><sup><%= posts.length %></sup>
+  <% YTD.MTD.forEach((MTD) => { index++; const posts = navbar.getPostsByDate(MTD.month, YTD.year)%>
+  <button onclick="dropDownMonth(<%= index %>)" class="drop-button"><%= MTD.month.toUpperCase() %></button><sup><%= posts.length %></sup>
   <div id="dropDown<%= index %>" class="dropdown-content">
     <% posts.forEach((post) => { %>
-    <a href="/posts/<%=post.postId%>"><%=post.title%></a>
+    <a href="<%=links.viewPost({id: post.postId})%>"><%=post.title%></a>
     <% }); %>
   </div>
-  <% });%> 
+  <% });%>
   <% });%>
 </div>
 <!-- Scripts -->
@@ -24,7 +22,7 @@
   }
 
   // Close the dropdown if the user clicks outside of it
-  window.onclick = function (event) {
+  window.onclick = function(event) {
     if (!event.target.matches(".drop-button")) {
       var dropdowns = document.getElementsByClassName("dropdown-content");
       var i;

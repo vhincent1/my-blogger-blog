@@ -7,17 +7,17 @@
 <div class="feed-info">
   <p>Labels: <%let labels = '';
     post.labels.forEach((item, index) => { 
-    labels += `\<a href='/?search=${item}&type=labels'>${item}\</a>`; 
+    labels += '\<a href='+links.searchLabel(item)+'>'+item+'\</a>'; 
     if (index < post.labels.length - 1) { labels += ', '; }
-  }); %> <%- labels %></p>
+  }); %> <%-labels%></p>
   <p>Published: <%= new Date(post.date.published).toLocaleDateString() %> <%= new Date(post.date.published).toTimeString() %></p>
   <p>Updated: <%= new Date(post.date.updated).toLocaleDateString() %> <%= new Date(post.date.updated).toTimeString() %></p>
   <p>Text: <%= post.size.content %>(<%= post.size.format %>) Images: <%=post.size.images%>(<%= post.size.format %>)</p>
-  <% if(post.source) {%>
+  <%if(post.source) {%>
   <p>Original URL: <a href="<%=post.source.url%>"><%=post.source.url%></a></p>
-  <% } %>
+  <%}%>
 </div>
 <!-- Pagination -->
-<a href="<%= previousUrl%>">Back</a>
+<a href="<%=previousUrl%>">Back</a>
 <!-- Footer -->
 <%- include('partials/footer') -%>

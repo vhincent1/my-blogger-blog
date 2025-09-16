@@ -36,6 +36,23 @@ const CONFIG = {
 
   // express config
   server: { port: process.env.PORT },
+
+  // EJS template
+  ejs: {
+    links: {
+      searchLabel: (item) => `/?search=${item}&type=labels`,
+      viewPost: (post) => `/posts/${post.id}`,
+      editPost: (post) => `/posts/${post.id}/edit`,
+      createPost: '/posts/create',
+      footerLinks: {
+        "/": "Home",
+        "/index": "Index",
+        "/login": "Login",
+        "/dashboard": "Dashboard",
+        "/gallery": "Gallery"
+      }
+    }
+  }
 };
 
 export default CONFIG;

@@ -1,0 +1,53 @@
+<style>
+  .fa-heart-o {
+    color: red;
+    cursor: pointer;
+  }
+
+  .fa-heart {
+    color: red;
+    cursor: pointer;
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("heart").addEventListener("click", function() {
+      const heartElement = document.getElementById("heart");
+      if (heartElement.classList.contains("liked")) {
+        heartElement.innerHTML = '<i class="fa fa-heart-o" aria-hidden="true"></i>';
+        heartElement.classList.remove("liked");
+      } else {
+        heartElement.innerHTML = '<i class="fa fa-heart" aria-hidden="true"></i>';
+        heartElement.classList.add("liked");
+      }
+    });
+  });
+
+  // document.querySelectorAll('.like-button').forEach(button => {
+  //   button.addEventListener('click', async () => {
+  //     const itemId = button.dataset.itemId;
+  //     try {
+  //       const response = await fetch(`/api/items/${itemId}/like`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         }
+  //       });
+  //       const data = await response.json();
+  //       // Update the like count on the frontend
+  //       button.nextElementSibling.textContent = data.newLikeCount;
+  //     } catch (error) {
+  //       console.error('Error liking item:', error);
+  //     }
+  //   });
+  // });
+
+</script>
+<!-- 
+<p>Click on the heart to love or un-love this post.</p>
+<span id=heart><i class="fa fa-heart-o" aria-hidden="true"></i> </span> 
+-->
+<!--
+<button class="like-button" data-item-id="123">Like</button>
+<span class="like-count">0</span> 
+-->

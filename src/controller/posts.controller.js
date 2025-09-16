@@ -3,13 +3,18 @@ import PostService from '../services/post.service.js'
 import { navbarController } from './navbar.controller.js';
 import { pageController } from './page.controller.js';
 
-const postsController = {
-  getEditPost: async (req, res) => {
+async function publishPost(req, res, editting) {
+  let parameters = { editting: false }
+  if (editting) {
     const postId = parseInt(req.params.postId);
-    res.render('publish-post', {
-      post: await PostService.getPostById(postId),
-    });
-  },
+    parameters = { editting: true, post: await PostService.getPostById(postId) }
+  }
+  res.render('publish-post', parameters);
+}
+
+const postsController = {
+  createPost: async (req, res) => publishPost(req, res),
+  getEditPost: async (req, res) => publishPost(req, res, true),
   getViewPost: async (req, res) => {
     const postId = parseInt(req.params.postId);
     res.render('view-post', {
@@ -18,4 +23,4 @@ const postsController = {
   },
 };
 
-export { postsController };
+export default postsController;

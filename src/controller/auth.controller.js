@@ -1,18 +1,23 @@
 import { notFound } from '../middleware/errorhandler.middleware.js';
 
 function isAuthenticated(req, res, next) {
-  console.log('restrict');
-  if (req.session.user) {
-    console.log('req user');
-    next();
+  const enabled = true
+  if (!enabled) {
+    next()
   } else {
-    console.log('error, ' + req.session.user);
-    req.session.error = 'Access denied!';
-    // res.redirect('/login');
-    // res.status(404).send('Error')
-    notFound(req, res, next);
+    if (req.session.user) {
+      console.log('req user');
+      next();
+    } else {
+      console.log('error, ' + req.session.user);
+      req.session.error = 'Access denied!';
+      // res.redirect('/login');
+      // res.status(404).send('Error')
+      notFound(req, res, next);
+    }
   }
 }
+
 
 async function postLogin(req, res) {
   try {

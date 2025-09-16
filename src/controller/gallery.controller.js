@@ -3,6 +3,9 @@ import path from 'path';
 import PostService from '../services/post.service.js'
 import { pageController } from './page.controller.js';
 
+
+// Example usage:
+const targetDirectory = './public/images';
 function readDirectoryRecursively(directoryPath) {
   const filesAndFolders = [];
   function walk(currentPath) {
@@ -24,9 +27,6 @@ function readDirectoryRecursively(directoryPath) {
   walk(directoryPath);
   return filesAndFolders;
 }
-
-// Example usage:
-const targetDirectory = './public/images';
 // const extension = path.extname(filename).toLowerCase();
 
 // if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.tiff', '.webp'].includes(extension)) {

@@ -1,15 +1,7 @@
 <!-- Nav links -->
-<%const links = {
-    "/" : "Home",
-    "/index" : "Index",
-    "/login" : "Login",
-    "/dashboard" : "Dashboard",
-    "/gallery" : "Gallery"
-}%>
-<%for (const [route, label] of Object.entries(links)) {%>
+<%for (const [route, label] of Object.entries(links.footerLinks)) {%>
 <a href="<%=route%>"><%=label%></a>
 <%}%>
-
 </body>
 <!-- Widgets -->
 <%- //include('widgets/image-modal') -%>

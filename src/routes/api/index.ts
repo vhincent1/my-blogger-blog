@@ -1,9 +1,9 @@
 import express from 'express';
-import emojis from './emojis.js';
+import emojis from './emojis.ts';
 
 import { performance } from 'node:perf_hooks';
 
-import { pageController } from '../../controller/page.controller.js';
+import { pageController } from '../../controller/page.controller.ts';
 
 const router = express.Router();
 

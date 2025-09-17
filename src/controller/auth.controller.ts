@@ -1,4 +1,4 @@
-import { notFound } from '../middleware/errorhandler.middleware.js';
+import { notFound } from '../middleware/errorhandler.middleware.ts';
 
 function isAuthenticated(req, res, next) {
   const enabled = true

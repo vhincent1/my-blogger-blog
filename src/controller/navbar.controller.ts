@@ -1,5 +1,5 @@
-// import database from '../database/index.database.js';
-import PostService from '../services/post.service.js';
+// import database from '../database/index.database.ts';
+import PostService from '../services/post.service.ts';
 
 const blogPosts = await PostService.getPosts();
 

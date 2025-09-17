@@ -2,13 +2,16 @@ import 'dotenv/config';
 import path from 'path';
 //express
 import express from 'express';
+
 import session from 'express-session';
 import compress from 'compression';
+import { xss } from 'express-xss-sanitizer';
+import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 //routes
-import routes from './routes/app.routes.js';
+import routes from './routes/app.routes.ts';
 //middleware
-import * as middlewares from './middleware/errorhandler.middleware.js';
+import * as middlewares from './middleware/errorhandler.middleware.ts';
 // color text
 import chalk from 'chalk';
 
@@ -24,20 +27,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(compress());
 app.use(express.json()); // for parsing application/json
 app.use(xss()); // Apply XSS sanitizer to all incoming requests
-app.use(mongoSanitize()); // Apply MongoDB sanitizer
+// app.use(mongoSanitize()); // Apply MongoDB sanitizer
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// const getClientIp = (req: Request): string | undefined => {
+//   // Check for the X-Forwarded-For header, which is commonly set by proxies
+//   const forwarded = req.headers['x-forwarded-for'];
+  
+//   if (forwarded) {
+//     // If it exists, the IP is the first value in the comma-separated list
+//     // (the client's original IP)
+//     return (Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0])?.trim();
+//   }
+
+//   // Fallback to req.ip or req.socket.remoteAddress if no proxy is involved
+//   return req.ip || req.socket.remoteAddress;
+// };
+
 // sessions
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET!,
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
 }));
 app.use('/', routes);
 
+
 // log ip addresses
 app.use((req, res, next) => {
+    //let clientIp = req.socket.remoteAddress
     // Get the remote IP address
     let remoteIp = req.ip || req.connection.remoteAddress; // Use req.ip if trust proxy is enabled
     // Store the IP address in the session if it's not already there

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import PostService from '../services/post.service.js'
-import { pageController } from './page.controller.js';
+import PostService from '../services/post.service.ts'
+import { pageController } from './page.controller.ts';
 
 
 // Example usage:

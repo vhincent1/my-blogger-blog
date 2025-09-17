@@ -1,6 +1,6 @@
-import appConfig from '../app.config.js'
+import appConfig from '../app.config.ts'
 import { Mutex } from 'async-mutex';
-import { readJsonFile, writeJsonFile } from './json.database.js';
+import { readJsonFile, writeJsonFile } from './json.database.ts';
 
 const dbMutex = new Mutex();
 

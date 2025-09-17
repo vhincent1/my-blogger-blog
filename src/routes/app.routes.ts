@@ -1,16 +1,16 @@
 import express from 'express';
 
-import appConfig from '../app.config.js'
+import appConfig from '../app.config.ts'
 
-import { navbarController } from '../controller/navbar.controller.js';
+import { navbarController } from '../controller/navbar.controller.ts';
 
-import apiRouter from './api/index.js';
-import indexRouter from './homepage/index.js';
-import authRouter from './auth.routes.js';
-import postsRouter from './posts.routes.js';
-import uploadRouter from './upload.routes.js'
+import apiRouter from './api/index.ts';
+import indexRouter from './homepage/index.ts';
+import authRouter from './auth.routes.ts';
+import postsRouter from './posts.routes.ts';
+import uploadRouter from './upload.routes.ts'
 
-import { apiLimiter } from '../middleware/limiter.middleware.js';
+import { apiLimiter } from '../middleware/limiter.middleware.ts';
 
 const app = express.Router();
 

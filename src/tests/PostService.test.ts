@@ -1,8 +1,8 @@
 import { assert } from "chai";
 import { describe } from "mocha";
 
-import PostService from "../services/post.service.js";
-import PostModel from "../model/Post.model.js"; // Import the service we want to test
+import PostService from "../services/post.service.ts";
+import PostModel from "../model/Post.model.ts"; // Import the service we want to test
 
 describe("Post Service", () => {
   const PostServiceInstance = new PostService();

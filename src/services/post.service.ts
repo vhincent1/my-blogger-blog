@@ -1,10 +1,10 @@
-import database from '../database/index.database.js';
-import PostModel from '../model/Post.model.js';
+import database from '../database/index.database.ts';
+import PostModel from '../model/Post.model.ts';
 
 // image db
 import fs from 'fs';
-import { fileFormat } from '../utils/io.utils.js';
-import appConfig from '../app.config.js';
+import { fileFormat } from '../utils/io.utils.ts';
+import appConfig from '../app.config.ts';
 
 // content formatting
 import parser from 'node-html-parser';

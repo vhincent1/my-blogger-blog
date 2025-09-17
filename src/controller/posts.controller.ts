@@ -1,7 +1,7 @@
-import PostService from '../services/post.service.js'
+import PostService from '../services/post.service.ts'
 
-import { navbarController } from './navbar.controller.js';
-import { pageController } from './page.controller.js';
+import { navbarController } from './navbar.controller.ts';
+import { pageController } from './page.controller.ts';
 
 async function publishPost(req, res, editting) {
   let parameters = { editting: false }

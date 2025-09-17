@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
 
-import { getMinutesDifference } from '../utils/date.utils.js';
+import { getMinutesDifference } from '../utils/date.utils.ts';
 
 const handler = (req, res) =>
   res.status(429).json({

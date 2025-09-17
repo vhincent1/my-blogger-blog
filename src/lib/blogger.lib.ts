@@ -5,8 +5,8 @@ import { google } from 'googleapis';
 import fetch from 'node-fetch';
 import parser from 'node-html-parser';
 
-import appConfig from '../app.config.js'
-import PostModel from '../model/Post.model.js';
+import appConfig from '../app.config.ts'
+import PostModel from '../model/Post.model.ts';
 const parameters = appConfig.blogger
 
 // ------------------------- Blogger api ---------------------------

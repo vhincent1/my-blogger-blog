@@ -1,4 +1,6 @@
-import { navbarController } from '../controller/navbar.controller.js';
+import { navbarController } from '../controller/navbar.controller.ts';
+import { StatusCodes } from 'http-status-codes';
+
 function notFound(req, res, next) {
   res.format({
     html: () => res.render('404', { navbar: navbarController }),
@@ -18,7 +20,7 @@ function errorHandler(err, req, res, next) {
   console.error(err.stack);
 
   // respond with 500 "Internal Server Error".
-  res.status(500);
+  res.status(StatusCodes.INTERNAL_SERVER_ERROR);
   res.send('Internal Server Error');
 }
 

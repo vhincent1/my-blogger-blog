@@ -1,4 +1,4 @@
-import PostService from '../services/post.service.js';
+import PostService from '../services/post.service.ts';
 
 //defaults = {page, limit, type(gallery, null)}
 const handlePagination = async (req, defaults) => {

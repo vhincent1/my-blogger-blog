@@ -1,9 +1,9 @@
 import express from 'express';
 
-import authController from '../../controller/auth.controller.js';
-import { dashboardController } from '../../controller/dashboard.controller.js';
-import galleryController from '../../controller/gallery.controller.js';
-import { pageController } from '../../controller/page.controller.js';
+import authController from '../../controller/auth.controller.ts';
+import { dashboardController } from '../../controller/dashboard.controller.ts';
+import galleryController from '../../controller/gallery.controller.ts';
+import { pageController } from '../../controller/page.controller.ts';
 
 const route = express.Router();
 

@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import PostService from '../services/post.service.ts'
-import { pageController } from './page.controller.ts';
+import { pageController, type Pagination } from './page.controller.ts';
 
 
 // Example usage:
 const targetDirectory = './public/images';
 function readDirectoryRecursively(directoryPath) {
-  const filesAndFolders = [];
+  const filesAndFolders: any = [];
   function walk(currentPath) {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
     for (const entry of entries) {
@@ -55,8 +55,21 @@ const galleryController = {
 
     // const hasNextPage = page < totalPages;
     // const hasPreviousPage = page > 1;
+    const parameters: Pagination = {
+      page: parseInt(req.query.page as string) || 0,
+      limit: parseInt(req.query.limit as string) || 50,
 
-    const pagination = await pageController.pagination(req, { page: 0, limit: 10, type: 'gallery'})
+      query: req.query.search as string,
+      type: req.query.type as string,
+    };
+
+    // const serviceResponse = await PostService.getGallery(parameters);
+    const posts = await PostService.getGallery(parameters);
+    parameters.data = posts
+
+    const pagination = await pageController.pagination(req, parameters);
+    if (pagination.currentPage > pagination.totalPages)
+      return res.status(404).json({ error: 'Page limit exceeded' });
     res.render('gallery', { images: allItems, pagination });
   },
 };

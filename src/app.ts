@@ -24,6 +24,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src', 'views'));
 // Serve static files (CSS, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public/content')));
+
 app.use(compress());
 app.use(express.json()); // for parsing application/json
 app.use(xss()); // Apply XSS sanitizer to all incoming requests
@@ -34,7 +36,7 @@ app.use(cookieParser());
 // const getClientIp = (req: Request): string | undefined => {
 //   // Check for the X-Forwarded-For header, which is commonly set by proxies
 //   const forwarded = req.headers['x-forwarded-for'];
-  
+
 //   if (forwarded) {
 //     // If it exists, the IP is the first value in the comma-separated list
 //     // (the client's original IP)
@@ -51,7 +53,6 @@ app.use(session({
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
 }));
-app.use('/', routes);
 
 
 // log ip addresses
@@ -66,9 +67,11 @@ app.use((req, res, next) => {
     // You can also update it on subsequent requests if needed,
     // for example, to track changes in IP address (e.g., mobile network changes)
     // req.session.lastKnownRemoteAddress = remoteIp;
-    console.log(remoteIp);
+    console.log(remoteIp, req.originalUrl);
     next();
 });
+
+app.use('/', routes);
 // app.use(function(req, res, next) {
 //   res.status(404);
 //   // respond with html page
@@ -126,7 +129,7 @@ const server = app.listen(port, () => {
     /* eslint-enable no-console */
 });
 
-server.on('error', (err) => {
+server.on('error', (err: any) => {
     switch (err.code) {
         case 'EADDRINUSE':
             console.error(`Port ${port} is already in use. Please choose another port or stop the process using it.`);
@@ -136,4 +139,17 @@ server.on('error', (err) => {
     }
     process.exit(1);
 });
+const onCloseSignal = () => {
+    console.log("sigint received, shutting down");
+    server.close(() => {
+        console.log("server closed");
+        process.exit();
+    });
+    setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+};
+
+process.on("SIGINT", onCloseSignal);
+process.on("SIGTERM", onCloseSignal);
+
+export default app
 //# sourceMappingURL=app.js.map

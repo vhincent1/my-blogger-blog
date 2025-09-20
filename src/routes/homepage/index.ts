@@ -11,6 +11,7 @@ route.get('/', pageController.getFrontPage);
 route.get('/index', pageController.getIndex);
 route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
 route.get('/gallery', galleryController.index)
+route.get('/chart', async (req, res) => { res.render('chart') })
 
 import jwt from 'jsonwebtoken';
 

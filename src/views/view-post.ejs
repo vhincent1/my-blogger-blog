@@ -18,6 +18,8 @@
   <%}%>
 </div>
 <!-- Pagination -->
+ <a href="<%=links.viewPost({id: prevPost})%>">Previous Post</a>
+ <a href="<%=links.viewPost({id: nextPost})%>">Next Post</a>
 <a href="<%=previousUrl%>">Back</a>
 <!-- Footer -->
 <%- include('partials/footer') -%>

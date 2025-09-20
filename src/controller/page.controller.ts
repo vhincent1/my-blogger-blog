@@ -1,33 +1,43 @@
 import PostService from '../services/post.service.ts';
 
+interface Pagination {
+  page: number;
+  limit: number;
+  data?: any;
+  query?: string;
+  type?: string;
+}
+
 //defaults = {page, limit, type(gallery, null)}
-const handlePagination = async (req, defaults) => {
-  const page = parseInt(req.query.page) || defaults.page;
-  const limit = parseInt(req.query.limit) || defaults.limit;
-  // search query
-  const query = req.query.search;
-  const type = req.query.type;
-  const parameters = {
-    query: query,
-    type: type,
-    page: page,
-    limit: limit,
-  };
+const handlePagination = async (req, parameters: Pagination) => {
+  // const page = parseInt(req.query.page) || defaults.page;
+  // const limit = parseInt(req.query.limit) || defaults.limit;
+  // // search query
+  // const query = req.query.search;
+  // const type = req.query.type;
+  // const parameters = {
+  //   query: query,
+  //   type: type,
+  //   page: page,
+  //   limit: limit,
+  // };
   //---------------------- pagination ----------------------
   const safePage = Math.max(0, parameters.page);
   const startIndex = safePage * parameters.limit;
   const endIndex = startIndex + parameters.limit;
 
-  let items
-  if (defaults.type == 'gallery') {
-    items = await PostService.getGallery(parameters);
-  } else {
-    items = await PostService.getPosts(parameters);
-  }
+  // console.log(parameters);
+
+  let items = parameters.data || [];
+  // if (defaults.type == 'gallery') {
+  //   items = await PostService.getGallery(parameters);
+  // } else {
+  //   items = await PostService.getPosts(parameters);
+  // }
 
   const paginatedResults = items.slice(startIndex, endIndex);
   const totalItems = items.length;
-  const totalPages = Math.ceil(totalItems / parameters.limit) - 1; //todo cheapfix (last page is blank page)
+  const totalPages = Math.ceil(totalItems / parameters.limit)// -1; //todo cheapfix (last page is blank page)
   //---------------------- pagination ----------------------
 
   // console.log("Current page query: " + req.query.page);
@@ -80,6 +90,13 @@ const handlePagination = async (req, defaults) => {
   //   return res.status(404).send('not found')
   // }
 
+  function generateNextPageToken() {
+    const currentPage = parameters.page
+    if (parameters.page < totalPages) //hasNextPage
+      return currentPage + 1
+     else return null
+  }
+
   return {
     //pagination
     posts: paginatedResults,
@@ -87,45 +104,38 @@ const handlePagination = async (req, defaults) => {
     totalPages: totalPages,
     limit: parameters.limit,
     // pages prev,next
-    hasPrevPage: parameters.page > 0, 
-    hasNextPage: parameters.page < totalPages, 
+    hasPrevPage: parameters.page > 0,
+    hasNextPage: parameters.page < totalPages,
     nextPageURL: nextPageURL,
     previousPageURL: previousPageURL,
     // original URL
     originalURL: req.originalUrl, //form
+    nextPageToken: generateNextPageToken()
   };
 };
 
-const pageController = {
-  pagination: handlePagination,
-
-  //show
-  getFrontPage: async (req, res) => {
-    const pagination = await handlePagination(req, { page: 0, limit: 5 });
-    if (pagination.currentPage > pagination.totalPages) {
-      res.status(404).render('404', { pagination: pagination });
-    } else {
-      res.render('index', { pagination: pagination, viewIndex: false });
-    }
-  },
-
-  //list
-  getIndex: async (req, res) => {
-    const pagination = await handlePagination(req, { page: 0, limit: 100 });
-    if (pagination.currentPage > pagination.totalPages) {
-      res.status(404).render('404', { pagination: pagination });
-    } else {
-      res.render('index', { pagination: pagination, viewIndex: true });
-    }
-  },
-};
-
-export { pageController };
-
 // src/controllers/UserController.js
-class HomeController {
-  list(req, res) {
-    res.send('List of users');
+class PageController {
+  async list(req, res, viewingIndex, limit) {
+    // search query
+    const parameters: Pagination = {
+      page: parseInt(req.query.page) || 0,
+      limit: parseInt(req.query.limit) || limit,
+      query: req.query.search,
+      type: req.query.type,
+    };
+
+    const serviceResponse = await PostService.getPosts(parameters);
+    const posts = serviceResponse.responseObject;
+    parameters.data = posts;
+    // console.log('RESPONSE: ', serviceResponse);
+    const pagination = await handlePagination(req, parameters);
+    if (pagination.currentPage > pagination.totalPages) {
+      res.status(404).render('404', { errorMessage: 'Not found' });
+    } else {
+      res.status(serviceResponse.statusCode).render('index', { pagination: pagination, viewIndex: viewingIndex });
+    }
+
   }
   create(req, res) {
     res.send('Create a new user');
@@ -140,3 +150,19 @@ class HomeController {
     res.send(`Deleting user with ID: ${req.params.id}`);
   }
 }
+
+const c = new PageController();
+
+const pageController = {
+  pagination: handlePagination,
+  //show
+  getFrontPage: async (req, res) => {
+    c.list(req, res, false, 5);
+  },
+  //list
+  getIndex: async (req, res) => {
+    c.list(req, res, true, 100);
+  },
+};
+
+export { pageController, type Pagination };

@@ -23,8 +23,10 @@
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-
+    "strictPropertyInitialization": false, //https://www.typescriptlang.org/tsconfig/#strictPropertyInitialization
+    
     // Style Options
+    "noImplicitAny": false, //https://www.typescriptlang.org/tsconfig/#noImplicitAny
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
     // "noUnusedLocals": true,
@@ -42,7 +44,5 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    
-    
   }
 }

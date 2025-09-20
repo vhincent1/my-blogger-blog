@@ -1,6 +1,6 @@
 <%- include('partials/header', {title: 'RSS Feed'}) -%>
 <!-- Body -->
-<h1>Latest Articles from RSS Feed</h1>
+<h1>Latest Articles from RSS Feed📡🛰️</h1>
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
@@ -28,7 +28,7 @@
       <td><%= post.title%></td>
       <td><%= new Date(post.date.published).toLocaleDateString() %></td>
       <td><%= post.size.total %><sup>(<%= post.size.format %>)</sup></td>
-      <td>[<a href="<%=links.viewPost(post)%>">view</a>][<a href="<%=links.editPost(post)%>">edit</a>]</td>
+      <td>[<a href="<%=links.viewPost({id: post.id})%>">view</a>][<a href="<%=links.editPost(post)%>">edit</a>]</td>
     </tr>
     <% }); %>
   </table>
@@ -37,7 +37,7 @@
 <!-- Posts view -->
 <% pagination.posts.forEach((post) => { %>
 <div class="feed-item">
-  <a href="<%= links.viewPost(post) %>"><h2><%= post.title %></h2></a>
+  <a href="<%= links.viewPost({id: post.id}) %>"><h2><%= post.title %></h2></a>
   <!-- <p>This is a summary of the first example article.</p>
     <p>Published: <%= //post.date.published %></p> -->
   <%- post.content -%>

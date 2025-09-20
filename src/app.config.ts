@@ -15,7 +15,8 @@ const CONFIG = {
     exportConfig: {
       enabled: true,
       uploadPath: './public/content/',
-      hostPath: 'http://127.0.0.1:3000/content/',
+      hostPath: '/content/', // img src tags
+      // hostPath: 'http://127.0.0.1:3000/content/',
       // hostPath: 'http://192.168.40.220:3000/content/',
       storageDir: (hostPath, bloggerPost, index) => hostPath + bloggerPost.author.displayName + '/' + index, // SAME THING
       errorLog: path.resolve('./public/dist', 'missing_images.txt'),
@@ -41,14 +42,15 @@ const CONFIG = {
   ejs: {
     links: {
       searchLabel: (item) => `/?search=${item}&type=labels`,
-      viewPost: (post) => `/posts/${post.id}`,
-      editPost: (post) => `/posts/${post.id}/edit`,
-      createPost: '/posts/create',
+      viewPost: (post) => `/post/${post.id}`,
+      editPost: (post) => `/post/${post.id}/edit`,
+      createPost: '/post',
       footerLinks: {
         "/": "Home",
         "/index": "Index",
         "/login": "Login",
         "/dashboard": "Dashboard",
+        "/post": "Post",
         "/gallery": "Gallery"
       }
     }

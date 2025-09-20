@@ -1,7 +1,7 @@
-// import database from '../database/index.database.ts';
+import Post from '../model/Post.model.ts';
 import PostService from '../services/post.service.ts';
 
-const blogPosts = await PostService.getPosts();
+const blogPosts: Post[] = (await PostService.getPosts()).responseObject;
 
 // ----------- Label Menu -----------
 function countTagOccurrences(tagsArray) {

@@ -1,9 +1,11 @@
 import express from 'express';
 import emojis from './emojis.ts';
-
 import { performance } from 'node:perf_hooks';
 
+import PostService from '../../services/post.service.ts'
+
 import { pageController } from '../../controller/page.controller.ts';
+import type { Pagination } from '../../controller/page.controller.ts';
 
 const router = express.Router();
 
@@ -28,50 +30,35 @@ const router = express.Router();
 // });
 
 router.get('/', async (req, res) => {
-  res.json({
-    message: 'API - 👋🌎🌍🌏',
-  });
+  res.json({ message: 'Hi - 👋🌎🌍🌏' });
 });
-
 router.use('/emojis', emojis);
 
 router.use('/posts', async (req, res) => {
   const t0 = performance.now();
-  const controller = await pageController.pagination(req, {
-    page: 0,
-    limit: 10,
-  });
+
+  const parameters: Pagination = {
+    page: parseInt(req.query.page as string) || 0,
+    limit: parseInt(req.query.limit as string) || 10,
+    query: req.query.search as string,
+    type: req.query.type as string,
+  };
+
+  const serviceResponse = await PostService.getPosts(parameters);
+  const posts = serviceResponse.responseObject
+  parameters.data = posts
+
+  const controller = await pageController.pagination(req, parameters);
   if (controller.currentPage > controller.totalPages)
     return res.status(404).json({ error: 'Page limit exceeded' });
 
-  res.status(200).json(controller.posts);
-
+  res.status(serviceResponse.statusCode).json({
+    items: controller.posts,
+    nextPageToken: controller.nextPageToken
+  });
+  
   const t1 = performance.now();
   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
-});
-
-// like widget
-router.post('/posts/:postId/like', async (req, res) => {
-  const itemId = req.params.itemId;
-  const userId = req.user.id; // Assuming user authentication and req.user is populated
-  try {
-    // Check if the user has already liked/disliked this item
-    const existingLike = await db.query('SELECT * FROM likes WHERE item_id = ? AND user_id = ?', [itemId, userId]);
-    let newLikeCount;
-    if (existingLike.length > 0) {
-      // User already liked, so unlike it (or toggle dislike)
-      await db.query('DELETE FROM likes WHERE item_id = ? AND user_id = ?', [itemId, userId]);
-      newLikeCount = await db.query('SELECT COUNT(*) AS count FROM likes WHERE item_id = ? AND value = 1', [itemId]);
-    } else {
-      // User has not liked, so add a like
-      await db.query('INSERT INTO likes (item_id, user_id, value) VALUES (?, ?, 1)', [itemId, userId]);
-      newLikeCount = await db.query('SELECT COUNT(*) AS count FROM likes WHERE item_id = ? AND value = 1', [itemId]);
-    }
-    res.json({ message: 'Like status updated', newLikeCount: newLikeCount[0].count });
-  } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
 });
 
 export default router;

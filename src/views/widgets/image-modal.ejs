@@ -2,13 +2,11 @@
   <style>
     /* img {
     border: 5px solid #555;
-} */
-
+    } */
     #myImg {
       border-radius: 5px;
       cursor: pointer;
       transition: 0.3s;
-      
     }
 
     #myImg:hover {
@@ -137,14 +135,37 @@
     var img = images[i];
     // and attach our click listener for this image.
     img.onclick = function(evt) {
-      console.log(evt);
-      modal.style.display = "block";
-      modalImg.src = this.src;
-      captionText.innerHTML = this.alt;
+      openModal(this)
     }
   }
   var span = document.getElementsByClassName("close")[0];
   span.onclick = function() {
     modal.style.display = "none";
   }
+
+  function onImgError(source) {
+    source.src = "/images/avatars/NFTs/Ape%20%23650.png";
+    console.log(source)
+    // disable onerror to prevent endless loop
+    source.onerror = "";
+    return true;
+  }
+
+  function openModal(targetElement) {
+    modal.style.display = "block";
+    modalImg.src = targetElement.src;
+    captionText.innerHTML = targetElement.alt;
+  }
+
+  window.onload = function() {
+    const hash = window.location.hash;
+    if (hash) {
+      // Perform actions based on the hash
+      // For example, highlight the targeted section
+      const targetElementId = hash.replace("#", "");
+      const myImg = 'myImg' + targetElementId
+      const targetElement = document.getElementById(myImg);
+      if (targetElement) openModal(targetElement)
+    } 
+  };
 </script>

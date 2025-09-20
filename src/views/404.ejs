@@ -4,8 +4,12 @@
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
-<div class="feed-item">Page not found</div>
+<div class="feed-item">
+  <% if(typeof errorMessage !== 'undefined'){ %>
+    <%=errorMessage%>
+    <% } %>
+</div>
 <!-- Pagination -->
-<!-- <%- //include('widgets/pagination') -%> -->
+<%- //include('widgets/pagination') -%>
 <!-- Footer -->
 <%- include('partials/footer') -%>

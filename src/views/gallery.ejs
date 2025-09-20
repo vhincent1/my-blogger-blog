@@ -14,7 +14,10 @@
   <h2>Index</h2>
   <%pagination.posts.forEach(result => {
      for(const image of result.images){%>
-  <img class="myImages" id="myImg" src="<%=image%>" alt="<%=result.postId%>" style="width:150px">
+  <% const caption = '<a href='+links.viewPost({id: result.postId})+'>'+result.title+'</a>'%>
+  <a href="#<%=result.postId%>" class="image-link" data-image-src="<%=image%>">
+  <img class="myImages" id="myImg<%=result.postId%>" src="<%=image%>" alt="<%=caption%>" style="width:150px" onerror="onImgError(this)">
+  </a>
   <%}%>
   <%});%>
 </div>

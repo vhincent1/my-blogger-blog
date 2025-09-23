@@ -4,8 +4,8 @@ import { performance } from 'node:perf_hooks';
 
 import PostService from '../../services/post.service.ts'
 
-import { pageController } from '../../controller/page.controller.ts';
-import type { Pagination } from '../../controller/page.controller.ts';
+import { pageController, getPaginationParameters, getPaginatedData } from '../../controller/page.controller.ts';
+// import type { Pagination } from '../../controller/page.controller.ts';
 
 const router = express.Router();
 
@@ -34,31 +34,55 @@ router.get('/', async (req, res) => {
 });
 router.use('/emojis', emojis);
 
+// router.use('/posts', async (req, res) => {
+//   const t0 = performance.now();
+//   try {
+//     const parameters: Pagination = {
+//       page: parseInt(req.query.page as string) || 0,
+//       limit: parseInt(req.query.limit as string) || 10,
+//       query: req.query.search as string,
+//       type: req.query.type as string,
+//     };
+//     const serviceResponse = await PostService.getPosts(parameters);
+//     const posts = serviceResponse.responseObject
+//     parameters.data = posts
+//     const controller = await pageController.pagination(req, parameters);
+//     if (controller.currentPage > controller.totalPages)
+//       return res.status(404).json({ error: 'Page limit exceeded' });
+//     res.status(serviceResponse.statusCode).json({
+//       items: controller.posts,
+//       nextPageToken: controller.nextPageToken
+//     });
+//   } catch (ex) {
+//     console.error('Failed to fetch data ', ex)
+//     res.status(500).json({ error: 'failed' })
+//   }
+//   const t1 = performance.now();
+//   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
+// });
+
 router.use('/posts', async (req, res) => {
   const t0 = performance.now();
-
-  const parameters: Pagination = {
-    page: parseInt(req.query.page as string) || 0,
-    limit: parseInt(req.query.limit as string) || 10,
-    query: req.query.search as string,
-    type: req.query.type as string,
-  };
-
-  const serviceResponse = await PostService.getPosts(parameters);
-  const posts = serviceResponse.responseObject
-  parameters.data = posts
-
-  const controller = await pageController.pagination(req, parameters);
-  if (controller.currentPage > controller.totalPages)
-    return res.status(404).json({ error: 'Page limit exceeded' });
-
-  res.status(serviceResponse.statusCode).json({
-    items: controller.posts,
-    nextPageToken: controller.nextPageToken
-  });
-  
+  try {
+    const paginationParams = getPaginationParameters(req, { page: 0, limit: 1 });
+    const serviceResponse = await PostService.getPosts({
+      search: req.query.search,
+      type: req.query.type
+    });
+    if (serviceResponse.success) {
+      const data: any = serviceResponse.responseObject
+      const paginatedItems = await getPaginatedData(paginationParams, data);
+      if (paginatedItems.currentPage > paginatedItems.totalPages)
+        return res.status(404).json({ error: 'Page limit exceeded' })
+      res.status(serviceResponse.statusCode).json(paginatedItems);
+    } else {
+      res.status(serviceResponse.statusCode).json(serviceResponse)
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching items' });
+  }
   const t1 = performance.now();
   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
-});
+})
 
 export default router;

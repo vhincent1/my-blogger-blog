@@ -125,6 +125,5 @@ const posts = await service.getPosts();
 //   }
 // })
 
-
-
 export default service;
+

@@ -1,147 +1,136 @@
 import PostService from '../services/post.service.ts';
 
-interface Pagination {
+interface PaginationParams {
   page: number;
   limit: number;
-  data?: any;
-  query?: string;
-  type?: string;
+  offset: number;
 }
 
-//defaults = {page, limit, type(gallery, null)}
-const handlePagination = async (req, parameters: Pagination) => {
-  // const page = parseInt(req.query.page) || defaults.page;
-  // const limit = parseInt(req.query.limit) || defaults.limit;
-  // // search query
-  // const query = req.query.search;
-  // const type = req.query.type;
-  // const parameters = {
-  //   query: query,
-  //   type: type,
-  //   page: page,
-  //   limit: limit,
-  // };
-  //---------------------- pagination ----------------------
-  const safePage = Math.max(0, parameters.page);
-  const startIndex = safePage * parameters.limit;
-  const endIndex = startIndex + parameters.limit;
+interface PaginatedResult<T> {
+  data: T[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+  nextPageToken: number | null;
+}
 
-  // console.log(parameters);
+interface PaginatedQuery {
+  // pages prev,next
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  nextPageURL: string;
+  previousPageURL: string;
+  // original URL
+  originalURL: string;
+}
 
-  let items = parameters.data || [];
-  // if (defaults.type == 'gallery') {
-  //   items = await PostService.getGallery(parameters);
-  // } else {
-  //   items = await PostService.getPosts(parameters);
-  // }
+function getPaginationParameters(req, defaults): PaginationParams {
+  const page = parseInt(req.query.page as string) || defaults.page;
+  const limit = parseInt(req.query.limit as string) || defaults.limit;
+  const offset = (page - 1) * limit;
+  return { page, limit, offset };
+}
 
-  const paginatedResults = items.slice(startIndex, endIndex);
+async function getPaginatedData<T extends Array<any>>(params: PaginationParams, data: T): Promise<PaginatedResult<T>> {
+  const { limit, offset, page } = params;
+  const safePage = Math.max(0, page);
+  const startIndex = safePage * limit;
+  const endIndex = startIndex + limit;
+
+  let items = data || [];
+  // const paginatedResults = items.slice(startIndex, endIndex);
+
+  const paginatedResults = items.slice(offset, offset + limit);
   const totalItems = items.length;
-  const totalPages = Math.ceil(totalItems / parameters.limit)// -1; //todo cheapfix (last page is blank page)
-  //---------------------- pagination ----------------------
-
-  // console.log("Current page query: " + req.query.page);
-  // console.log("Current Page: " + search.page);
-
-  //------- pagination urls
-  let currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-
-  // if(parameters.page > totalPages){
-  //   parameters.page = totalPages
-  //   console.log("Current page: "+parameters.page)
-  //   console.log("Total: "+totalPages)
-  // }
-
-  const pageQuery = 'page=' + parameters.page;
-
-  let nextPage = parameters.page + 1;
-  if (nextPage > totalPages) nextPage = totalPages;
-  const nextQuery = 'page=' + nextPage;
-
-  let prevPage = parameters.page - 1;
-  if (prevPage < 0) prevPage = 0;
-  const prevQuery = 'page=' + prevPage;
-
-  // appened query
-  const queries = Object.keys(req.query);
-  if (queries.length == 0) {
-    currentUrl += '?page=' + parameters.page;
-  } else {
-    // currentURL += "&page=" + page;
-    if (!currentUrl.includes('page=')) currentUrl += '&page=' + parameters.page;
-  }
-
-  // fix starting page
-  if (currentUrl.includes('page=0')) {
-    // currentURL = currentURL.replace("page=0", "page=1");
-  }
-
-  // appened page query to the current url
-  //  if (!currentURL.includes("page=")) currentURL += "&page=" + page;
-
-  const nextPageURL = currentUrl.replace(pageQuery, nextQuery);
-  const previousPageURL = currentUrl.replace(pageQuery, prevQuery);
-
-  // console.log("Current: " + currentPageQuery);
-  // console.log("Next: " + nextPageURL);
-  //--------
-
-  // if (parameters.page > totalPages) {
-  //   return res.status(404).send('not found')
-  // }
+  const totalPages = Math.ceil(totalItems / limit)// -1; //todo cheapfix (last page is blank page)
 
   function generateNextPageToken() {
-    const currentPage = parameters.page
-    if (parameters.page < totalPages) //hasNextPage
-      return currentPage + 1
-     else return null
+    return page < totalPages ? page + 1 : null
   }
 
   return {
-    //pagination
-    posts: paginatedResults,
-    currentPage: parameters.page,
-    totalPages: totalPages,
-    limit: parameters.limit,
+    data: paginatedResults,
+    totalCount: items.length,
+    totalPages,
+    currentPage: page,
+    limit,
+    nextPageToken: generateNextPageToken()
+  };
+}
+
+function getPaginatedQueryDetails(req, paginatedResult): PaginatedQuery {
+  let currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  const pageQuery = 'page=' + paginatedResult.currentPage;
+  let nextPage = paginatedResult.currentPage + 1;
+  if (nextPage > paginatedResult.totalPages) nextPage = paginatedResult.totalPages;
+  const nextQuery = 'page=' + nextPage;
+  let prevPage = paginatedResult.currentPage - 1;
+  if (prevPage < 0) prevPage = 0;
+  const prevQuery = 'page=' + prevPage;
+  // appened query
+  const queries = Object.keys(req.query);
+  if (queries.length == 0) {
+    currentUrl += '?page=' + paginatedResult.currentPage;
+  } else {
+    if (!currentUrl.includes('page='))
+      currentUrl += '&page=' + paginatedResult.currentPage;
+  }
+  const nextPageURL = currentUrl.replace(pageQuery, nextQuery);
+  const previousPageURL = currentUrl.replace(pageQuery, prevQuery);
+  return {
     // pages prev,next
-    hasPrevPage: parameters.page > 0,
-    hasNextPage: parameters.page < totalPages,
+    hasPrevPage: paginatedResult.currentPage > 0,
+    hasNextPage: paginatedResult.currentPage < paginatedResult.totalPages,
     nextPageURL: nextPageURL,
     previousPageURL: previousPageURL,
     // original URL
     originalURL: req.originalUrl, //form
-    nextPageToken: generateNextPageToken()
-  };
-};
+  }
+}
 
 // src/controllers/UserController.js
 class PageController {
   async list(req, res, viewingIndex, limit) {
     // search query
-    const parameters: Pagination = {
-      page: parseInt(req.query.page) || 0,
-      limit: parseInt(req.query.limit) || limit,
-      query: req.query.search,
-      type: req.query.type,
-    };
+    // const parameters: Pagination = {
+    //   page: parseInt(req.query.page) || 0,
+    //   limit: parseInt(req.query.limit) || limit,
+    //   query: req.query.search,
+    //   type: req.query.type,
+    // };
+    const parameters = getPaginationParameters(req, { page: 1, limit });
+    const serviceResponse = await PostService.getPosts({
+      search: req.query.search,
+      type: req.query.type
+    });
+    if (serviceResponse.success) {
+      const posts: any = serviceResponse.responseObject;
+      const paginatedResult = await getPaginatedData(parameters, posts)
+      const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult)
+      // parameters.data = posts;
 
-    const serviceResponse = await PostService.getPosts(parameters);
-    const posts = serviceResponse.responseObject;
-    parameters.data = posts;
-    // console.log('RESPONSE: ', serviceResponse);
-    const pagination = await handlePagination(req, parameters);
-    if (pagination.currentPage > pagination.totalPages) {
-      res.status(404).render('404', { errorMessage: 'Not found' });
+      // console.log('RESPONSE: ', serviceResponse);
+      // const pagination = await handlePagination(req, parameters);
+      // console.log(pagination.totalPages)
+      if (paginatedResult.currentPage > paginatedResult.totalPages) {
+        res.status(404).render('404', { errorMessage: 'Not found' });
+      } else {
+        res.status(serviceResponse.statusCode).render('index', {
+          pagination: paginationQueryDetails,
+          paginationResult: paginatedResult,
+          viewIndex: viewingIndex
+        });
+      }
     } else {
-      res.status(serviceResponse.statusCode).render('index', { pagination: pagination, viewIndex: viewingIndex });
+      res.status(serviceResponse.statusCode).send(serviceResponse)
     }
-
   }
   create(req, res) {
     res.send('Create a new user');
   }
   show(req, res) {
-    res.send(`Showing user with ID: ${req.params.id}`);
+    // res.send(`Showing user with ID: ${req.params.id}`);
   }
   update(req, res) {
     res.send(`Updating user with ID: ${req.params.id}`);
@@ -154,15 +143,13 @@ class PageController {
 const c = new PageController();
 
 const pageController = {
-  pagination: handlePagination,
-  //show
-  getFrontPage: async (req, res) => {
-    c.list(req, res, false, 5);
-  },
-  //list
-  getIndex: async (req, res) => {
-    c.list(req, res, true, 100);
-  },
+  getFrontPage: async (req, res) => c.list(req, res, false, 5),
+  getIndex: async (req, res) => c.list(req, res, true, 100)
 };
 
-export { pageController, type Pagination };
+export {
+  pageController,
+  getPaginationParameters,
+  getPaginatedData,
+  getPaginatedQueryDetails
+};

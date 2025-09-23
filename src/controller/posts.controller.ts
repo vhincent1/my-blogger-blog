@@ -7,8 +7,9 @@ import { pageController } from './page.controller.ts';
 async function publishPost(req, res, editting = false) {
   const postId = parseInt(req.params.postId);
   const serviceResponse = await PostService.getPostById(postId)
+  // console.log(serviceResponse)
   const create = !serviceResponse.success 
-  res.render('publish-post', { post: serviceResponse.responseObject, editting: editting});
+  res.render('edit-post', { post: serviceResponse.responseObject, editting: editting});
 }
 
 const postsController = {

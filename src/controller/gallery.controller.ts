@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import PostService from '../services/post.service.ts'
-import { pageController, type Pagination } from './page.controller.ts';
-
+import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './page.controller.ts';
 
 // Example usage:
 const targetDirectory = './public/images';
@@ -35,42 +34,30 @@ function readDirectoryRecursively(directoryPath) {
 //     console.log('This is not a recognized image file extension.');
 // }
 const allItems = readDirectoryRecursively(targetDirectory).filter(item => path.extname(item.path) == '.png');
-// console.log('All files and folders in', targetDirectory, 'and its subdirectories:');
-// allItems.forEach(item => {
-//   console.log(`${item.type}: ${item.path}`);
-// });
-//todo paginated results
+
 
 const galleryController = {
   index: async (req, res) => {
-    // const page = parseInt(req.query.page) || 1;
-    // const limit = parseInt(req.query.limit) || 200;
-    // const skip = (page - 1) * limit;//offset
 
-    // const fullArray = await PostService.gallery();
-    // const paginatedResults = fullArray.slice(skip, skip + limit);
+    const parameters = getPaginationParameters(req, {
+      page: 1,
+      limit: parseInt(req.query.limit) || 50
+    });
 
-    // const totalItems = fullArray.length;
-    // const totalPages = Math.ceil(totalItems / limit);
+    const posts = await PostService.getGallery({
+      search: req.query.search,
+      type: req.query.type
+    });
 
-    // const hasNextPage = page < totalPages;
-    // const hasPreviousPage = page > 1;
-    const parameters: Pagination = {
-      page: parseInt(req.query.page as string) || 0,
-      limit: parseInt(req.query.limit as string) || 50,
+    const paginatedResult = await getPaginatedData(parameters, posts)
+    const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult)
 
-      query: req.query.search as string,
-      type: req.query.type as string,
-    };
+    // parameters.data = posts
 
-    // const serviceResponse = await PostService.getGallery(parameters);
-    const posts = await PostService.getGallery(parameters);
-    parameters.data = posts
-
-    const pagination = await pageController.pagination(req, parameters);
-    if (pagination.currentPage > pagination.totalPages)
+    // const pagination = await pageController.pagination(req, parameters);
+    if (paginatedResult.currentPage > paginatedResult.totalPages)
       return res.status(404).json({ error: 'Page limit exceeded' });
-    res.render('gallery', { images: allItems, pagination });
+    res.render('gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult, });
   },
 };
 

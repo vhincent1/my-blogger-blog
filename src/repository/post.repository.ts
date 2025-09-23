@@ -17,9 +17,9 @@ export class PostRepository {
     let type: string = '';
     if(filter) type = filter.type
       switch (type) {
-        case 'content': return posts.filter((post) => post.content.includes(filter.query));
-        case 'labels': return posts.filter((post) => post.labels.includes(filter.query));
-        case 'title': return posts.filter((post) => post.title.includes(filter.query));
+        case 'content': return posts.filter((post) => post.content.includes(filter.search));
+        case 'labels': return posts.filter((post) => post.labels.includes(filter.search));
+        case 'title': return posts.filter((post) => post.title.includes(filter.search));
         default: return posts
       }
   }

@@ -29,7 +29,7 @@ app.use('/login', authRouter);
 app.use('/post', postsRouter);
 app.use('/upload', uploadRouter)
 
-app.use('/api/v1', apiLimiter, apiRouter);
+app.use('/api/v1', /*apiLimiter,*/ apiRouter);
 app.get('/api/v2', async (req, res) => {
   res.json({
     message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄',

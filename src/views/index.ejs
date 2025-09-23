@@ -23,7 +23,7 @@
       <th style="width:1%">Size</th>
       <th style="width:40%">Links</th>
     </tr>
-    <% pagination.posts.forEach(post => { %>
+    <% paginationResult.data.forEach(post => { %>
     <tr>
       <td><%= post.title%></td>
       <td><%= new Date(post.date.published).toLocaleDateString() %></td>
@@ -35,7 +35,7 @@
 </div>
 <% } else { %>
 <!-- Posts view -->
-<% pagination.posts.forEach((post) => { %>
+<% paginationResult.data.forEach((post) => { %>
 <div class="feed-item">
   <a href="<%= links.viewPost({id: post.id}) %>"><h2><%= post.title %></h2></a>
   <!-- <p>This is a summary of the first example article.</p>

@@ -1,18 +1,17 @@
 <!-- Pagination -->
-<form>
+
+<form action="<%= pagination.originalURL -%>" method="GET">
   <%if(pagination.hasPrevPage){%><a href="<%= pagination.previousPageURL %>">Previous</a> |<%}%>
   <%if(pagination.hasNextPage){%><a href="<%= pagination.nextPageURL %>">Next</a> | <%}%>
-  Page: <%=pagination.currentPage %> |
-  Total: <%=pagination.totalPages %> |
+  Page: <%=paginationResult.currentPage %> |
+  Total: <%=paginationResult.totalPages %> |
   <label for="limit">Limit:</label>
   <select name="limit" id="limit" onchange="setLimit()">
     <option value="0" selected>0</option>
     <% for (let i = 5; i< 25; i+= 5){ %>
     <option value="<%=i-%>" <%if(pagination.limit == i){ %>selected<%}%>><%=i-%></option>
-      <% } %>
+    <% } %>
   </select>
-</form>
-<form action="<%= pagination.originalURL -%>" method="GET">
   <label for="search">Search:</label>
   <input type="text" id="search" name="search" required /><label for="type"> In:</label>
   <select id="type" name="type">
@@ -31,7 +30,7 @@
     const currentUrl = new URL(window.location.href);
     const newURL = new URL(window.location.href);
 
-    newURL.searchParams.set("page", <%=pagination.currentPage%>);
+    newURL.searchParams.set("page", <%=paginationResult.currentPage%>);
     // newURL.searchParams.set("page", 0); // reset page
     newURL.searchParams.set("limit", selectedValue);
     // If you want to transfer existing parameters from the current URL

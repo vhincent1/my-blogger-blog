@@ -1,7 +1,7 @@
 import { notFound } from '../middleware/errorhandler.middleware.ts';
 
 function isAuthenticated(req, res, next) {
-  const enabled = true
+  const enabled = false
   if (!enabled) {
     next()
   } else {
@@ -9,7 +9,7 @@ function isAuthenticated(req, res, next) {
       console.log('req user');
       next();
     } else {
-      console.log('error, ' + req.session.user);
+      console.log('error, not logged in' + req.session.user);
       req.session.error = 'Access denied!';
       // res.redirect('/login');
       // res.status(404).send('Error')
@@ -17,7 +17,6 @@ function isAuthenticated(req, res, next) {
     }
   }
 }
-
 
 async function postLogin(req, res) {
   try {

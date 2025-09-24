@@ -1,0 +1,49 @@
+<head>
+  <link rel="stylesheet" type="text/css" href="/js/pell/pell.min.css" />
+  <style>
+    /* override styles here */
+    .pell-content {
+      background-color: pink;
+    }
+  </style>
+</head>
+<div id="pell-editor" class="pell"></div>
+<div id="pell-code">
+  <b>Code:</b>
+  <textarea id="content" name="pell-content" rows="5" cols="40"><%= content %></textarea>
+  <button onclick="PellEditor.previewButton()">Preview</button>
+</div>
+<div style="margin-top: 20px">
+  <h3>Preview:</h3>
+  <pre id="live-preview"></pre>
+</div>
+<!-- WYSIWYG Editor -->
+<script src="/js/pell/pell.min.js"></script>
+<!-- Beautifier -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.4/beautify-html.min.js"></script>
+<script>
+  const PellEditor = {}
+  PellEditor.unescapeHtml = (escapedString) => {
+      const temp = document.createElement('textarea'); // or 'div'
+      temp.innerHTML = escapedString;
+      return temp.value; // or tempElement.innerText for div
+    },
+    PellEditor.pellCode = document.getElementById('pell-code'),
+    PellEditor.editor = PellEditor.pellCode.querySelector('textarea'),
+    PellEditor.init = function() {
+      window.pell.init({
+        element: document.getElementById('pell-editor'),
+        // defaultParagraphSeparator: '',
+        onChange: function(html) {
+          PellEditor.editor.value = html_beautify(PellEditor.unescapeHtml(html));
+        },
+      })
+    },
+    PellEditor.previewButton = function() {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(PellEditor.editor.value, 'text/html');
+      document.getElementById('live-preview').innerHTML = PellEditor.editor.value;
+    }
+
+  PellEditor.init()
+</script>

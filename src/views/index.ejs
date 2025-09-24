@@ -8,7 +8,9 @@
   table {
     /* width: 100%; */
   }
-  td, th {
+
+  td,
+  th {
     /* border: 1px solid #dddddd; */
     text-align: left;
   }
@@ -35,7 +37,9 @@
 <!-- Posts view -->
 <% paginationResult.data.forEach((post) => { %>
 <div class="feed-item">
-  <a href="<%= common.links.viewPost({id: post.id}) %>"><h2><%= post.title %></h2></a>
+  <a href="<%= common.links.viewPost({id: post.id}) %>">
+    <h2><%= post.title %></h2>
+  </a>
   <!-- <p>This is a summary of the first example article.</p>
     <p>Published: <%= //post.date.published %></p> -->
   <%- post.content -%>
@@ -47,6 +51,8 @@
 </div>
 <!-- Pagination -->
 <%- include('widgets/pagination') -%>
-<%- include('widgets/autoscroll') -%>
+<%- include('widgets/autoscroll',{
+  currentPage: paginationResult.currentPage, 
+  limit: paginationResult.limit}) -%>
 <!-- Footer -->
 <%- include('partials/footer') -%>

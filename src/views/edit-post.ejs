@@ -63,11 +63,19 @@ if(editting){
 <textarea id="labels" name="edit-labels" placeholder="Blog Labels" rows="1"><%=labels%></textarea>
 <div class="tab">
   <button class="tablinks" onclick="openTab(event, 'Info')" id="defaultOpen">Info</button>
+  <button class="tablinks" onclick="openTab(event, 'Raw')">Raw</button>
+  <button class="tablinks" onclick="openTab(event, 'Pell')">Pell</button>
   <button class="tablinks" onclick="openTab(event, 'SunEditor')">SunEditor</button>
   <button class="tablinks" onclick="openTab(event, 'WYSIHTML')">WYSIHTML (Text Only)</button>
 </div>
 <div id="Info" class="tabcontent">
   Select an editor
+</div>
+<div id="Raw" class="tabcontent">
+  <%- include('editors/RawEditor') %>
+</div>
+<div id="Pell" class="tabcontent">
+  <%- include('editors/PellEditor', {content}) %>
 </div>
 <div id="SunEditor" class="tabcontent">
   <%-include('editors/SunEditor', {content}) %>

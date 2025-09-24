@@ -1,10 +1,24 @@
+<input type="checkbox" id="myCheckbox" name="option1" value="yes">
+<label for="myCheckbox">AutoScroll</label>
 <script>
   widgets.autoscroll = {
-    currentPage: 1,
+    myCheckbox: document.getElementById('myCheckbox'),
+    currentPage: parseInt('<%=currentPage%>'), // ejs
+    limit: parseInt('<%=limit%>'),// ejs
     isLoading: false,
     hasMoreData: true, // Set based on server response
     windowEvent() {
       window.addEventListener('scroll', () => {
+        // const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+        // if (window.scrollY >= maxScrollY) {
+        //     // User is at the bottom or attempting to overscroll downwards
+        //     console.log("Reached bottom or overscrolling downwards!");
+        // } else if (window.scrollY <= 0) {
+        //     // User is at the top or attempting to overscroll upwards
+        //     // console.log("Reached top or overscrolling upwards!");
+        // }
+        // Check if the checkbox is checked
+        if (!myCheckbox.checked)  return
         const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
         if (scrollTop + clientHeight >= scrollHeight - 0 && !widgets.autoscroll.isLoading && widgets.autoscroll.hasMoreData) {
           widgets.autoscroll.isLoading = true;
@@ -17,7 +31,7 @@
     },
     async loadMoreItems() {
       try {
-        const response = await fetch(`/api/v1/posts?page=${widgets.autoscroll.currentPage}&limit=100`);
+        const response = await fetch(`/api/v1/posts?page=${widgets.autoscroll.currentPage}&limit=${widgets.autoscroll.limit}`);
         // const response = await fetch(`/api/v1/posts?page=1&limit=1`);
         const apiResponse = await response.json();
         if (response.status != 200) {

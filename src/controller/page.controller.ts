@@ -46,6 +46,7 @@ async function getPaginatedData<T extends Array<any>>(params: PaginationParams, 
   const totalPages = Math.ceil(totalItems / limit)// -1; //todo cheapfix (last page is blank page)
 
   function generateNextPageToken() {
+    if(page > totalPages) return null
     return page < totalPages ? page + 1 : null
   }
 

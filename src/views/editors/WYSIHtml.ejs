@@ -34,9 +34,9 @@
   #myUniqueTextarea {
     color: black;
     border: 2px solid black;
-  } 
+  }
 
-  #myUniqueTextarea{
+  #myUniqueTextarea {
     height: 280px;
     border: 2px solid green;
     font-family: Verdana;
@@ -266,7 +266,15 @@
   </div>
 </div><!-- toolbar -->
 
+<%if(content){ %>
 <textarea id="myUniqueTextarea" class="editor" placeholder="Enter text ..."><%- content %></textarea>
+<%}else{%>
+<textarea id="myUniqueTextarea" class="editor" placeholder="Enter text ..."></textarea>
+<div style="font-family: 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+  <h1><b>THIS </b>is <span style="color: rgb(0, 162, 255); font-weight: 400;">the </span> type<span style="color: rgb(255, 249, 197); font-weight: 400;"><b>writer </b></span><span style="color: rgb(0, 162, 255);"><b><i>for </i></b></span>the <span style="color: rgb(255, 249, 197);"><b>modern</b> </span>web<span style="color: rgb(0, 162, 255);"><b>.</b></span></h1>
+  <p>Go on, start typing here ...</p>
+</div>
+<%}%>
 <small>powered by <a href="https://github.com/Voog/wysihtml" target="_blank">wysihtml</a>.</small>
 
 <h2>Events:</h2>
@@ -297,7 +305,6 @@
       log.innerHTML += "<div>blur</div>";
     })
     .on("change", function() {
-      console.log(textArea.value)
       log.innerHTML += "<div>change</div>";
     })
     .on("paste", function() {

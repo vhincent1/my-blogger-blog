@@ -64,13 +64,35 @@ router.use('/emojis', emojis);
 router.use('/posts', async (req, res) => {
   const t0 = performance.now();
   try {
-    const paginationParams = getPaginationParameters(req, { page: 0, limit: 1 });
+    const paginationParams = getPaginationParameters(req, { page: 1, limit: 5 });
+    //todo: max page results
+    if (paginationParams.limit > 50) {
+
+    }
     const serviceResponse = await PostService.getPosts({
       search: req.query.search,
       type: req.query.type
     });
     if (serviceResponse.success) {
-      const data: any = serviceResponse.responseObject
+      let data: any
+      const posts: any = serviceResponse.responseObject
+      // filter
+      const include = req.query.include || ''
+      if (include) {
+        const toInclude = (include as string).split(',')
+        const desiredProperties = toInclude
+        const filteredArray = posts.map(obj => {
+          const newObj = {};
+          for (const prop of desiredProperties)
+            if (obj.hasOwnProperty(prop)) 
+              newObj[prop] = obj[prop];
+          return newObj;
+        });
+        data = filteredArray
+      } else {
+        data = posts
+      }
+      // ----------------------------------
       const paginatedItems = await getPaginatedData(paginationParams, data);
       if (paginatedItems.currentPage > paginatedItems.totalPages)
         return res.status(404).json({ error: 'Page limit exceeded' })

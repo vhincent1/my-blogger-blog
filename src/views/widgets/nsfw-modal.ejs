@@ -7,7 +7,7 @@
   widgets.NSFWModal = {
     element: document.querySelectorAll('nsfw'),
     message: 'I am 18+ years old or older',
-    onLoad() {
+    init() {
       widgets.NSFWModal.element.forEach((element) => {
         const warningBox = document.createElement('div');
         const warningText = document.createElement('div');
@@ -30,7 +30,7 @@
     }
   }
 
-  window.onload = function() {
-    widgets.NSFWModal.onLoad()
-  };
+  window.addEventListener('load', function() {
+    widgets.NSFWModal.init()
+  })
 </script>

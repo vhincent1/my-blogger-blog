@@ -28,8 +28,8 @@ interface PaginatedQuery {
 function getPaginationParameters(req, defaults): PaginationParams {
   let page, limit
   if (req) {
-   page = parseInt(req.query.page as string) || defaults.page;
-   limit = parseInt(req.query.limit as string) || defaults.limit;
+    page = parseInt(req.query.page as string) || defaults.page;
+    limit = parseInt(req.query.limit as string) || defaults.limit;
   } else {
     page = defaults.page
     limit = defaults.limit
@@ -95,6 +95,30 @@ function getPaginatedQueryDetails(req, paginatedResult): PaginatedQuery {
   }
 }
 
+async function findPage(postId, pageLimit, data) {
+  let result: any
+  let nextPageToken: number | null = 0
+  while (nextPageToken != null) {
+    // const paginatedUrl = `http://localhost:3000/api/v1/posts?limit=1&page=${nextPageToken}`;
+    // const paginatedResponse = await fetch(paginatedUrl);
+    async function getData(page, limit) {
+      const getPaginationParams = getPaginationParameters(null, { page: page, limit: limit })
+      const result = await getPaginatedData(getPaginationParams, data)
+      return result
+    }
+    const paginatedData = await getData(nextPageToken, pageLimit);
+    // allItems = allItems.concat(paginatedData.data);
+    const find = paginatedData.data.find(post => post.id == postId)
+    if (find) {
+      console.log('f', paginatedData.currentPage)
+      result = { page: paginatedData.currentPage }
+    }
+    // r.push({page: paginatedData.currentPage, find})
+    nextPageToken = paginatedData.nextPageToken; // Update for the next iteration
+  }
+  return result
+}
+
 // src/controllers/UserController.js
 class PageController {
   async list(req, res, viewingIndex, limit) {
@@ -157,5 +181,5 @@ export {
   pageController,
   getPaginationParameters,
   getPaginatedData,
-  getPaginatedQueryDetails
+  getPaginatedQueryDetails,
 };

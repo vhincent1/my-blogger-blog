@@ -22,6 +22,10 @@ convert it
 ```
 yarn run api:blogger convert
 ```
+api lib
+```
+yarn run build
+```
 then run
 ```
 yarn run start

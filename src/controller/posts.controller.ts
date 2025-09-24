@@ -18,12 +18,14 @@ const postsController = {
   getViewPost: async (req, res) => {
     const postId = parseInt(req.params.postId);
     const serviceResponse = await PostService.getPostById(postId)
-    if (!serviceResponse.success)
+    if (!serviceResponse.success) 
       return res.status(serviceResponse.statusCode).render('404', { errorMessage: 'Post not found' })
+
     res.status(serviceResponse.statusCode).render('view-post', {
       post: serviceResponse.responseObject,
       nextPost: postId + 1,
-      prevPost: postId - 1
+      prevPost: postId - 1,
+      // findPage: findPage(postId, 5, 0)
     })
   },
 };

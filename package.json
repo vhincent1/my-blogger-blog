@@ -8,6 +8,8 @@
     "dev": "nodemon --env-file=.env src/app.ts",
     "api": "curl -H \"Accept: application/json\" -X GET http://localhost:3000/api/v1",
     "api:blogger": "node --import=tsx --env-file=.env src/lib/blogger.lib.ts",
+    "api:simp":"",
+    "build": "terser src/lib/simpblog.lib.ts -o public/js/simpblog.min.js --compress --mangle",
     "test:database": "node --env-file=.env src/database/index.database.js",
     "test": "yarn mocha ./src/tests/*.test.ts --reporter spec"
   },

@@ -70,12 +70,11 @@ if(editting){
   Select an editor
 </div>
 <div id="SunEditor" class="tabcontent">
-  <%-include('editors/SunEditor', {post}) %>
+  <%-include('editors/SunEditor', {content}) %>
 </div>
 <div id="WYSIHTML" class="tabcontent">
-  <%-include('editors/WYSIHtml', {post}) %>
+  <%-include('editors/WYSIHtml', {content}) %>
 </div>
-
 <script>
   // Get the element with id="defaultOpen" and click on it
   document.getElementById("defaultOpen").click();

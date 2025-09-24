@@ -1,8 +1,9 @@
 <!-- Nav links -->
-<%for (const [route, label] of Object.entries(links.footerLinks)) {%>
+<%for (const [route, label] of Object.entries(common.links.footerLinks)) {%>
 <a href="<%=route%>"><%=label%></a>
 <%}%>
 </body>
 <!-- Widgets -->
+<%- include('../widgets/nsfw-modal') -%>
 <%- //include('widgets/image-modal') -%>
 </html>

@@ -7,7 +7,7 @@
 <div class="feed-info">
   <p>Labels: <%let labels = '';
     post.labels.forEach((item, index) => { 
-    labels += '\<a href='+links.searchLabel(item)+'>'+item+'\</a>'; 
+    labels += '\<a href='+common.links.searchLabel(item)+'>'+item+'\</a>'; 
     if (index < post.labels.length - 1) { labels += ', '; }
   }); %> <%-labels%></p>
   <p>Published: <%= new Date(post.date.published).toLocaleDateString() %> <%= new Date(post.date.published).toTimeString() %></p>
@@ -18,8 +18,10 @@
   <%}%>
 </div>
 <!-- Pagination -->
- <a href="<%=links.viewPost({id: prevPost})%>">Previous Post</a>
- <a href="<%=links.viewPost({id: nextPost})%>">Next Post</a>
-<a href="<%=previousUrl%>">Back</a>
+ <a href="<%=common.links.viewPost({id: prevPost})%>">Previous Post</a>
+ <a href="<%=common.links.viewPost({id: nextPost})%>">Next Post</a>
+<a href="<%=common.previousUrl%>">Back</a>
+<!-- Widgets -->
+<%- //include('widgets/nsfw-modal') -%>
 <!-- Footer -->
 <%- include('partials/footer') -%>

@@ -1,40 +1,47 @@
 <script>
-  let currentPage = 1;
-  let isLoading = false;
-  let hasMoreData = true; // Set based on server response
-
-  window.addEventListener("scroll", () => {
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (
-      scrollTop + clientHeight >= scrollHeight - 100 &&
-      !isLoading &&
-      hasMoreData
-    ) {
-      isLoading = true;
-      currentPage++;
-      loadMoreItems();
-    }
-  });
-
-  async function loadMoreItems() {
-    try {
-      const response = await fetch(`/items?page=${currentPage}&limit=10`);
-      const data = await response.json();
-
-      // Append new items to the container
-      const itemContainer = document.getElementById("item-container");
-      data.items.forEach((item) => {
-        const itemDiv = document.createElement("div");
-        itemDiv.classList.add("item");
-        itemDiv.textContent = item.name;
-        itemContainer.appendChild(itemDiv);
+  widgets.autoscroll = {
+    currentPage: 1,
+    isLoading: false,
+    hasMoreData: true, // Set based on server response
+    windowEvent() {
+      window.addEventListener('scroll', () => {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        if (scrollTop + clientHeight >= scrollHeight - 0 && !widgets.autoscroll.isLoading && widgets.autoscroll.hasMoreData) {
+          widgets.autoscroll.isLoading = true;
+          widgets.autoscroll.currentPage++;
+          // console.log('end page', currentPage);
+          // isLoading = false
+          widgets.autoscroll.loadMoreItems();
+        }
       });
+    },
+    async loadMoreItems() {
+      try {
+        const response = await fetch(`/api/v1/posts?page=${widgets.autoscroll.currentPage}&limit=100`);
+        // const response = await fetch(`/api/v1/posts?page=1&limit=1`);
+        const apiResponse = await response.json();
+        if (response.status != 200) {
+          console.log('error:', apiResponse);
+          widgets.autoscroll.hasMoreData = false;
+          return;
+        }
+        // Append new items to the container
+        const itemContainer = document.getElementById('rss-feed-container');
+        apiResponse.data.forEach((item) => {
+          console.log(item);
+          const itemDiv = document.createElement('div');
+          itemDiv.classList.add('feed-item');
+          itemDiv.textContent = item.title;
+          itemContainer.appendChild(itemDiv);
+        });
+        widgets.autoscroll.isLoading = false;
+      } catch (error) {
+        console.error('Error loading more items:', error);
+        widgets.autoscroll.isLoading = false;
+        widgets.autoscroll.hasMoreData = false;
+      }
+    },
+  };
 
-      hasMoreData = data.hasMore;
-      isLoading = false;
-    } catch (error) {
-      console.error("Error loading more items:", error);
-      isLoading = false;
-    }
-  }
+  widgets.autoscroll.windowEvent();
 </script>

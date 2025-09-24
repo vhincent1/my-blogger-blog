@@ -6,11 +6,11 @@
   Page: <%=paginationResult.currentPage %> |
   Total: <%=paginationResult.totalPages %> |
   <label for="limit">Limit:</label>
-  <select name="limit" id="limit" onchange="setLimit()">
+  <select name="limit" id="limit" onchange="widgets.pagination.setLimit()">
     <option value="0" selected>0</option>
     <% for (let i = 5; i< 25; i+= 5){ %>
     <option value="<%=i-%>" <%if(pagination.limit == i){ %>selected<%}%>><%=i-%></option>
-    <% } %>
+      <% } %>
   </select>
   <label for="search">Search:</label>
   <input type="text" id="search" name="search" required /><label for="type"> In:</label>
@@ -23,22 +23,24 @@
 </form>
 
 <script>
-  function setLimit() {
-    var selectElement = document.getElementById("limit");
-    var selectedValue = selectElement.value;
+  widgets.pagination = {
+    setLimit() {
+      var selectElement = document.getElementById("limit");
+      var selectedValue = selectElement.value;
 
-    const currentUrl = new URL(window.location.href);
-    const newURL = new URL(window.location.href);
+      const currentUrl = new URL(window.location.href);
+      const newURL = new URL(window.location.href);
 
-    newURL.searchParams.set("page", <%=paginationResult.currentPage%>);
-    // newURL.searchParams.set("page", 0); // reset page
-    newURL.searchParams.set("limit", selectedValue);
-    // If you want to transfer existing parameters from the current URL
-    currentUrl.searchParams.forEach((value, key) => {
-      if (!key) newURL.searchParams.append(key, value);
-      console.log("KEY:" + key + " V:" + value);
-      //   console.log(newURL.toString())
-    });
-    window.location.href = newURL.toString();
+      newURL.searchParams.set("page", <%=paginationResult.currentPage%>);
+      // newURL.searchParams.set("page", 0); // reset page
+      newURL.searchParams.set("limit", selectedValue);
+      // If you want to transfer existing parameters from the current URL
+      currentUrl.searchParams.forEach((value, key) => {
+        if (!key) newURL.searchParams.append(key, value);
+        console.log("KEY:" + key + " V:" + value);
+        //   console.log(newURL.toString())
+      });
+      window.location.href = newURL.toString();
+    }
   }
 </script>

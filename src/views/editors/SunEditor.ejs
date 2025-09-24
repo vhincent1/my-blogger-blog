@@ -2,11 +2,12 @@
 <textarea id="myEditor"></textarea>
 <script src="/js/suneditor/suneditor.min.js"></script>
 <script>
+  const SunEditor = {}
   // Initialize SunEditor on the client-side
-  const editor = SUNEDITOR.create('myEditor', {
+  SunEditor.editor = SUNEDITOR.create('myEditor', {
     width: "auto",
     height: "auto",
-    value: '<%- post.content %>',
+    value: '<%- content %>',
     // plugins: plugins,
     buttonList: [
       ['undo', 'redo'],
@@ -22,11 +23,11 @@
       /** ['imageGallery'] */ // You must add the "imageGalleryUrl".
       ['fullScreen', 'showBlocks', 'codeView'],
       ['preview', 'print'],
-      ['save', 'template'],
+      ['save'],
       /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
     ]
   })
-  editor.onSave = function(contents, core) {
+  SunEditor.editor.onSave = function(contents, core) {
     console.log(contents)
   };
 </script>

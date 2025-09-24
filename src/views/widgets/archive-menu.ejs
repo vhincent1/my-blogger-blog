@@ -1,14 +1,14 @@
 <!-- Monthly archive menu -->
 <div class="archive-menu">
-  <% let index = 0; navbar.getArchiveMenu().forEach((YTD) => {%>
+  <% let index = 0; common.navbar.getArchiveMenu().forEach((YTD) => {%>
   <!-- YEAR -->
   <b><%= YTD.year -%></b><sup><%= YTD.total %></sup>
   <!-- MONTHS -->
-  <% YTD.MTD.forEach((MTD) => { index++; const posts = navbar.getPostsByDate(MTD.month, YTD.year)%>
-  <button onclick="dropDownMonth(<%= index %>)" class="drop-button"><%= MTD.month.toUpperCase() %></button><sup><%= posts.length %></sup>
+  <% YTD.MTD.forEach((MTD) => { index++; const posts = common.navbar.getPostsByDate(MTD.month, YTD.year)%>
+  <button onclick="widgets.archiveMenu.dropDownMonth(<%= index %>)" class="drop-button"><%= MTD.month.toUpperCase() %></button><sup><%= posts.length %></sup>
   <div id="dropDown<%= index %>" class="dropdown-content">
     <% posts.forEach((post) => { %>
-    <a href="<%=links.viewPost({id: post.postId})%>"><%=post.title%></a>
+    <a href="<%=common.links.viewPost({id: post.postId})%>"><%=post.title%></a>
     <% }); %>
   </div>
   <% });%>
@@ -16,22 +16,22 @@
 </div>
 <!-- Scripts -->
 <script>
-  function dropDownMonth(index) {
-    document.getElementById("dropDown" + index).classList.toggle("show");
-    console.log(index);
-  }
-
-  // Close the dropdown if the user clicks outside of it
-  window.onclick = function(event) {
-    if (!event.target.matches(".drop-button")) {
-      var dropdowns = document.getElementsByClassName("dropdown-content");
-      var i;
-      for (i = 0; i < dropdowns.length; i++) {
-        var openDropdown = dropdowns[i];
-        if (openDropdown.classList.contains("show")) {
-          openDropdown.classList.remove("show");
+  widgets.archiveMenu = {
+    dropDownMonth: (index) => {
+      document.getElementById("dropDown" + index).classList.toggle("show");
+      console.log(index);
+    },
+    closeDropDown: (event) => {
+      if (!event.target.matches(".drop-button")) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains("show")) openDropdown.classList.remove("show");
         }
       }
     }
-  };
+  }
+  // Close the dropdown if the user clicks outside of it
+  window.onclick = (event) => widgets.archiveMenu.closeDropDown(event)
 </script>

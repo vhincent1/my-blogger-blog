@@ -30,6 +30,7 @@
   #toolbar [data-wysihtml-action] {
     float: right;
   }
+
   #myUniqueTextarea {
     color: black;
     border: 2px solid black;
@@ -265,7 +266,7 @@
   </div>
 </div><!-- toolbar -->
 
-<textarea id="myUniqueTextarea" class="editor" placeholder="Enter text ..."><%- post.content %></textarea>
+<textarea id="myUniqueTextarea" class="editor" placeholder="Enter text ..."><%- content %></textarea>
 <small>powered by <a href="https://github.com/Voog/wysihtml" target="_blank">wysihtml</a>.</small>
 
 <h2>Events:</h2>
@@ -276,15 +277,17 @@
 <script src="/js/wysihtml/wysihtml.toolbar.min.js"></script>
 <script src="/js/wysihtml/parser_rules/simple.js"></script>
 <script>
-  var textArea = document.getElementById("myUniqueTextarea")
-  var e = new wysihtml.Editor(textArea, {
+  const WYSIEditor = {};
+
+  WYSIEditor.textArea = document.getElementById("myUniqueTextarea")
+  WYSIEditor.editor = new wysihtml.Editor(WYSIEditor.textArea, {
     toolbar: document.querySelector('.toolbar'),
     parserRules: wysihtmlParserRules, // Assuming wysihtmlParserRules is defined elsewhere
     // pasteParserRulesets: wysihtmlParserPasteRulesets // Assuming wysihtmlParserPasteRulesets is defined elsewhere
   });
   var log = document.getElementById("log");
 
-  e.on("load", function() {
+  WYSIEditor.editor.on("load", function() {
       log.innerHTML += "<div>load</div>";
     })
     .on("focus", function() {
@@ -294,6 +297,7 @@
       log.innerHTML += "<div>blur</div>";
     })
     .on("change", function() {
+      console.log(textArea.value)
       log.innerHTML += "<div>change</div>";
     })
     .on("paste", function() {

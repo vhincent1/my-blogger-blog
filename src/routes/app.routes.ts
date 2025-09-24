@@ -16,9 +16,11 @@ const app = express.Router();
 
 // render common variables
 app.use((req, res, next) => {
-  res.locals.navbar = navbarController;
-  res.locals.previousUrl = req.headers.referer || '/';
-  res.locals.links = appConfig.ejs.links
+  res.locals.common = {
+    navbar: navbarController,
+    previousUrl: req.headers.referer || '/',
+    links: appConfig.ejs.links
+  }
   // const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   // console.log('Full URL:', fullUrl);
   next();

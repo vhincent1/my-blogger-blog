@@ -29,8 +29,7 @@ class PostService {
     //   }
     try {
       const posts = await this.repository.findAllAsync(filter);
-      if (!posts || posts.length === 0)
-        return ServiceResponse.failure("No Posts found", null, StatusCodes.NOT_FOUND);
+      if (!posts || posts.length === 0) return ServiceResponse.failure("No Posts found", null, StatusCodes.NOT_FOUND);
       return ServiceResponse.success<Post[]>("Posts found", posts);
     } catch (ex) {
       const errorMessage = `Error finding all posts: $${(ex as Error).message}`;

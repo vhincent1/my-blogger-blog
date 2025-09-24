@@ -15,7 +15,7 @@
 </div>
 <div style="margin-top: 20px">
   <h3>Preview:</h3>
-  <pre id="live-preview"></pre>
+  <pre id="pell-preview"></pre>
 </div>
 <!-- WYSIWYG Editor -->
 <script src="/js/pell/pell.min.js"></script>
@@ -42,8 +42,7 @@
     PellEditor.previewButton = function() {
       const parser = new DOMParser();
       const doc = parser.parseFromString(PellEditor.editor.value, 'text/html');
-      document.getElementById('live-preview').innerHTML = PellEditor.editor.value;
+      document.getElementById('pell-preview').innerHTML = PellEditor.editor.value;
     }
-
   PellEditor.init()
 </script>

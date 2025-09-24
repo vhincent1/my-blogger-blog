@@ -122,6 +122,7 @@
 </body>
 
 <script>
+  console.log('e')
   widgets.imageModal = {
     // create references to the modal...
     modal: document.getElementById('myModal'),
@@ -149,6 +150,7 @@
     },
 
     openBookmarklet(hash) {
+      console.log('o')
       if (hash) {
         // Perform actions based on the hash
         // For example, highlight the targeted section
@@ -175,9 +177,11 @@
     widgets.imageModal.modal.style.display = "none";
   }
 
-  window.onload = function() {
+
+  window.addEventListener('load', function() {
+    console.log('load')
     widgets.imageModal.attachEvents()
     // bookmarklet
     widgets.imageModal.openBookmarklet(window.location.hash)
-  };
+  });
 </script>

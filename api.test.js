@@ -51,3 +51,41 @@ const filteredArray = originalArray.filter(item => !exclude.includes(item.id));
 
 console.log(filteredArray);
 // Output: [ { id: 1, name: 'Apple' }, { id: 3, name: 'Cherry' } ]
+
+import { getPaginatedData, getPaginationParameters } from './src/controller/page.controller'
+import PostService from './src/services/post.service'
+
+// all posts
+const serviceResponse = await PostService.getPosts();
+const posts = serviceResponse.responseObject
+console.log(posts.length)
+
+// paginated results
+const getPaginationParams = getPaginationParameters(null, { page: 1, limit: 1 })
+const result = await getPaginatedData(getPaginationParams, posts)
+
+
+let allItems = result.data
+
+async function findPage(postId, pageLimit) {
+  let nextPageToken = 0
+  while (nextPageToken != null) {
+    // const paginatedUrl = `http://localhost:3000/api/v1/posts?limit=1&page=${nextPageToken}`;
+    // const paginatedResponse = await fetch(paginatedUrl);
+    async function getData(page, limit) {
+      const getPaginationParams = getPaginationParameters(null, { page: page, limit: limit })
+      const result = await getPaginatedData(getPaginationParams, posts)
+      return result
+    }
+    const paginatedData = await getData(nextPageToken, pageLimit);
+    // allItems = allItems.concat(paginatedData.data);
+    const find = paginatedData.data.find(post => post.id == postId)
+    if (find) {
+      console.log('f', paginatedData.currentPage)
+    }
+    // r.push({page: paginatedData.currentPage, find})
+    nextPageToken = paginatedData.nextPageToken; // Update for the next iteration
+  }
+}
+
+await findPage(397, 5)

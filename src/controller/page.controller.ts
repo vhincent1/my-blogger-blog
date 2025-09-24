@@ -26,12 +26,17 @@ interface PaginatedQuery {
 }
 
 function getPaginationParameters(req, defaults): PaginationParams {
-  const page = parseInt(req.query.page as string) || defaults.page;
-  const limit = parseInt(req.query.limit as string) || defaults.limit;
+  let page, limit
+  if (req) {
+   page = parseInt(req.query.page as string) || defaults.page;
+   limit = parseInt(req.query.limit as string) || defaults.limit;
+  } else {
+    page = defaults.page
+    limit = defaults.limit
+  }
   const offset = (page - 1) * limit;
   return { page, limit, offset };
 }
-
 async function getPaginatedData<T extends Array<any>>(params: PaginationParams, data: T): Promise<PaginatedResult<T>> {
   const { limit, offset, page } = params;
   const safePage = Math.max(0, page);
@@ -46,7 +51,7 @@ async function getPaginatedData<T extends Array<any>>(params: PaginationParams, 
   const totalPages = Math.ceil(totalItems / limit)// -1; //todo cheapfix (last page is blank page)
 
   function generateNextPageToken() {
-    if(page > totalPages) return null
+    if (page > totalPages) return null
     return page < totalPages ? page + 1 : null
   }
 

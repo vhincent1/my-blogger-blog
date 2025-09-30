@@ -12,6 +12,21 @@ route.get('/index', pageController.getIndex);
 route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
 route.get('/gallery', galleryController.index)
 route.get('/chart', async (req, res) => { res.render('chart') })
+route.get('/search', async (req, res) => {
+  const { limit, page } = req.query
+
+  //if(!search)res.status(400).send('Missing search')
+  res.render('search')
+})
+route.get('/v2', async (req, res) => {
+  res.render('themes/v2/index', {viewIndex: false})
+})
+
+route.get('/v2/index', async (req, res) => {
+  const { limit, page } = req.query
+  // console.log(req.query)
+  res.render('themes/v2/index', {viewIndex: true})
+})
 
 import jwt from 'jsonwebtoken';
 

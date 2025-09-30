@@ -114,7 +114,7 @@
 
 <body>
   <!-- The Modal -->
-  <div id="myModal" class="modal">
+  <div id="widget-image-modal" class="modal">
     <span class="close">&times;</span>
     <img class="modal-content" id="img01">
     <div id="caption"></div>
@@ -122,12 +122,11 @@
 </body>
 
 <script>
-  console.log('e')
-  widgets.imageModal = {
+  const Widgets_ImageModal = {
     // create references to the modal...
-    modal: document.getElementById('myModal'),
+    modal: document.getElementById('widget-image-modal'),
     // to all images -- note I'm using a class!
-    images: document.getElementsByClassName('myImages'),
+    images: document.getElementsByClassName('widget-image-open-modal'),
     // the image in the modal
     modalImg: document.getElementById("img01"),
     // and the caption in the modal
@@ -137,49 +136,48 @@
 
     onImgError(source) {
       source.src = "/images/avatars/NFTs/Ape%20%23650.png";
-      console.log(source)
+      // console.log(source)
       // disable onerror to prevent endless loop
       source.onerror = "";
       return true;
     },
 
     openModal(targetElement) {
-      widgets.imageModal.modal.style.display = "block";
-      widgets.imageModal.modalImg.src = targetElement.src;
-      widgets.imageModal.captionText.innerHTML = targetElement.alt;
+      Widgets_ImageModal.modal.style.display = "block";
+      Widgets_ImageModal.modalImg.src = targetElement.src;
+      Widgets_ImageModal.captionText.innerHTML = targetElement.alt;
     },
 
     openBookmarklet(hash) {
-      console.log('o')
       if (hash) {
         // Perform actions based on the hash
         // For example, highlight the targeted section
         const targetElementId = hash.replace("#", "");
         const myImg = 'myImg' + targetElementId
         const targetElement = document.getElementById(myImg);
-        if (targetElement) widgets.imageModal.openModal(targetElement)
+        if (targetElement) Widgets_ImageModal.openModal(targetElement)
       }
     },
 
     attachEvents() {
       // Go through all of the images with our custom class
-      for (var i = 0; i < widgets.imageModal.images.length; i++) {
-        var img = widgets.imageModal.images[i];
+      for (var i = 0; i < Widgets_ImageModal.images.length; i++) {
+        var img = Widgets_ImageModal.images[i];
         // and attach our click listener for this image.
         img.onclick = function(evt) {
-          widgets.imageModal.openModal(this)
+          Widgets_ImageModal.openModal(this)
         }
       }
     }
   }
 
-  widgets.imageModal.closeButton.onclick = function() {
-    widgets.imageModal.modal.style.display = "none";
+  Widgets_ImageModal.closeButton.onclick = function() {
+    Widgets_ImageModal.modal.style.display = "none";
   }
 
   window.addEventListener('load', function() {
-    widgets.imageModal.attachEvents()
+    Widgets_ImageModal.attachEvents()
     // bookmarklet
-    widgets.imageModal.openBookmarklet(window.location.hash)
+    Widgets_ImageModal.openBookmarklet(window.location.hash)
   });
 </script>

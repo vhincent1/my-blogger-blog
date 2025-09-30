@@ -45,6 +45,10 @@ export function buildGallery(post) {
   const document = parser.parse(post.content);
   const imagesInPost: any = [];
   const img = document.querySelectorAll('img');
+
+  const nsfw = document.querySelectorAll('nsfw') //widget
+  let isNSFW = nsfw.length > 0? true : false
+  
   if (img.length > 0) {
     img.forEach((element) => {
       const originalSource = element.getAttribute('src');
@@ -62,7 +66,7 @@ export function buildGallery(post) {
       // }
     });
     // gallery.push({ postId: post.id, images: imagesInPost });
-    return { postId: post.id, title:post.title, images: imagesInPost }
+    return { postId: post.id, title:post.title, images: imagesInPost, isNSFW }
   }
   return {};
 }

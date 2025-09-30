@@ -2,6 +2,7 @@ import express from 'express';
 import emojis from './emojis.ts';
 import { performance } from 'node:perf_hooks';
 
+import Post from '../../model/Post.model.ts';
 import PostService from '../../services/post.service.ts'
 
 import { pageController, getPaginationParameters, getPaginatedData } from '../../controller/page.controller.ts';
@@ -61,44 +62,38 @@ router.use('/emojis', emojis);
 //   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
 // });
 
-router.use('/posts', async (req, res) => {
-  const t0 = performance.now();
-  try {
-    const paginationParams = getPaginationParameters(req, { page: 1, limit: 5 });
-    //todo: max page results
-    if (paginationParams.limit > 50) {
+router.use('/posts/format', async (req, res) => {
+  const placeholder = new Post(0)
+  placeholder.title = 'Title'
+  placeholder.content = 'Hi'
+  placeholder.labels = ['label1', 'label2']
+  placeholder.date = {
+    published: new Date(),
+    updated: new Date()
+  } //as PostDate
+  placeholder.author = 'Author'
+  res.status(200).json(placeholder)
+})
 
-    }
-    const serviceResponse = await PostService.getPosts({
-      search: req.query.search,
-      type: req.query.type
-    });
-    if (serviceResponse.success) {
-      let data: any
-      const posts: any = serviceResponse.responseObject
-      // filter
-      const include = req.query.include || ''
-      if (include) {
-        const toInclude = (include as string).split(',')
-        const desiredProperties = toInclude
-        const filteredArray = posts.map(obj => {
-          const newObj = {};
-          for (const prop of desiredProperties)
-            if (obj.hasOwnProperty(prop)) 
-              newObj[prop] = obj[prop];
-          return newObj;
-        });
-        data = filteredArray
-      } else {
-        data = posts
-      }
+import { ServiceResponse } from '../../model/ServiceResponse.model.ts';
+router.use('/posts', async (req, res) => {
+  const t0 = performance.now(); //timer
+  const { page, limit, search, type, filter, exclude }: any = req.query
+  try {
+    const postsResponse = await PostService.getPostsFiltered({ search, type, filter, exclude });
+    if (postsResponse.success) {
+      const posts: any = postsResponse.responseObject
       // ----------------------------------
-      const paginatedItems = await getPaginatedData(paginationParams, data);
+      const paginationParams = getPaginationParameters(req, {
+        page: page || 1,
+        limit: limit || 5
+      });
+      const paginatedItems = await getPaginatedData(paginationParams, posts);
       if (paginatedItems.currentPage > paginatedItems.totalPages)
-        return res.status(404).json({ error: 'Page limit exceeded' })
-      res.status(serviceResponse.statusCode).json(paginatedItems);
+        return res.send(ServiceResponse.failure('Page limit exceeded', null, 404));
+      res.send(ServiceResponse.success<any>('Posts found', paginatedItems))
     } else {
-      res.status(serviceResponse.statusCode).json(serviceResponse)
+      res.send(postsResponse)
     }
   } catch (error) {
     res.status(500).json({ message: 'Error fetching items' });

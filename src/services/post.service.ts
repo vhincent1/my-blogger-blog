@@ -12,24 +12,28 @@ class PostService {
 
   //filter={type, query}
   //findAll
-  async getPosts(filter?) {
-    // let posts = await this.repository.findAllAsync(filter);
-    // if (filter)
-    //   switch (filter.type) {
-    //     case 'content':
-    //       posts = posts.filter((post) => post.content.includes(filter.query));
-    //       break;
-    //     case 'labels':
-    //       posts = posts.filter((post) => post.labels.includes(filter.query));
-    //       break;
-    //     case 'title':
-    //       posts = posts.filter((post) => post.title.includes(filter.query));
-    //       break;
-    //     default: //all
-    //   }
+  async getPosts(parameters?) {
     try {
-      const posts = await this.repository.findAllAsync(filter);
-      if (!posts || posts.length === 0) return ServiceResponse.failure("No Posts found", null, StatusCodes.NOT_FOUND);
+      const posts = await this.repository.findAllAsync(parameters);
+      if (!posts || posts.length === 0)
+        return ServiceResponse.failure("No Posts found", null, StatusCodes.OK);
+      return ServiceResponse.success<Post[]>("Posts found", posts);
+    } catch (ex) {
+      const errorMessage = `Error finding all posts: $${(ex as Error).message}`;
+      console.log(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while retrieving posts.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getPostsFiltered(parameters?) {
+    try {
+      const posts = await this.repository.findAllPostsFiltered(parameters);
+      if (!posts || posts.length === 0)
+        return ServiceResponse.failure("No Posts found", null, StatusCodes.OK);
       return ServiceResponse.success<Post[]>("Posts found", posts);
     } catch (ex) {
       const errorMessage = `Error finding all posts: $${(ex as Error).message}`;

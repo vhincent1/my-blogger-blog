@@ -45,6 +45,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "typeRoots": ["./node_modules/@types", "./src/@types"]
-  }          ,    "include": ["src/**/*.ts", "src/@types/**/*.d.ts"]
-
+  }
 }

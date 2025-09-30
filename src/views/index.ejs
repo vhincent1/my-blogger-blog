@@ -16,7 +16,7 @@
   }
 </style>
 <div class="feed-item">
-  <table style="width:100%">
+  <table id='indexTable' style="width:100%">
     <tr>
       <th>Title</th>
       <th style="width:5%">Published</th>
@@ -30,9 +30,10 @@
       <td><%= post.size.total %><sup>(<%= post.size.format %>)</sup></td>
       <td>[<a href="<%=common.links.viewPost({id: post.id})%>">view</a>][<a href="<%=common.links.editPost(post)%>">edit</a>]</td>
     </tr>
-    <% }); %>
+    <% }); %> 
   </table>
 </div>
+
 <% } else { %>
 <!-- Posts view -->
 <% paginationResult.data.forEach((post) => { %>
@@ -40,9 +41,9 @@
   <a href="<%= common.links.viewPost({id: post.id}) %>">
     <h2><%= post.title %></h2>
   </a>
-  <!-- <p>This is a summary of the first example article.</p>
+<!-- <p>This is a summary of the first example article.</p>
     <p>Published: <%= //post.date.published %></p> -->
-  <%- post.content -%>
+<%- post.content -%>
 </div>
 <% }); %>
 <% } %>
@@ -53,6 +54,7 @@
 <%- include('widgets/pagination') -%>
 <%- include('widgets/autoscroll',{
   currentPage: paginationResult.currentPage, 
-  limit: paginationResult.limit}) -%>
+  limit: paginationResult.limit,
+  style: viewIndex? 0 : 1}) -%>
 <!-- Footer -->
 <%- include('partials/footer') -%>

@@ -6,3 +6,4 @@ yarn.lock
 public/dist/*
 public/content/*
 public/images/*
+public/videos/*

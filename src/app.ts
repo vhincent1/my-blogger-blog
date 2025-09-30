@@ -2,12 +2,12 @@ import 'dotenv/config';
 import path from 'path';
 //express
 import express from 'express';
-
 import session from 'express-session';
 import compress from 'compression';
 import { xss } from 'express-xss-sanitizer';
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
+import cors from 'cors'
 //routes
 import routes from './routes/app.routes.ts';
 //middleware
@@ -32,6 +32,14 @@ app.use(xss()); // Apply XSS sanitizer to all incoming requests
 // app.use(mongoSanitize()); // Apply MongoDB sanitizer
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Enable CORS for all routes (for development purposes, or if you want to allow all origins)
+app.use(cors());
+
+// Or, configure CORS to allow specific origins:
+// app.use(cors({
+//   origin: 'http://localhost:3000' // Replace with your frontend's origin
+// }));
+
 
 // const getClientIp = (req: Request): string | undefined => {
 //   // Check for the X-Forwarded-For header, which is commonly set by proxies

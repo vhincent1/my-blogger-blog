@@ -1,13 +1,18 @@
 <input type="checkbox" id="myCheckbox" name="option1" value="yes">
 <label for="myCheckbox">AutoScroll</label>
 <script>
-  widgets.autoscroll = {
+  const Widgets_AutoScroll = {
     myCheckbox: document.getElementById('myCheckbox'),
     currentPage: parseInt('<%=currentPage%>'), // ejs
-    limit: parseInt('<%=limit%>'),// ejs
+    limit: parseInt('<%=limit%>'), // ejs
+    style: parseInt('<%=style%>'), // ejs
     isLoading: false,
     hasMoreData: true, // Set based on server response
-    windowEvent() {
+    async init() {
+      window.addEventListener('load', () => {
+        console.log('load')
+        Widgets_AutoScroll.loadMoreItems();
+      })
       window.addEventListener('scroll', () => {
         // const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
         // if (window.scrollY >= maxScrollY) {
@@ -17,45 +22,149 @@
         //     // User is at the top or attempting to overscroll upwards
         //     // console.log("Reached top or overscrolling upwards!");
         // }
+        // const isPageAtBottom = (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
+        // console.log(isPageAtBottom)
+        // if (isPageAtBottom) {
+        //   console.log('a')
+        // }
         // Check if the checkbox is checked
-        if (!myCheckbox.checked)  return
-        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-        if (scrollTop + clientHeight >= scrollHeight - 0 && !widgets.autoscroll.isLoading && widgets.autoscroll.hasMoreData) {
-          widgets.autoscroll.isLoading = true;
-          widgets.autoscroll.currentPage++;
-          // console.log('end page', currentPage);
+        if (!myCheckbox.checked) return
+        const {
+          scrollTop,
+          scrollHeight,
+          clientHeight
+        } = document.documentElement;
+
+        if (scrollTop + clientHeight >= scrollHeight - 0 && !Widgets_AutoScroll.isLoading && Widgets_AutoScroll.hasMoreData) {
+          Widgets_AutoScroll.isLoading = true;
+          Widgets_AutoScroll.currentPage++;
           // isLoading = false
-          widgets.autoscroll.loadMoreItems();
+          Widgets_AutoScroll.loadMoreItems();
         }
       });
     },
     async loadMoreItems() {
+      const currentPage = Widgets_AutoScroll.currentPage
+      const maxResults = Widgets_AutoScroll.limit
+
+      console.log('current page: ', currentPage)
+      console.log('max results : ', maxResults)
+
       try {
-        const response = await fetch(`/api/v1/posts?page=${widgets.autoscroll.currentPage}&limit=${widgets.autoscroll.limit}`);
-        // const response = await fetch(`/api/v1/posts?page=1&limit=1`);
-        const apiResponse = await response.json();
-        if (response.status != 200) {
-          console.log('error:', apiResponse);
-          widgets.autoscroll.hasMoreData = false;
-          return;
+        const response = await getPosts({
+          page: currentPage,
+          limit: maxResults
+        })
+        if (!response.success) {
+          Widgets_AutoScroll.hasMoreData = false;
+          return
         }
-        // Append new items to the container
-        const itemContainer = document.getElementById('rss-feed-container');
-        apiResponse.data.forEach((item) => {
-          console.log(item);
-          const itemDiv = document.createElement('div');
-          itemDiv.classList.add('feed-item');
-          itemDiv.textContent = item.title;
-          itemContainer.appendChild(itemDiv);
-        });
-        widgets.autoscroll.isLoading = false;
+        const posts = response.responseObject.data
+
+        if (Widgets_AutoScroll.style == 0) { // index view
+          const tableContainer = document.getElementById("indexTable");
+          const table = document.createElement("table");
+          // table.style = 'width:100%'
+          // const tbody = document.createElement("tbody");
+          const tbody = tableContainer.querySelector('tbody')
+
+          posts.forEach((post) => {
+            const row = document.createElement("tr");
+
+            const title = document.createElement('td');
+            title.textContent = post.title;
+            row.appendChild(title);
+
+            const date = document.createElement('td');
+            date.textContent = new Date(post.date.published).toLocaleDateString();
+            row.appendChild(date)
+
+            const size = document.createElement('td');
+            size.innerText = post.size.total
+            const supElement = document.createElement('sup');
+            supElement.textContent = `(${post.size.format})`
+            size.appendChild(supElement)
+            row.appendChild(size)
+
+            const links = document.createElement('td');
+            const viewp = document.createElement('a');
+            viewp.href = `/post/${post.id}`
+            viewp.textContent = 'view'
+            links.appendChild(document.createTextNode('['))
+            links.appendChild(viewp)
+            links.appendChild(document.createTextNode(']'))
+            const editp = document.createElement('a');
+            editp.href = `/post/${post.id}/edit`
+            editp.textContent = 'edit'
+            links.appendChild(document.createTextNode('['))
+            links.appendChild(editp)
+            links.appendChild(document.createTextNode(']'))
+            row.appendChild(links)
+
+            tbody.appendChild(row);
+          });
+
+          table.appendChild(tbody);
+          // table.classList.add("my-table-style"); // Apply CSS class
+          tableContainer.appendChild(table);
+        } else if (Widgets_AutoScroll.style == 1) { // front page view
+          // Append new items to the container
+          const itemContainer = document.getElementById('rss-feed-container');
+          posts.forEach((post) => {
+            // console.log(item);
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('feed-item');
+            itemDiv.innerHTML = `
+            <a href='/post/${post.id}'><h2>${post.title}</h2></a>
+            ${post.content}
+            `
+            itemContainer.appendChild(itemDiv);
+          });
+        }
+        Widgets_AutoScroll.isLoading = false;
+
       } catch (error) {
         console.error('Error loading more items:', error);
-        widgets.autoscroll.isLoading = false;
-        widgets.autoscroll.hasMoreData = false;
+        Widgets_AutoScroll.isLoading = false;
+        Widgets_AutoScroll.hasMoreData = false;
       }
+
     },
+    // async loadMoreItems() {
+    //   try {
+    //     const response = await fetch(`/api/v1/posts?page=${Widgets_AutoScroll.currentPage}&limit=${Widgets_AutoScroll.limit}`);
+    //     // const response = await fetch(`/api/v1/posts?page=1&limit=1`);
+    //     const apiResponse = await response.json();
+    //     if (response.status != 200) {
+    //       console.log('error:', apiResponse);
+    //       Widgets_AutoScroll.hasMoreData = false;
+    //       return;
+    //     }
+    //     // Append new items to the container
+    //     const itemContainer = document.getElementById('rss-feed-container');
+    //     apiResponse.responseObject.data.forEach((item) => {
+    //       console.log(item);
+    //       const itemDiv = document.createElement('div');
+    //       itemDiv.classList.add('feed-item');
+    //       itemDiv.textContent = item.title;
+    //       itemContainer.appendChild(itemDiv);
+    //     });
+    //     Widgets_AutoScroll.isLoading = false;
+    //   } catch (error) {
+    //     console.error('Error loading more items:', error);
+    //     Widgets_AutoScroll.isLoading = false;
+    //     Widgets_AutoScroll.hasMoreData = false;
+    //   }
+    // },
   };
 
-  widgets.autoscroll.windowEvent();
+  Widgets_AutoScroll.init();
 </script>
+
+
+<!-- <% if(style == 1){ %>
+<script>
+
+
+</script>
+<% } %> -->

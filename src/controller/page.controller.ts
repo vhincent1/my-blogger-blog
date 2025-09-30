@@ -122,6 +122,7 @@ async function findPage(postId, pageLimit, data) {
 // src/controllers/UserController.js
 class PageController {
   async list(req, res, viewingIndex, limit) {
+     res.set('Cache-Control', 'public, max-age=3600');
     // search query
     // const parameters: Pagination = {
     //   page: parseInt(req.query.page) || 0,

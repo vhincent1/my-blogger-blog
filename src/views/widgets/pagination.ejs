@@ -6,11 +6,11 @@
   Page: <%=paginationResult.currentPage %> |
   Total: <%=paginationResult.totalPages %> |
   <label for="limit">Limit:</label>
-  <select name="limit" id="limit" onchange="widgets.pagination.setLimit()">
+  <select name="limit" id="limit" onchange="Widgets_Pagination.setLimit()">
     <option value="0" selected>0</option>
     <% for (let i = 5; i< 25; i+= 5){ %>
     <option value="<%=i-%>" <%if(pagination.limit == i){ %>selected<%}%>><%=i-%></option>
-      <% } %>
+    <% } %>
   </select>
   <label for="search">Search:</label>
   <input type="text" id="search" name="search" required /><label for="type"> In:</label>
@@ -23,7 +23,7 @@
 </form>
 
 <script>
-  widgets.pagination = {
+  const Widgets_Pagination = {
     setLimit() {
       var selectElement = document.getElementById("limit");
       var selectedValue = selectElement.value;
@@ -41,6 +41,28 @@
         //   console.log(newURL.toString())
       });
       window.location.href = newURL.toString();
-    }
+    },
   }
+
+  // const searchForm = document.getElementById('searchForm');
+  // searchForm.addEventListener('submit', (event) => {
+  //   event.preventDefault(); // Prevent default form submission
+
+  //   // const searchTerm = searchInput.value;
+
+  //   // try {
+  //   //   const response = await getPosts({
+  //   //     page: 0,
+  //   //     limit: 5
+  //   //   })
+  //   //   if (!response.success) {
+  //   //     throw Error('error')
+  //   //     return
+  //   //   }
+  //   //   const posts = response.responseObject.data
+  //   // } catch (err) {
+  //   //   console.error('Error fetching data: ', error)
+  //   // }
+
+  // });
 </script>

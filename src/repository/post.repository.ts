@@ -13,19 +13,84 @@ export class PostRepository {
   }
 
   //filter={type, query}
-  async findAllAsync(filter?): Promise<Post[]> {
-    let type: string = '';
-    if(filter) type = filter.type
-      switch (type) {
-        case 'content': return posts.filter((post) => post.content.includes(filter.search));
-        case 'labels': return posts.filter((post) => post.labels.includes(filter.search));
-        case 'title': return posts.filter((post) => post.title.includes(filter.search));
-        default: return posts
-      }
+  async findAllAsync(parameters?): Promise<Post[]> {
+    const p = {
+      search: parameters?.search || '',
+      type: parameters?.type || '',
+      // filter: parameters.filter || null,
+      // exclude: parameters.exclude || null
+    }
+    let data: Post[]
+    switch (p.type) {
+      case 'content':
+        data = posts.filter((post) => post.content.includes(p.search));
+        break;
+      case 'labels':
+        data = posts.filter((post) => post.labels.includes(p.search));
+        break;
+      case 'title':
+        data = posts.filter((post) => post.title.includes(p.search));
+        break;
+      default:
+        data = posts
+        break;
+    }
+    return data
   }
 
   async findByIdAsync(id: number): Promise<Post | null> {
     return posts.find((post) => post.id === id) || null;
+  }
+
+  //searchPosts
+  async findAllPostsFiltered(parameters?): Promise<any> {
+    const p = {
+      search: parameters?.search || '',
+      type: parameters?.type || '',
+      filter: parameters?.filter || null,
+      exclude: parameters?.exclude || null
+    }
+    // console.log(p)
+    let data: any
+    switch (p.type) {
+      case 'content':
+        data = posts.filter((post) => post.content.includes(p.search));
+        break;
+      case 'labels':
+        data = posts.filter((post) => post.labels.includes(p.search));
+        break;
+      case 'title':
+        data = posts.filter((post) => post.title.includes(p.search));
+        break;
+      default:
+        //type not found
+        data = posts
+        break;
+    }
+    // properties to only show
+    if (p.filter) {
+      const desiredProperties = p.filter.split(',')
+      const filteredArray = data.map(post => {
+        let newObj = {};
+        for (const prop of desiredProperties)
+          if (post.hasOwnProperty(prop)) newObj[prop] = post[prop];
+        return newObj;
+      });
+      data = filteredArray
+    }
+    // properties to exclude
+    if (p.exclude) {
+      const excludedProperties = p.exclude.split(',') //['price', 'category'];
+      const newArray = data.map(post => {
+        const newItem = { ...post }; // Create a shallow copy
+        excludedProperties.forEach(prop => delete newItem[prop]);
+        return newItem;
+      });
+      data = newArray
+    }
+    // remove empty objects
+    data = data.filter(post => Object.keys(post).length > 0);
+    return data
   }
 
   async getGallery() {
@@ -62,3 +127,7 @@ export class PostRepository {
     return gallery;
   }
 }
+
+//test
+// const repo = new PostRepository()
+// console.log(await repo.getGallery())

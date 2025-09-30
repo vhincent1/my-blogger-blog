@@ -4,20 +4,24 @@
   }
 </style>
 <script>
-  widgets.NSFWModal = {
+  const Widgets_NSFWModal = {
     element: document.querySelectorAll('nsfw'),
     message: 'I am 18+ years old or older',
     init() {
-      widgets.NSFWModal.element.forEach((element) => {
+      Widgets_NSFWModal.element.forEach((element) => {
         const warningBox = document.createElement('div');
+        warningBox.setAttribute('id', 'nsfw-modal')
         const warningText = document.createElement('div');
-        warningText.textContent = widgets.NSFWModal.message;
+        warningText.textContent = Widgets_NSFWModal.message;
         warningText.style.fontFamily = 'Arial, sans-serif';
         warningBox.appendChild(warningText);
         const createButton = (text, answer) => {
           const button = document.createElement('button');
           button.textContent = text;
-          button.onclick = () => (element.style.display = answer ? 'block' : 'none');
+          button.onclick = () => {
+          (element.style.display = answer ? 'block' : 'none');
+          if(answer) warningBox.style.display = 'none'
+          }
           warningBox.appendChild(button);
         };
         const YES = createButton('YES', true);
@@ -31,6 +35,6 @@
   }
 
   window.addEventListener('load', function() {
-    widgets.NSFWModal.init()
+    Widgets_NSFWModal.init()
   })
 </script>

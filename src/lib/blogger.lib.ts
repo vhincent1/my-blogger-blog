@@ -288,7 +288,12 @@ async function inspectPosts(jsonData, id) {
       imageTags.forEach(async (img) => {
         const imgSrc = img.getAttribute('src');
         imageUrls.push(imgSrc);
+
+        try {
         const filename = path.basename(new URL(imgSrc).pathname);
+        } catch(err){
+          console.log('error')
+        }
       });
 
       const template = {
@@ -336,7 +341,8 @@ async function inspectPosts(jsonData, id) {
       manualDownloadInfo.push({ postId: post.id, author: post.author, sourceUrl: post.source })
     });
     //todo toggle
-    await fs.writeFile(exportInspect.inspectLog, JSON.stringify(manualDownloadInfo, null, 1))
+    console.log(exportInspect)
+     await fs.writeFile(exportInspect, JSON.stringify(manualDownloadInfo, null, 1))
   }
   // misc
   let unique = [];

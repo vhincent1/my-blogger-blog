@@ -1,0 +1,136 @@
+<%- include('partials/header', {title: 'Search'}) -%>
+<!-- Body -->
+<h1>Search</h1>
+<div id="rss-feed-container">
+  <!-- RSS feed items will be dynamically inserted here -->
+</div>
+<div class="feed-item">
+  <!-- <form id="searchForm">
+    <label for="searchInput">Search:</label>
+    <input type="search" id="searchInput" name="q" placeholder="Enter your query..." />
+    <button type="submit">Search</button>
+  </form> -->
+
+  <div id="searchResults">
+    <!-- Search results will be displayed here -->
+  </div>
+</div>
+
+<script>
+  // const searchInput = document.getElementById('searchInput');
+  // const searchResults = document.getElementById('searchResults');
+  // const items = ['Apple', 'Banana', 'Orange', 'Grape', 'Strawberry']; // Example data
+
+  // async function searchPosts(){
+  //   fetch('', {})
+  // }
+
+  // function filterResults() {
+  //   const query = searchInput.value.toLowerCase();
+  //   searchResults.innerHTML = ''; // Clear previous results
+
+  //   const filteredItems = items.filter(item => item.toLowerCase().includes(query));
+
+  //   if (filteredItems.length > 0) {
+  //     const ul = document.createElement('ul');
+  //     filteredItems.forEach(item => {
+  //       const li = document.createElement('li');
+  //       li.textContent = item;
+  //       ul.appendChild(li);
+  //     });
+  //     searchResults.appendChild(ul);
+  //   } else {
+  //     searchResults.textContent = 'No results found.';
+  //   }
+  // }
+
+  // searchInput.addEventListener('keyup', filterResults);
+  // Or, if using a submit button:
+  // const searchForm = document.getElementById('searchForm');
+  // searchForm.addEventListener('submit', function(event) {
+  //   event.preventDefault(); // Prevent default form submission
+  //   filterResults();
+  // });
+</script>
+
+<!-- v2 -->
+<div class="feed-item">
+  <input type="text" id="searchInput" placeholder="Search...">
+  <button id="searchButton">Search</button>
+  <div id="resultsContainer"></div>
+
+  <div id="searchResults">
+    <!-- Search results will be displayed here -->
+  </div>
+</div>
+<!-- <script src='/js/simpblog.min.js'></script> -->
+<script>
+  // const searchInput = document.getElementById('searchInput');
+  // const searchResults = document.getElementById('searchResults');
+  let items = ['Apple', 'Banana', 'Orange', 'Grape', 'Strawberry']; // Example data
+
+  const searchInput = document.getElementById('searchInput');
+  const searchButton = document.getElementById('searchButton');
+  const resultsContainer = document.getElementById('resultsContainer');
+
+  searchButton.addEventListener('click', performSearch);
+  searchInput.addEventListener("keypress", async function(event) {
+    if (event.key === "Enter" || event.keyCode === 13) await performSearch()
+  });
+
+  async function performSearch() {
+    console.log('search')
+    const query = searchInput.value;
+    if (!query) return; // Don't search if the input is empty
+
+    const apiUrl = `http://127.0.0.1:3000/api/v1/posts?search=${encodeURIComponent(query)}&type=title`; // Replace with your actual API endpoint
+
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok)  throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      displayResults(data);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      resultsContainer.innerHTML = '<p>Error loading results.</p>';
+    }
+  }
+
+  function displayResults(results) {
+    const posts = results.data
+    resultsContainer.innerHTML = ''; // Clear previous results
+
+    if (results.length === 0 || !results.success) {
+      resultsContainer.innerHTML = '<p>No results found.</p>';
+      return;
+    }
+
+    posts.forEach(result => {
+      const resultItem = document.createElement('div');
+      resultItem.classList.add('search-result-item'); // Add a class for styling
+      // Assuming each result object has 'title' and 'description' properties
+      resultItem.innerHTML = `
+                <h3>${result.title}</h3>
+                <p>${result.date}</p>
+            `;
+      resultsContainer.appendChild(resultItem);
+    });
+  }
+  // items = (await getPosts()).data
+
+
+  // searchInput.addEventListener('keyup', filterResults);
+  // window.onload = async() =>{
+  //   console.log(await getPosts())
+  // }
+  // Or, if using a submit button:
+  // const searchForm = document.getElementById('searchForm');
+  // searchForm.addEventListener('submit', function(event) {
+  //   event.preventDefault(); // Prevent default form submission
+  //   filterResults();
+  // });
+</script>
+<!-- Pagination -->
+<!-- <%- //include('widgets/pagination') -%> -->
+<!-- Footer -->
+<%- include('partials/footer') -%>

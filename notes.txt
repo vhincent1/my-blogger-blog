@@ -68,3 +68,51 @@ https://nodejs.org/en/learn/getting-started/profiling
 
 # curl json response
 curl -H "Accept: application/json" -X GET "http://localhost:3000/protected-data"
+
+#Sending JSON Data in a POST Request:
+curl -X POST -H "Content-Type: application/json" -d '{"key": "value", "anotherKey": "anotherValue"}' http://localhost:3000/api/v1/ping
+
+# load test
+npx autocannon --renderStatusCodes http://localhost:3000/non-blocking
+
+# cache middleware stuff
+const myCache = require('node-cache'); // Or other caching library
+const cache = new myCache({ stdTTL: 60 }); // Example with node-cache
+
+const cacheMiddleware = (req, res, next) => {
+    const key = req.originalUrl;
+    const cachedData = cache.get(key);
+
+    if (cachedData) {
+        console.log(`Cache Hit for: ${key}`);
+        return res.status(200).json(cachedData);
+    } else {
+        console.log(`Cache Miss for: ${key}`);
+        // Store original res.send/json to capture data before sending
+        const originalJson = res.json;
+        res.json = (data) => {
+            cache.set(key, data);
+            originalJson.call(res, data);
+        };
+        next();
+    }
+};
+
+// Apply middleware to specific routes
+app.get('/api/data', cacheMiddleware, async (req, res) => {
+    // ... fetch data from database or external API ...
+});
+
+
+# Workers
+Use asynchronous operations (async/await) for:
+Database interactions
+API calls
+File system operations
+Any other task that involves waiting for an external resource.
+
+Use worker threads for:
+Heavy computations
+Data processing algorithms
+Image or video manipulation
+Any task that requires significant CPU time and would otherwise block the main thread.

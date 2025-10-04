@@ -1,0 +1,166 @@
+<!-- AutoScroll -->
+<div id="toolbar"></div>
+<script>
+  const Widget_Toolbar = {
+    async statusBar() {
+      // const toolbar = document.getElementById('toolbar');
+
+      const status = document.createElement('label');
+      status.id = 'status';
+
+      const response = await checkHealth();
+      if (response == null) {
+        status.style = 'background: #ff0000;'
+        status.textContent = 'NOT OK';
+      } else {
+        for (let [key, value] of Object.entries(response)) {
+          if (key == 'date') 
+          value = new Date(value).toLocaleString()
+          status.textContent += `${value.concat(' ')}`;
+        }
+        // status.style = 'background: green;'
+      }
+
+      const ping = document.createElement('button');
+      ping.textContent = 'PING';
+      ping.onclick = async () => {
+        const response = await sendPing();
+        ping.textContent = response != null ? response.message : 'ERROR';
+      };
+
+      // if (toolbar.querySelector('#'.concat(status.id)) == null) {
+      //   toolbar.appendChild(document.createTextNode(' '));
+      //   toolbar.appendChild(status);
+      //   toolbar.appendChild(ping);
+      // }
+      return {
+        status,
+        ping
+      }
+    },
+
+    async getInbox() {
+      const toolbar = document.getElementById('toolbar');
+
+      const label = document.createElement('label');
+      label.textContent = 'Inbox';
+      label.setAttribute('for', 'inbox');
+
+      const progress = document.createElement('progress')
+      progress.id = 'inbox'
+      progress.max = 100
+      progress.value = 42
+      progress.textContent = progress.value + '%'
+
+      return {
+        spacerrrr: document.createTextNode(' '),
+        label,
+        progress
+      }
+    },
+
+    async autoScroll() { //displayPosts parameter
+
+      const label = document.createElement('label');
+      label.textContent = 'AutoScroll';
+      label.setAttribute('for', 'myCheckbox');
+
+      const input = document.createElement('input');
+      input.id = 'myCheckbox';
+      input.name = 'autoscrolls';
+      input.value = 'yes';
+      input.type = 'checkbox';
+
+      window.addEventListener('scroll', async () => {
+        if (!myCheckbox.checked) return;
+        const {
+          scrollTop,
+          scrollHeight,
+          clientHeight
+        } = document.documentElement;
+
+        if (scrollTop + clientHeight >= scrollHeight - 0 && !isLoading && hasMoreData) {
+          isLoading = true;
+          parameters.page++;
+          await displayPosts({
+            page: parameters.page,
+            limit: parameters.limit
+          }, style);
+        }
+      });
+
+      return {
+        label,
+        input
+      }
+    },
+
+    async themeSelect() {
+      const label = document.createElement('label');
+      label.textContent = 'Theme: ';
+      label.setAttribute('for', 'selectTheme');
+
+      const select = document.createElement('select');
+      select.id = 'selectTheme';
+      select.name = 'type';
+      select.onchange = async() => {
+        //
+        const loadedParams = await loadedPage
+        const totalPages = loadedParams.responseObject.totalPages
+        if(parameters.page > totalPages) parameters.page = 1
+
+        console.log('hi', select.value);
+        // loadedPage =
+        displayPosts(parameters, select.value, (refresh = true), true);
+        style = select.value;
+        currentUrl.searchParams.set('theme', select.value);
+        WidgetPagination.updateLinks();
+      };
+
+      const themeOptions = [{
+          name: 'Index',
+          id: 0
+        },
+        {
+          name: 'Show',
+          id: 1
+        },
+      ];
+      themeOptions.forEach((optionInfo) => {
+        const option = document.createElement('option');
+        option.value = optionInfo.id;
+        option.textContent = optionInfo.name;
+        if (style == option.value)
+          //highlight
+          option.selected = true;
+        select.appendChild(option);
+      });
+      // toolbar.appendChild(labelTheme);
+      // toolbar.appendChild(selectTheme);
+      return {
+        label,
+        select
+      }
+    }
+  }
+
+  Widget_Toolbar.loadToolbar = async () => {
+    const toolbar = document.getElementById('toolbar');
+
+    const items = [
+      Widget_Toolbar.autoScroll(),
+      Widget_Toolbar.themeSelect(),
+      Widget_Toolbar.statusBar(),
+      Widget_Toolbar.getInbox()
+    ]
+
+    for (const item of items) {
+      for (const elements of Object.values((await item))) {
+        // toolbar.appendChild(document.createTextNode(' '))
+        toolbar.appendChild(elements)
+      }
+    }
+  }
+
+  window.addEventListener('load', Widget_Toolbar.loadToolbar);
+</script>

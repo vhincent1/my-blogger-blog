@@ -1,5 +1,6 @@
 import express from 'express';
 import emojis from './emojis.ts';
+import inboxRouter from './inbox.ts'
 import { performance } from 'node:perf_hooks';
 
 import Post from '../../model/Post.model.ts';
@@ -30,10 +31,55 @@ const router = express.Router();
 //   res.json({ message: 'This is public data.' });
 // });
 
-router.get('/', async (req, res) => {
-  res.json({ message: 'Hi - 👋🌎🌍🌏' });
+const startTime = new Date();
+router.get('/health', async (req, res) => {
+  const healthCheck = {
+    status: 'OK',
+    message: 'Hi - 👋🌎🌍🌏',
+    date: startTime
+  }
+  try {
+    res.status(200).json(healthCheck);
+  } catch (error) {
+    res.status(503).json(healthCheck)
+  }
 });
+
+const inbox = []
+let pingCount = 0
+
+router.get('/ping', async (req, res) => {
+
+})
+
+import path from 'path'
+import fs from 'fs'
+
+router.post('/ping', async (req, res) => {
+  const data = req.body
+  const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  let remoteIp = req.ip || req.connection.remoteAddress;
+  console.log('Recieved :', { timestamp: Date.now(), data, clientIp })
+  res.status(201).json({ message: 'pong', receivedData: true, pingCount: pingCount = ++pingCount });
+});
+
+
+// router.get('/memory-status', (req, res) => {
+//   const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
+
+//   const memoryData = process.memoryUsage();
+
+//   const memoryUsage = {
+//     rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
+//     heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
+//     heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
+//     external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
+//   };
+//   res.json(memoryUsage);
+// });
+
 router.use('/emojis', emojis);
+router.use('/inbox', inboxRouter);
 
 // router.use('/posts', async (req, res) => {
 //   const t0 = performance.now();
@@ -89,7 +135,8 @@ router.use('/posts', async (req, res) => {
         limit: limit || 5
       });
       const paginatedItems = await getPaginatedData(paginationParams, posts);
-      if (paginatedItems.currentPage > paginatedItems.totalPages)
+      if (paginatedItems.currentPage > paginatedItems.totalPages/*exceeds limit*/
+        || paginatedItems.currentPage < 0 /*is negative*/)
         return res.send(ServiceResponse.failure('Page limit exceeded', null, 404));
       res.send(ServiceResponse.success<any>('Posts found', paginatedItems))
     } else {

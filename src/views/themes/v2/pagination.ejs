@@ -1,0 +1,66 @@
+<!-- Pagination -->
+<div id="pagination"></div>
+<script>
+  const WidgetPagination = {
+    // currentPage: parameters.page,
+    // element: document.getElementById('pagination')
+    async updateLinks() {
+      //widget params
+      const pElement = document.getElementById('pagination');
+      pElement.innerHTML = ''; //reset
+
+      const serviceResponse = await loadedPage;
+      if (!serviceResponse.success) {
+        pElement.innerHTML = serviceResponse.message; //'Error loading pagination widget';
+        return;
+      }
+      const response = serviceResponse.responseObject;
+
+      const currentPage = response.currentPage;
+      const totalPages = response.totalPages;
+      const totalCount = response.totalCount;
+      const limit = response.limit;
+
+      const pURL = currentUrl; //new URL(window.location.href);
+      pURL.searchParams.set('page', currentPage + 1);
+
+      const nextPage = document.createElement('a');
+      nextPage.id = 'nextPage';
+      nextPage.href = pURL.href;
+      nextPage.textContent = 'Next';
+      pURL.searchParams.set('page', currentPage - 1);
+
+      const prevPage = document.createElement('a');
+      prevPage.href = pURL.href;
+      prevPage.textContent = 'Prev';
+
+      const loadMoreButton = document.createElement('button');
+      loadMoreButton.textContent = 'LOAD MORE';
+      loadMoreButton.onclick = async () => {
+        // parameters.page = parameters.page + 1
+        const copy = {
+          ...parameters
+        };
+        copy.page = parseInt(copy.page) + 1;
+
+        parameters.page = parseInt(parameters.page) + 1;
+
+        console.log('NEXT: ', parameters.page);
+
+        const resp = await displayPosts(parameters, style, false, false);
+        if (resp.success == false) loadMoreButton.style.display = 'none';
+      };
+      pElement.appendChild(loadMoreButton)
+
+      pElement.appendChild(prevPage);
+      pElement.appendChild(document.createTextNode(' | '));
+      pElement.appendChild(nextPage);
+      pElement.appendChild(document.createTextNode(' '));
+
+      pElement.appendChild(document.createTextNode(`Page: ${currentPage} / ${totalPages} | Posts: ${totalCount} | Limit: ${limit}`));
+    },
+
+  };
+
+  window.addEventListener('load', WidgetPagination.updateLinks);
+</script>

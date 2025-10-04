@@ -1,24 +1,38 @@
 const simpblog = {
   apiHost: 'http://localhost:3000',
-  postsUrl: '/api/v1/posts',
+  healthContext: '/api/v1/health',
+  postsContext: '/api/v1/posts',
+  pingContext: '/api/v1/ping',
   key: '',
 };
 
-async function post(page, limit) {
-  const initialUrl = simpblog.apiHost + simpblog.apiUrl + `?page=${page}&limit=${limit}`;
-  const include = '&filter=id,title';
-  const response = await fetch(simpblog.apiHost + simpblog.apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      page,
-      limit,
-      filter: ['id'],
-    }),
-  });
-  const data = await response.json();
-  //todo exclude content
-  return data;
+async function checkHealth() {
+  try {
+    const response = await fetch(simpblog.apiHost + simpblog.healthContext);
+    const data = await response.json();
+    // if (response.ok) {
+    //   console.log('Application is healthy:', data);
+    // } else {
+    //   console.error('Application is unhealthy:', data);
+    // }
+    return data;
+  } catch (error) {
+    console.error('Error fetching health check: ');
+  }
+}
+
+async function sendPing(misc) {
+  try {
+    const response = await fetch(simpblog.apiHost + simpblog.pingContext, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(misc),
+    });
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 async function getPosts(
@@ -34,7 +48,7 @@ async function getPosts(
   if (params.filter) params.filter = params.filter.split(',');
   if (params.exclude) params.exclude = params.exclude.split(',');
 
-  const url = new URL(simpblog.postsUrl, simpblog.apiHost);
+  const url = new URL(simpblog.postsContext, simpblog.apiHost);
   for (const [key, value] of Object.entries(params)) {
     if (value == null) continue;
     url.searchParams.set(key, value);
@@ -99,30 +113,29 @@ async function fetchAllPages(url, accumulatedItems = []) {
   }
 }
 
-
-  async function displayPosts(params = {
+async function displayPosts(
+  params = {
     page,
     limit,
     search,
-    type
-  }, style = 0) {
-    console.log('current page: ', params.page);
-    console.log('max results : ', params.limit);
+    type,
+  }, style = 0 ) {
+  console.log('current page: ', params.page);
+  console.log('max results : ', params.limit);
 
-    try {
-      const response = await getPosts(params);
-      if (!response.success) {
-        //   hasMoreData = false; // server response
-        return
-      }
-      const posts = response.responseObject.data;
-
-  
-      isLoading = false;
-      return response
-    } catch (error) {
-      console.error('Error loading more items:', error);
-      isLoading = false;
-      // hasMoreData = false;
+  try {
+    const response = await getPosts(params);
+    if (!response.success) {
+      //   hasMoreData = false; // server response
+      return;
     }
+    const posts = response.responseObject.data;
+
+    isLoading = false;
+    return response;
+  } catch (error) {
+    console.error('Error loading more items:', error);
+    isLoading = false;
+    // hasMoreData = false;
   }
+}

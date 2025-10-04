@@ -1,6 +1,6 @@
 <%- include('../../partials/header', {title: 'RSS Feed'}) -%>
 <script>
-  const style = <%=viewIndex%> ? 0 : 1
+  let style = <%=viewIndex%> ? 0 : 1
 
   let hasMoreData = true
   let isLoading = false
@@ -12,333 +12,31 @@
     type: null
   }
 
+  let loadedPage;
+  let error
+
   const currentUrl = new URL(window.location.href);
-  const newURL = new URL(window.location.href);
+  // const newURL = new URL(window.location.href);
   currentUrl.searchParams.forEach((value, key) => {
-    if (!key) newURL.searchParams.append(key, value);
+    // if (!key) newURL.searchParams.append(key, value);
     console.log(`${key}=${value}`);
     parameters[key] = value
+
+    if (key.includes('theme')) {
+      style = value
+      console.log('theme updated')
+    }
+
   });
   console.log(parameters)
-
-  //load page
-  // const response = displayPosts(parameters, style)
-
-  window.addEventListener('load', async () => {
-    console.log('load')
-
-    parameters.response = displayPosts(parameters, style)
-    // const currentUrl = new URL(window.location.href);
-  })
-
-  async function displayPosts(params = {
-    page,
-    limit,
-    search,
-    type
-  }, style = 0) {
-    console.log('current page: ', params.page);
-    console.log('max results : ', params.limit);
-
-    try {
-      const response = await getPosts(params);
-      if (!response.success) {
-        //   hasMoreData = false; // server response
-        return
-      }
-      const posts = response.responseObject.data;
-
-      if (style == 0) {
-        // index view
-        const tableContainer = document.getElementById('indexTable');
-        const table = document.createElement('table');
-        // table.style = 'width:100%'
-        // const tbody = document.createElement("tbody");
-        const tbody = tableContainer.querySelector('tbody');
-
-        posts.forEach((post) => {
-          const row = document.createElement('tr');
-
-          const title = document.createElement('td');
-          title.textContent = post.title;
-          row.appendChild(title);
-
-          const date = document.createElement('td');
-          date.textContent = new Date(post.date.published).toLocaleDateString();
-          row.appendChild(date);
-
-          const size = document.createElement('td');
-          size.innerText = post.size.total;
-          const supElement = document.createElement('sup');
-          supElement.textContent = `(${post.size.format})`;
-          size.appendChild(supElement);
-          row.appendChild(size);
-
-          const links = document.createElement('td');
-          const viewp = document.createElement('a');
-          viewp.href = `/post/${post.id}`;
-          viewp.textContent = 'view';
-          links.appendChild(document.createTextNode('['));
-          links.appendChild(viewp);
-          links.appendChild(document.createTextNode(']'));
-          const editp = document.createElement('a');
-          editp.href = `/post/${post.id}/edit`;
-          editp.textContent = 'edit';
-          links.appendChild(document.createTextNode('['));
-          links.appendChild(editp);
-          links.appendChild(document.createTextNode(']'));
-          row.appendChild(links);
-
-          tbody.appendChild(row);
-        });
-
-        table.appendChild(tbody);
-        // table.classList.add("my-table-style"); // Apply CSS class
-        tableContainer.appendChild(table);
-      } else if (style == 1) {
-        // front page view
-        // Append new items to the container
-        const itemContainer = document.getElementById('rss-feed-container');
-        posts.forEach((post) => {
-          // console.log(item);
-          const itemDiv = document.createElement('div');
-          itemDiv.classList.add('feed-item');
-          itemDiv.innerHTML = `
-            <a href='/post/${post.id}'><h2>${post.title}</h2></a>
-            ${post.content}
-            `;
-          itemContainer.appendChild(itemDiv);
-        });
-      }
-      isLoading = false;
-      return response
-    } catch (error) {
-      console.error('Error loading more items:', error);
-      isLoading = false;
-      // hasMoreData = false;
-    }
-  }
 </script>
+<%- include('../../widgets/nsfw-modal', {init: false}) -%>
 
-<!-- AutoScroll -->
-<div id="toolbar"></div>
-<script>
-  window.addEventListener('load', async () => {
-    const toolbar = document.getElementById('toolbar');
+<div id='main'>
+  <%- include('toolbar') %>
+  <%- include('search-form') %>
+  <%- include('../../partials/footer') %>
 
-    const autoScroll = document.createElement('input');
-    autoScroll.id = 'myCheckbox';
-    autoScroll.name = 'autoscrolls';
-    autoScroll.value = 'yes';
-    autoScroll.type = 'checkbox';
-
-    const labelAutoScroll = document.createElement('label');
-    labelAutoScroll.textContent = 'AutoScroll';
-
-    window.addEventListener('scroll', async () => {
-      if (!myCheckbox.checked) return;
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-      if (scrollTop + clientHeight >= scrollHeight - 0 && !isLoading && hasMoreData) {
-        isLoading = true;
-        parameters.page++;
-        await displayPosts({ page: parameters.page, limit: parameters.limit }, style);
-      }
-    });
-
-    toolbar.appendChild(labelAutoScroll);
-    toolbar.appendChild(autoScroll);
-
-    // Theme selector
-    const labelTheme = document.createElement('label');
-    labelTheme.textContent = 'Theme: ';
-    // labelTheme.setAttribute('for', 'selectTheme');
-
-    const selectTheme = document.createElement('select');
-    selectTheme.id = 'selectTheme';
-    selectTheme.name = 'type';
-    selectTheme.onchange = () => {
-      console.log('hi', selectTheme.value);
-    };
-
-    const themeOptions = ['Index', 'Show'];
-    themeOptions.forEach((optionInfo) => {
-      const option = document.createElement('option');
-      option.value = optionInfo;
-      option.textContent = optionInfo;
-      // if(currentLimit == option.value)//highlight
-      option.selected = true;
-      selectTheme.appendChild(option);
-    });
-
-    toolbar.appendChild(labelTheme);
-    toolbar.appendChild(selectTheme);
-  });
-</script>
-
-<!-- Search -->
-<form id="searchForm"></form>
-<script>
-  //widget params
-  window.addEventListener('load', async () => {
-    const searchForm = document.getElementById('searchForm');
-    let currentLimit = 0;
-    const serviceResponse = await parameters.response;
-    if (!serviceResponse.success) {
-      searchForm.innerHTML = 'Error loading search widget';
-      return;
-    }
-    const response = serviceResponse.responseObject;
-
-    currentType = '';
-    currentLimit = response.limit;
-
-    // search input
-    const labelSearch = document.createElement('label');
-    labelSearch.textContent = 'Search: ';
-    // labelSearch.setAttribute('for', 'searchLabel');
-    const searchInput = document.createElement('input');
-    searchInput.id = 'searchInput';
-    searchInput.name = 'search';
-    searchInput.type = 'text';
-    searchInput.required = true;
-
-    searchForm.appendChild(labelSearch);
-    searchForm.appendChild(searchInput);
-    searchForm.appendChild(document.createTextNode(' '));
-
-    // Search Type
-    const labelSearchType = document.createElement('label');
-    labelSearchType.textContent = 'In: ';
-    labelSearchType.setAttribute('for', 'searchType');
-
-    const selectSearchType = document.createElement('select');
-    selectSearchType.id = 'searchType';
-    selectSearchType.name = 'type';
-
-    const searchTypeOptions = ['Title', 'Content', 'Labels'];
-    searchTypeOptions.forEach((optionInfo) => {
-      const option = document.createElement('option');
-      option.value = optionInfo.toLowerCase();
-      option.textContent = optionInfo;
-      // if(currentLimit == option.value)//highlight
-      option.selected = true;
-      selectSearchType.appendChild(option);
-    });
-
-    searchForm.appendChild(labelSearchType);
-    searchForm.appendChild(selectSearchType);
-    searchForm.appendChild(document.createTextNode(' '));
-
-    // limit
-    const labelLimit = document.createElement('label');
-    labelLimit.textContent = 'Limit: ';
-    labelLimit.setAttribute('for', 'limit');
-    const selectLimit = document.createElement('select');
-    selectLimit.id = 'limit';
-    selectLimit.name = 'limit';
-    const optionsData = [1, 5, 10, 15, 20];
-    optionsData.forEach((optionInfo) => {
-      const option = document.createElement('option');
-      option.value = optionInfo;
-      option.textContent = optionInfo;
-      if (currentLimit == option.value)
-        //highlight
-        option.selected = true;
-      selectLimit.appendChild(option);
-    });
-
-    searchForm.appendChild(labelLimit);
-    searchForm.appendChild(selectLimit);
-    searchForm.appendChild(document.createTextNode(' '));
-
-    const submitButton = document.createElement('button');
-    submitButton.type = 'submit';
-    submitButton.textContent = 'Search';
-
-    searchForm.appendChild(document.createTextNode(' '));
-    searchForm.appendChild(submitButton);
-  });
-</script>
-
-<!-- Pagination -->
-<div id="pagination"></div>
-<script>
-  const WidgetPagination = {
-    // currentPage: parameters.page,
-    // element: document.getElementById('pagination')
-  };
-
-  window.addEventListener('load', async () => {
-    //widget params
-    const pElement = document.getElementById('pagination');
-
-    const serviceResponse = await parameters.response;
-    if (!serviceResponse.success) {
-      pElement.innerHTML = 'Error loading pagination widget';
-      return;
-    }
-    const response = serviceResponse.responseObject;
-
-    const currentPage = response.currentPage;
-    const totalPages = response.totalPages;
-    const totalCount = response.totalCount;
-    const limit = response.limit;
-
-    const pURL = new URL(window.location.href);
-    pURL.searchParams.set('page', currentPage + 1);
-
-    const nextPage = document.createElement('a');
-    nextPage.href = pURL.href;
-    nextPage.textContent = 'Next';
-    pURL.searchParams.set('page', currentPage - 1);
-
-    const prevPage = document.createElement('a');
-    prevPage.href = pURL.href;
-    prevPage.textContent = 'Prev';
-
-    pElement.appendChild(prevPage);
-    pElement.appendChild(document.createTextNode(' | '));
-    pElement.appendChild(nextPage);
-    pElement.appendChild(document.createTextNode(' '));
-
-    pElement.appendChild(document.createTextNode(`Page: ${currentPage} / ${totalPages} | Posts: ${totalCount} | Limit: ${limit}`));
-  });
-</script>
-<%- include('../../partials/footer') %>
-<!-- Body -->
-<h1>Latest Articles from RSS Feed📡🛰️</h1>
-<!-- Index view -->
-<% if(viewIndex){ %>
-<style>
-  table {
-    /* width: 100%; */
-  }
-
-  td,
-  th {
-    /* border: 1px solid #dddddd; */
-    text-align: left;
-  }
-</style>
-<div class="feed-item">
-  <table id="indexTable" style="width: 100%">
-    <tr>
-      <th>Title</th>
-      <th style="width: 5%">Published</th>
-      <th style="width: 1%">Size</th>
-      <th style="width: 40%">Links</th>
-    </tr>
-  </table>
+  <%- include('display-posts') %>
+  <%- include('pagination') %>
 </div>
-
-<% } else { %>
-<div id="rss-feed-container">
-  <!-- RSS feed items will be dynamically inserted here -->
-</div>
-<% } %>
-
-<!-- Pagination -->
-<%- //include('../widgets/pagination') -%> <%- //include('../widgets/autoscroll', { // currentPage: 1, // limit: 5, // style: viewIndex? 0 : 1 // }) -%>
-<!-- Footer -->
-<%- //include('../partials/footer') -%>

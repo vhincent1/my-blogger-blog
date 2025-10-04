@@ -1,0 +1,91 @@
+<!-- Search -->
+<form id="searchForm"></form>
+<script>
+  Widget_SearchForm = {
+    async load() {
+      const form = document.getElementById('searchForm');
+      let currentLimit = 0;
+
+      // const serviceResponse = await loadedPage;
+      // console.log('SF:  ',serviceResponse);
+      // if (!serviceResponse.success) {
+      //   // searchForm.innerHTML = 'Error loading search widget';
+      //   // return;
+      // }
+      // const response = serviceResponse.responseObject;
+
+      currentType = '';
+      // currentLimit = response ? response.limit : 5;
+      currentLimit = parameters.limit
+
+      // search input
+      const searchLabel = document.createElement('label');
+      searchLabel.textContent = 'Search: ';
+      searchLabel.setAttribute('for', 'searchLabel');
+      const searchInput = document.createElement('input');
+      searchInput.id = 'searchInput';
+      searchInput.name = 'search';
+      searchInput.type = 'text';
+      searchInput.required = true;
+      // if (response == null) searchInput.placeholder = serviceResponse.message;
+
+      form.appendChild(searchLabel);
+      form.appendChild(searchInput);
+      form.appendChild(document.createTextNode(' '));
+
+      // Search Type
+      const searchTypeLabel = document.createElement('label');
+      searchTypeLabel.textContent = 'In: ';
+      searchTypeLabel.setAttribute('for', 'searchType');
+
+      const searchTypeSelector = document.createElement('select');
+      searchTypeSelector.id = 'searchType';
+      searchTypeSelector.name = 'type';
+
+      const searchTypeOptions = ['Title', 'Content', 'Labels'];
+      searchTypeOptions.forEach((optionInfo) => {
+        const option = document.createElement('option');
+        option.value = optionInfo.toLowerCase();
+        option.textContent = optionInfo;
+        if(currentLimit == option.value)//highlight
+        option.selected = true;
+        searchTypeSelector.appendChild(option);
+      });
+
+      form.appendChild(searchTypeLabel);
+      form.appendChild(searchTypeSelector);
+      form.appendChild(document.createTextNode(' '));
+
+      // limit
+      const labelLimit = document.createElement('label');
+      labelLimit.textContent = 'Limit: ';
+      labelLimit.setAttribute('for', 'limit');
+      const selectLimit = document.createElement('select');
+      selectLimit.id = 'limit';
+      selectLimit.name = 'limit';
+      const optionsData = [1, 5, 10, 15, 20];
+      optionsData.forEach((optionInfo) => {
+        const option = document.createElement('option');
+        option.value = optionInfo;
+        option.textContent = optionInfo;
+        if (currentLimit == option.value)
+          //highlight
+          option.selected = true;
+        selectLimit.appendChild(option);
+      });
+
+      form.appendChild(labelLimit);
+      form.appendChild(selectLimit);
+      form.appendChild(document.createTextNode(' '));
+
+      const submit = document.createElement('button');
+      submit.type = 'submit';
+      submit.textContent = 'Search';
+
+      form.appendChild(document.createTextNode(' '));
+      form.appendChild(submit);
+    }
+  }
+  //widget params
+  window.addEventListener('load', Widget_SearchForm.load);
+</script>

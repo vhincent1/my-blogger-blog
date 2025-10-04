@@ -43,9 +43,7 @@ class Database {
   async savePosts() {
     const release = await dbMutex.acquire()
     try {
-      await writeJsonFile(appConfig.database.file, this.blogPosts, (err) => {
-        if (err) console.log('Error saving posts')
-      })
+      await writeJsonFile(appConfig.database.file, this.blogPosts)
     } catch (error) {
       console.log('Database error: ', error)
     } finally {

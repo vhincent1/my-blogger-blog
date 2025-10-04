@@ -7,7 +7,7 @@ import compress from 'compression';
 import { xss } from 'express-xss-sanitizer';
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
-import cors from 'cors'
+import cors from 'cors';
 //routes
 import routes from './routes/app.routes.ts';
 //middleware
@@ -35,11 +35,13 @@ app.use(cookieParser());
 // Enable CORS for all routes (for development purposes, or if you want to allow all origins)
 app.use(cors());
 
+import expressStatusMonitorMiddleware from './middleware/express-status-monitor.middleware.ts';
+app.use(expressStatusMonitorMiddleware); 
+
 // Or, configure CORS to allow specific origins:
 // app.use(cors({
 //   origin: 'http://localhost:3000' // Replace with your frontend's origin
 // }));
-
 
 // const getClientIp = (req: Request): string | undefined => {
 //   // Check for the X-Forwarded-For header, which is commonly set by proxies
@@ -56,27 +58,28 @@ app.use(cors());
 // };
 
 // sessions
-app.use(session({
+app.use(
+  session({
     secret: process.env.SESSION_SECRET!,
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
-}));
-
+  })
+);
 
 // log ip addresses
 app.use((req, res, next) => {
-    //let clientIp = req.socket.remoteAddress
-    // Get the remote IP address
-    let remoteIp = req.ip || req.connection.remoteAddress; // Use req.ip if trust proxy is enabled
-    // Store the IP address in the session if it's not already there
-    if (!req.session.remoteAddress) {
-        req.session.remoteAddress = remoteIp;
-    }
-    // You can also update it on subsequent requests if needed,
-    // for example, to track changes in IP address (e.g., mobile network changes)
-    // req.session.lastKnownRemoteAddress = remoteIp;
-    console.log(remoteIp, req.originalUrl);
-    next();
+  //let clientIp = req.socket.remoteAddress
+  // Get the remote IP address
+  let remoteIp = req.ip || req.connection.remoteAddress; // Use req.ip if trust proxy is enabled
+  // Store the IP address in the session if it's not already there
+  if (!req.session.remoteAddress) {
+    req.session.remoteAddress = remoteIp;
+  }
+  // You can also update it on subsequent requests if needed,
+  // for example, to track changes in IP address (e.g., mobile network changes)
+  // req.session.lastKnownRemoteAddress = remoteIp;
+  console.log(req.method, remoteIp, req.originalUrl);
+  next();
 });
 
 app.use('/', routes);
@@ -132,32 +135,35 @@ app.use(middlewares.notFound);
 // from app.get() etc
 app.use(middlewares.errorHandler);
 const server = app.listen(port, () => {
-    /* eslint-disable no-console */
-    console.log(`Listening: ` + chalk.bgBlue.white(`http://localhost:${port}`));
-    /* eslint-enable no-console */
+  /* eslint-disable no-console */
+  console.log(`Listening: ` + chalk.bgBlue.white(`http://localhost:${port}`));
+
+  // const memoryUsage = process.memoryUsage();
+  // console.log('Memory Usage:', memoryUsage);
+  /* eslint-enable no-console */
 });
 
 server.on('error', (err: any) => {
-    switch (err.code) {
-        case 'EADDRINUSE':
-            console.error(`Port ${port} is already in use. Please choose another port or stop the process using it.`);
-        default:
-            console.error('Failed to start server:', err);
-            break;
-    }
-    process.exit(1);
+  switch (err.code) {
+    case 'EADDRINUSE':
+      console.error(`Port ${port} is already in use. Please choose another port or stop the process using it.`);
+    default:
+      console.error('Failed to start server:', err);
+      break;
+  }
+  process.exit(1);
 });
 const onCloseSignal = () => {
-    console.log("sigint received, shutting down");
-    server.close(() => {
-        console.log("server closed");
-        process.exit();
-    });
-    setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+  console.log('sigint received, shutting down');
+  server.close(() => {
+    console.log('server closed');
+    process.exit();
+  });
+  setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
 };
 
-process.on("SIGINT", onCloseSignal);
-process.on("SIGTERM", onCloseSignal);
+process.on('SIGINT', onCloseSignal);
+process.on('SIGTERM', onCloseSignal);
 
-export default app
+export default app;
 //# sourceMappingURL=app.js.map

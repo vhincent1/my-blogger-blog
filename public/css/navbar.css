@@ -1,16 +1,16 @@
 .drop-button {
-padding: 0;
-border: none;
-background: none;
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 .drop-button:focus {
   /* background-color: #0e07d2; */
+  /* background-color: #ff0000; */
   text-decoration: underline;
 }
 
-.dropdown {
-}
+.dropdown {}
 
 .dropdown-content {
   display: none;
@@ -19,4 +19,7 @@ background: none;
 .dropdown-content a {
   display: block;
 }
-.show {display: block;}
+
+.show {
+  display: block;
+}

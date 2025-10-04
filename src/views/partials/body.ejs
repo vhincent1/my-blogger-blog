@@ -1,16 +1,11 @@
-<%- include('header', {title: 'Gallery'}) -%>
+<%- include('header', {title: 'Template'}) -%>
 <!-- Navigation bar -->
 <%- include('../partials/navbar') -%>
 <!-- Body -->
-<h1>Gallery</h1>
+<h1>Title</h1>
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
+   <div class="feed-item"></div>
 </div>
-<div class="feed-item">
-  <img class="myImages" id="myImg" src="http://192.168.40.220:3000/content/VHINCENT/533/911.png" style="width: 150px;">
-  <% images.forEach(image => {%>
-  <img class="myImages" id="myImg" src="<%=image.path%>" alt="<%=image.fileName%>" style="width:150px">
-  <%});%>
-</div>
+
 <%- include('footer') -%>
-<%- include('../widgets/image-modal')-%>

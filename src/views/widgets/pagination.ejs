@@ -9,7 +9,7 @@
   <select name="limit" id="limit" onchange="Widgets_Pagination.setLimit()">
     <option value="0" selected>0</option>
     <% for (let i = 5; i< 25; i+= 5){ %>
-    <option value="<%=i-%>" <%if(pagination.limit == i){ %>selected<%}%>><%=i-%></option>
+    <option value="<%=i-%>" <%if(paginationResult.limit == i){ %>selected<%}%>><%=i-%></option>
     <% } %>
   </select>
   <label for="search">Search:</label>

@@ -1,0 +1,181 @@
+<!-- Body -->
+<h1>Latest Articles from RSS Feed📡🛰️</h1>
+<div id="rss-feed-container">
+  <!-- RSS feed items will be dynamically inserted here -->
+</div>
+<script>
+
+  //load page
+  // const response = displayPosts(parameters, style)
+
+  window.addEventListener('load', async () => {
+    console.log('load')
+
+    // parameters.response = displayPosts(parameters, style, false, true)
+
+    loadedPage = displayPosts(parameters, style, false, true)
+    //loadMore()
+
+    // console.log('LOAD ',  await loadedPage)
+    // const currentUrl = new URL(window.location.href);
+  })
+
+
+  async function displayPosts(params = {
+    page,
+    limit,
+    search,
+    type
+  }, style = 0, refresh = false, a) {
+    console.log('current page: ', params.page);
+    console.log('max results : ', params.limit);
+
+    try {
+      const response = await getPosts(params);
+      if (response == undefined) {
+        //   hasMoreData = false; // server response
+        console.error('Err: ', response)
+        return
+      }
+      // const posts = response.responseObject.data;
+
+      const pageFound = response.responseObject
+      const feedContainer = document.getElementById('rss-feed-container');
+
+      let error = document.getElementById('error')
+      if(error != null)  error.remove()
+      
+
+      if (pageFound == null) {
+        // feedContainer.innerHTML = response.message
+         error = document.createElement('div')
+        error.id = 'error'
+        error.textContent = response.message
+        feedContainer.insertAdjacentElement('afterend', error);
+      } else if (pageFound != null) {
+        if (refresh) feedContainer.innerHTML = ''
+
+        const posts = pageFound.data;
+        if (style == 0) {
+          // index view
+          // const tableContainer = document.getElementById('rss-feed-container');
+
+          const getTable = document.getElementById('indexTable')
+
+          const table = getTable ? getTable : document.createElement('table');
+          table.id = 'indexTable'
+          // table.style = 'width:100%'
+
+          const getTBody = document.querySelector('tbody')
+          const tbody = getTBody ? getTBody : document.createElement('tbody')
+
+          const rowInfo = document.createElement('tr');
+          const header1 = document.createElement("th");
+          header1.textContent = 'Title';
+          header1.style = 'text-align: left;'
+          const header2 = document.createElement("th");
+          header2.textContent = 'Date';
+          const header3 = document.createElement("th");
+          header3.textContent = 'Size';
+          const header4 = document.createElement("th");
+          header4.textContent = 'Links';
+
+          if (a) {
+            tbody.appendChild(header1)
+            tbody.appendChild(header2)
+            tbody.appendChild(header3)
+            tbody.appendChild(header4)
+          }
+
+          posts.forEach((post) => {
+            const row = document.createElement('tr');
+
+            const title = document.createElement('td');
+            title.textContent = post.title;
+            row.appendChild(title);
+
+            const date = document.createElement('td');
+            date.textContent = new Date(post.date.published).toLocaleDateString();
+            row.appendChild(date);
+
+            const size = document.createElement('td');
+            size.innerText = post.size.total;
+            const supElement = document.createElement('sup');
+            supElement.textContent = `(${post.size.format})`;
+            size.appendChild(supElement);
+            row.appendChild(size);
+
+            const links = document.createElement('td');
+            const viewp = document.createElement('a');
+            viewp.href = `/post/${post.id}`;
+            viewp.textContent = 'view';
+            links.appendChild(document.createTextNode('['));
+            links.appendChild(viewp);
+            links.appendChild(document.createTextNode(']'));
+            const editp = document.createElement('a');
+            editp.href = `/post/${post.id}/edit`;
+            editp.textContent = 'edit';
+            links.appendChild(document.createTextNode('['));
+            links.appendChild(editp);
+            links.appendChild(document.createTextNode(']'));
+            row.appendChild(links);
+
+            tbody.appendChild(row);
+          });
+
+          table.appendChild(tbody);
+          // table.classList.add("my-table-style"); // Apply CSS class
+          feedContainer.appendChild(table);
+        } else if (style == 1) {
+          // front page view
+          // Append new items to the container
+          posts.forEach((post) => {
+            // console.log(item);
+            const feedItem = document.createElement('div');
+            feedItem.classList.add('feed-item');
+            feedItem.innerHTML = `
+            <a href='/post/${post.id}'><h2>${post.title}</h2></a>
+            ${post.content}
+            `;
+            feedContainer.appendChild(feedItem);
+          });
+        }
+      }
+      Widgets_NSFWModal.init();
+      isLoading = false;
+      return response
+    } catch (error) {
+      console.error('Error loading more items:', error);
+      isLoading = false;
+      // hasMoreData = false;
+    }
+  }
+
+  async function loadMore() {
+    console.log('load');
+    // const currentUrl = new URL(window.location.href);
+    const div = document.createElement('div')
+    // const div = document.getElementById('loadMore');
+    div.id = 'loadMore'
+    // div.status
+
+    const loadMoreButton = document.createElement('button');
+    loadMoreButton.textContent = 'LOAD MORE';
+    loadMoreButton.onclick = async () => {
+      // parameters.page = parameters.page + 1
+      const copy = {...parameters};
+      copy.page = parseInt(copy.page) + 1;
+
+      parameters.page = parseInt(parameters.page) + 1;
+
+      console.log('NEXT: ', parameters.page);
+
+      const resp = await displayPosts(parameters, style, false, false);
+      if (resp.success == false) div.innerHTML = '';
+    };
+    div.appendChild(loadMoreButton);
+
+    const feedContainer = document.getElementById('rss-feed-container')
+    feedContainer.insertAdjacentElement('afterend', div);
+  }
+</script>

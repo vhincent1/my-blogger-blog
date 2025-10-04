@@ -9,7 +9,7 @@ async function readJsonFile(filePath) {
     const jsonData = JSON.parse(data);
     // console.log('JSON data:', jsonData.length);
     return jsonData;
-  } catch (error) {
+  } catch (error: any) {
     switch (error.code) {
       case 'ENOENT': //file doesn't exist
         return [];

@@ -24,9 +24,9 @@
  </script>
 <!-- <a href="findPage(397).postId">Go-to Page</a> -->
 <a href="<%=common.links.viewPost({id: prevPost})%>">Previous Post</a>
-<a href="<%=common.links.viewPost({id: nextPost})%>">Next Post</a>
-<a href="<%=common.previousUrl%>">Back</a>
-<!-- Widgets -->
-<%- //include('widgets/nsfw-modal') -%>
-<!-- Footer -->
-<%- include('partials/footer') -%>
+  <a href="<%=common.links.viewPost({id: nextPost})%>">Next Post</a>
+  <a href="<%=common.previousUrl%>">Back</a>
+  <!-- Widgets -->
+  <%- include('widgets/nsfw-modal', {init: true}) -%>
+  <!-- Footer -->
+  <%- include('partials/footer') -%>

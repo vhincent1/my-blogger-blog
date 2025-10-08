@@ -1,4 +1,5 @@
-<%- include('partials/header', {title: 'RSS Feed'}) -%>
+<%- include('../../partials/header', {title: 'RSS Feed'}) -%>
+
 <!-- Body -->
 <h1>Latest Articles from RSS Feed📡🛰️</h1>
 
@@ -51,10 +52,10 @@
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
 <!-- Pagination -->
-<%- include('widgets/pagination') -%>
-<%- include('widgets/autoscroll',{
+<%- include('../../widgets/pagination') -%>
+<%- include('../../widgets/autoscroll',{
   currentPage: paginationResult.currentPage, 
   limit: paginationResult.limit,
   style: viewIndex? 0 : 1}) -%>
 <!-- Footer -->
-<%- include('partials/footer') -%>
+<%- include('../../partials/footer') -%>

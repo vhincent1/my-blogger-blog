@@ -5,8 +5,7 @@ import { performance } from 'node:perf_hooks';
 
 import Post from '../../model/Post.model.ts';
 import PostService from '../../services/post.service.ts'
-
-import { pageController, getPaginationParameters, getPaginatedData } from '../../controller/page.controller.ts';
+import { getPaginationParameters, getPaginatedData } from '../../controller/pagination.controller.ts';
 // import type { Pagination } from '../../controller/page.controller.ts';
 
 const router = express.Router();

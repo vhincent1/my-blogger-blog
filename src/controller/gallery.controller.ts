@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import PostService from '../services/post.service.ts'
-import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './page.controller.ts';
+import  { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
+// import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './home.controller.ts';
 
 // Example usage:
 const targetDirectory = './public/images';

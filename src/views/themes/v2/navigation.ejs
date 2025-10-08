@@ -1,0 +1,25 @@
+<script>
+  const Widget_NavLinks = {
+    links: {
+      '/v2': 'Home',
+      '/v2/index': 'Index',
+      '/login': 'Login',
+      '/dashboard': 'Dashboard',
+      '/post': 'Post',
+      '/gallery': 'Gallery',
+    },
+
+    init() {
+      const div = document.getElementById('links');
+      for (const [route, label] of Object.entries(Widget_NavLinks.links)) {
+        const link = document.createElement('a');
+        link.textContent = label;
+        link.href = route;
+        div.appendChild(link);
+        div.appendChild(document.createTextNode(' '));
+      }
+    },
+  };
+  window.addEventListener('load',  Widget_NavLinks.init);
+</script>
+<div id="links"></div>

@@ -1,8 +1,8 @@
 import appConfig from '../app.config.ts'
 import PostService from '../services/post.service.ts'
 
-import { navbarController } from './navbar.controller.ts';
-import { pageController } from './page.controller.ts';
+// import { navbarController } from './navbar.controller.ts';
+// import { homepageController } from './home.controller.ts';
 
 async function publishPost(req, res, editting = false) {
   const postId = parseInt(req.params.postId);

@@ -15,7 +15,7 @@ function countTagOccurrences(tagsArray) {
 }
 
 let allLabels = [];
-blogPosts.forEach((post) => {allLabels = allLabels.concat(post.labels);});
+blogPosts.forEach((post) => { allLabels = allLabels.concat(post.labels); });
 
 const uniqueTags = [...new Set(allLabels)];
 const labelCount = countTagOccurrences(allLabels.sort().reverse());
@@ -50,9 +50,9 @@ function getYearlyCount(year) {
  */
 const postsByMonthYear = blogPosts.reduce((groups, post) => {
   const date = new Date(post.date.published);
-  const monthYear = date.toLocaleString('en-US', { month: 'long',year: 'numeric'});
+  const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   if (!groups[monthYear]) groups[monthYear] = [];
-  groups[monthYear].push({ postId: post.id, title: post.title});
+  groups[monthYear].push({ postId: post.id, title: post.title });
   return groups;
 }, {});
 
@@ -66,25 +66,25 @@ const archiveMenu = [];
 // load
 function buildMenu() {
   Object.keys(postCountByYear).reverse().forEach((year) => {
-      // yearly
-      const yearlyPostCount = postCountByYear[year];
-      // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
-      let YTD = { year: year, total: yearlyPostCount };
-      let MTD = [];
-      //monthly
-      // key = "Month Year"
-      Object.keys(postsByMonthYear).filter((key) => key.includes(year))
-        .reverse() // descending order
-        .forEach((key) => {
-          const posts = postsByMonthYear[key];
-          const month = key.replace(' ' + year, '');
-          const monthCount = posts.length;
-          MTD.push({ month, total: monthCount });
-          YTD.MTD = MTD;
-        });
-      //update
-      archiveMenu.push(YTD);
-    });
+    // yearly
+    const yearlyPostCount = postCountByYear[year];
+    // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
+    let YTD = { year: year, total: yearlyPostCount };
+    let MTD = [];
+    //monthly
+    // key = "Month Year"
+    Object.keys(postsByMonthYear).filter((key) => key.includes(year))
+      .reverse() // descending order
+      .forEach((key) => {
+        const posts = postsByMonthYear[key];
+        const month = key.replace(' ' + year, '');
+        const monthCount = posts.length;
+        MTD.push({ month, total: monthCount });
+        YTD.MTD = MTD;
+      });
+    //update
+    archiveMenu.push(YTD);
+  });
   return archiveMenu;
 }
 

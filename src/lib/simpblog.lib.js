@@ -31,7 +31,7 @@ async function sendPing(misc) {
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error(err)
+    console.error(err);
   }
 }
 
@@ -67,18 +67,23 @@ async function getPosts(
 
 // console.log(await getPosts({ page: 0, limit: 1, exclude: 'content' }))
 
-async function getAllPosts(params = { startPage: 0, maxResultsPerPage: 5 }, callback) {
-  const response = await getPosts({ page: params.startPage, limit: params.maxResultsPerPage });
+async function getAllPosts(params = { page: 1, maxResultsPerPage: 5 }, callback) {
+  let serviceResponse = await getPosts({ page: params.page, limit: params.maxResultsPerPage });
+  if (serviceResponse.success == false) return [];
+  const response = serviceResponse.responseObject;
+
   let allItems = response.data;
   let nextPageToken = response.nextPageToken;
   while (nextPageToken != null) {
-    const paginatedData = await getPosts({ page: nextPageToken, limit: params.maxResultsPerPage });
-    allItems = allItems.concat(paginatedData.data);
-    nextPageToken = paginatedData.nextPageToken; // update for the next iteration
-    if (callback) callback(paginatedData);
+    serviceResponse = await getPosts({ page: nextPageToken, limit: params.maxResultsPerPage });
+    allItems = allItems.concat(serviceResponse.responseObject.data);
+    nextPageToken = serviceResponse.responseObject.nextPageToken; // update for the next iteration
+    if (callback) callback(serviceResponse);
   }
   return allItems;
 }
+
+console.log((await getAllPosts()).length);
 // let allItems = []
 // function a(data){
 //     allItems = allItems.concat(data.data)
@@ -113,29 +118,31 @@ async function fetchAllPages(url, accumulatedItems = []) {
   }
 }
 
-async function displayPosts(
-  params = {
-    page,
-    limit,
-    search,
-    type,
-  }, style = 0 ) {
-  console.log('current page: ', params.page);
-  console.log('max results : ', params.limit);
+// async function displayPosts(
+//   params = {
+//     page,
+//     limit,
+//     search,
+//     type,
+//   },
+//   style = 0
+// ) {
+//   console.log('current page: ', params.page);
+//   console.log('max results : ', params.limit);
 
-  try {
-    const response = await getPosts(params);
-    if (!response.success) {
-      //   hasMoreData = false; // server response
-      return;
-    }
-    const posts = response.responseObject.data;
+//   try {
+//     const response = await getPosts(params);
+//     if (!response.success) {
+//       //   hasMoreData = false; // server response
+//       return;
+//     }
+//     const posts = response.responseObject.data;
 
-    isLoading = false;
-    return response;
-  } catch (error) {
-    console.error('Error loading more items:', error);
-    isLoading = false;
-    // hasMoreData = false;
-  }
-}
+//     isLoading = false;
+//     return response;
+//   } catch (error) {
+//     console.error('Error loading more items:', error);
+//     isLoading = false;
+//     // hasMoreData = false;
+//   }
+// }

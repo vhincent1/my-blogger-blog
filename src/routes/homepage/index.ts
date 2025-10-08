@@ -3,12 +3,12 @@ import express from 'express';
 import authController from '../../controller/auth.controller.ts';
 import { dashboardController } from '../../controller/dashboard.controller.ts';
 import galleryController from '../../controller/gallery.controller.ts';
-import { pageController } from '../../controller/page.controller.ts';
+import { homepageController } from '../../controller/home.controller.ts';
 
 const route = express.Router();
 
-route.get('/', pageController.getFrontPage);
-route.get('/index', pageController.getIndex);
+route.get('/', homepageController.getFrontPage);
+route.get('/index', homepageController.getIndex);
 route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
 route.get('/gallery', galleryController.index)
 route.get('/chart', async (req, res) => { res.render('chart') })

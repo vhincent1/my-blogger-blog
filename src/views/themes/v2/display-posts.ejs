@@ -4,29 +4,15 @@
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
 <script>
-
   //load page
   // const response = displayPosts(parameters, style)
 
   window.addEventListener('load', async () => {
-    console.log('load')
+    console.log('load');
+    loadedPage = displayPosts(parameters, style, false, true);
+  });
 
-    // parameters.response = displayPosts(parameters, style, false, true)
-
-    loadedPage = displayPosts(parameters, style, false, true)
-    //loadMore()
-
-    // console.log('LOAD ',  await loadedPage)
-    // const currentUrl = new URL(window.location.href);
-  })
-
-
-  async function displayPosts(params = {
-    page,
-    limit,
-    search,
-    type
-  }, style = 0, refresh = false, a) {
+  async function displayPosts(params = { page, limit, search, type }, style = 0, refresh = false, a) {
     console.log('current page: ', params.page);
     console.log('max results : ', params.limit);
 
@@ -34,57 +20,56 @@
       const response = await getPosts(params);
       if (response == undefined) {
         //   hasMoreData = false; // server response
-        console.error('Err: ', response)
-        return
+        console.error('Err: ', response);
+        return;
       }
       // const posts = response.responseObject.data;
 
-      const pageFound = response.responseObject
+      const pageFound = response.responseObject;
       const feedContainer = document.getElementById('rss-feed-container');
 
-      let error = document.getElementById('error')
-      if(error != null)  error.remove()
-      
+      let error = document.getElementById('error');
+      if (error != null) error.remove();
 
       if (pageFound == null) {
         // feedContainer.innerHTML = response.message
-         error = document.createElement('div')
-        error.id = 'error'
-        error.textContent = response.message
+        error = document.createElement('div');
+        error.id = 'error';
+        error.textContent = response.message;
         feedContainer.insertAdjacentElement('afterend', error);
       } else if (pageFound != null) {
-        if (refresh) feedContainer.innerHTML = ''
+        if (refresh) feedContainer.innerHTML = '';
 
         const posts = pageFound.data;
         if (style == 0) {
           // index view
           // const tableContainer = document.getElementById('rss-feed-container');
 
-          const getTable = document.getElementById('indexTable')
+          const getTable = document.getElementById('indexTable');
 
           const table = getTable ? getTable : document.createElement('table');
-          table.id = 'indexTable'
-          // table.style = 'width:100%'
+          table.id = 'indexTable';
+          table.style = 'text-align: left; table-layout: fixed;';
 
-          const getTBody = document.querySelector('tbody')
-          const tbody = getTBody ? getTBody : document.createElement('tbody')
+          const getTBody = document.querySelector('tbody');
+          const tbody = getTBody ? getTBody : document.createElement('tbody');
 
           const rowInfo = document.createElement('tr');
-          const header1 = document.createElement("th");
+          const header1 = document.createElement('th');
           header1.textContent = 'Title';
-          header1.style = 'text-align: left;'
-          const header2 = document.createElement("th");
+          header1.style = 'text-align: left;';
+          const header2 = document.createElement('th');
           header2.textContent = 'Date';
-          const header3 = document.createElement("th");
+          const header3 = document.createElement('th');
           header3.textContent = 'Size';
-          const header4 = document.createElement("th");
+          const header4 = document.createElement('th');
           header4.textContent = 'Links';
 
           if (a) {
-            tbody.appendChild(header1)
-            tbody.appendChild(header2)
-            tbody.appendChild(header3)
-            tbody.appendChild(header4)
+            tbody.appendChild(header1);
+            tbody.appendChild(header2);
+            tbody.appendChild(header3);
+            tbody.appendChild(header4);
           }
 
           posts.forEach((post) => {
@@ -143,27 +128,26 @@
       }
       Widgets_NSFWModal.init();
       isLoading = false;
-      return response
+      return response;
     } catch (error) {
       console.error('Error loading more items:', error);
-      isLoading = false;
+      // isLoading = false;
       // hasMoreData = false;
     }
   }
 
   async function loadMore() {
     console.log('load');
-    // const currentUrl = new URL(window.location.href);
-    const div = document.createElement('div')
+    const div = document.createElement('div');
     // const div = document.getElementById('loadMore');
-    div.id = 'loadMore'
+    div.id = 'loadMore';
     // div.status
 
     const loadMoreButton = document.createElement('button');
     loadMoreButton.textContent = 'LOAD MORE';
     loadMoreButton.onclick = async () => {
       // parameters.page = parameters.page + 1
-      const copy = {...parameters};
+      const copy = { ...parameters };
       copy.page = parseInt(copy.page) + 1;
 
       parameters.page = parseInt(parameters.page) + 1;
@@ -175,7 +159,7 @@
     };
     div.appendChild(loadMoreButton);
 
-    const feedContainer = document.getElementById('rss-feed-container')
+    const feedContainer = document.getElementById('rss-feed-container');
     feedContainer.insertAdjacentElement('afterend', div);
   }
 </script>

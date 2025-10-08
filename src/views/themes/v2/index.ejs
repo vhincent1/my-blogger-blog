@@ -2,18 +2,17 @@
 <script>
   let style = <%=viewIndex%> ? 0 : 1
 
-  let hasMoreData = true
+  // let hasMoreData = true
   let isLoading = false
 
   let parameters = {
     page: 1,
-    limit: 5,
+    limit: 15,
     search: null,
     type: null
   }
 
   let loadedPage;
-  let error
 
   const currentUrl = new URL(window.location.href);
   // const newURL = new URL(window.location.href);
@@ -35,7 +34,7 @@
 <div id='main'>
   <%- include('toolbar') %>
   <%- include('search-form') %>
-  <%- include('../../partials/footer') %>
+  <%- include('navigation') %>
 
   <%- include('display-posts') %>
   <%- include('pagination') %>

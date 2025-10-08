@@ -10,12 +10,11 @@
 
       const response = await checkHealth();
       if (response == null) {
-        status.style = 'background: #ff0000;'
+        status.style = 'background: #ff0000;';
         status.textContent = 'NOT OK';
       } else {
         for (let [key, value] of Object.entries(response)) {
-          if (key == 'date') 
-          value = new Date(value).toLocaleString()
+          if (key == 'date') value = new Date(value).toLocaleString();
           status.textContent += `${value.concat(' ')}`;
         }
         // status.style = 'background: green;'
@@ -33,10 +32,7 @@
       //   toolbar.appendChild(status);
       //   toolbar.appendChild(ping);
       // }
-      return {
-        status,
-        ping
-      }
+      return { status, ping };
     },
 
     async getInbox() {
@@ -46,20 +42,21 @@
       label.textContent = 'Inbox';
       label.setAttribute('for', 'inbox');
 
-      const progress = document.createElement('progress')
-      progress.id = 'inbox'
-      progress.max = 100
-      progress.value = 42
-      progress.textContent = progress.value + '%'
+      const progress = document.createElement('progress');
+      progress.id = 'inbox';
+      progress.max = 100;
+      progress.value = 42;
+      progress.textContent = progress.value + '%';
 
       return {
         spacerrrr: document.createTextNode(' '),
         label,
-        progress
-      }
+        progress,
+      };
     },
 
-    async autoScroll() { //displayPosts parameter
+    async autoScroll() {
+      //displayPosts parameter
 
       const label = document.createElement('label');
       label.textContent = 'AutoScroll';
@@ -73,26 +70,14 @@
 
       window.addEventListener('scroll', async () => {
         if (!myCheckbox.checked) return;
-        const {
-          scrollTop,
-          scrollHeight,
-          clientHeight
-        } = document.documentElement;
-
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
         if (scrollTop + clientHeight >= scrollHeight - 0 && !isLoading && hasMoreData) {
           isLoading = true;
           parameters.page++;
-          await displayPosts({
-            page: parameters.page,
-            limit: parameters.limit
-          }, style);
+          await displayPosts({ page: parameters.page, limit: parameters.limit }, style);
         }
       });
-
-      return {
-        label,
-        input
-      }
+      return { label, input };
     },
 
     async themeSelect() {
@@ -103,11 +88,11 @@
       const select = document.createElement('select');
       select.id = 'selectTheme';
       select.name = 'type';
-      select.onchange = async() => {
-        //
-        const loadedParams = await loadedPage
-        const totalPages = loadedParams.responseObject.totalPages
-        if(parameters.page > totalPages) parameters.page = 1
+      select.onchange = async () => {
+        const loadedParams = await loadedPage;
+        const totalPages = loadedParams.responseObject.totalPages;
+        parameters.page = 1;
+        // if(parameters.page > totalPages) parameters.page = 1
 
         console.log('hi', select.value);
         // loadedPage =
@@ -117,13 +102,14 @@
         WidgetPagination.updateLinks();
       };
 
-      const themeOptions = [{
+      const themeOptions = [
+        {
           name: 'Index',
-          id: 0
+          id: 0,
         },
         {
           name: 'Show',
-          id: 1
+          id: 1,
         },
       ];
       themeOptions.forEach((optionInfo) => {
@@ -139,28 +125,24 @@
       // toolbar.appendChild(selectTheme);
       return {
         label,
-        select
-      }
-    }
-  }
+        select,
+        spacerrrr: document.createTextNode(' '),
+      };
+    },
+  };
 
   Widget_Toolbar.loadToolbar = async () => {
     const toolbar = document.getElementById('toolbar');
 
-    const items = [
-      Widget_Toolbar.autoScroll(),
-      Widget_Toolbar.themeSelect(),
-      Widget_Toolbar.statusBar(),
-      Widget_Toolbar.getInbox()
-    ]
+    const items = [Widget_Toolbar.autoScroll(), Widget_Toolbar.themeSelect(), Widget_Toolbar.statusBar(), Widget_Toolbar.getInbox()];
 
     for (const item of items) {
-      for (const elements of Object.values((await item))) {
+      for (const elements of Object.values(await item)) {
         // toolbar.appendChild(document.createTextNode(' '))
-        toolbar.appendChild(elements)
+        toolbar.appendChild(elements);
       }
     }
-  }
+  };
 
   window.addEventListener('load', Widget_Toolbar.loadToolbar);
 </script>

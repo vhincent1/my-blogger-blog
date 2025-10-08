@@ -34,30 +34,64 @@
       prevPage.href = pURL.href;
       prevPage.textContent = 'Prev';
 
-      const loadMoreButton = document.createElement('button');
+      const loadMoreButton = document.createElement('label');
       loadMoreButton.textContent = 'LOAD MORE';
       loadMoreButton.onclick = async () => {
         // parameters.page = parameters.page + 1
-        const copy = {
-          ...parameters
-        };
-        copy.page = parseInt(copy.page) + 1;
+        // const copy = {
+        //   ...parameters
+        // };
+        // copy.page = parseInt(copy.page) + 1;
 
         parameters.page = parseInt(parameters.page) + 1;
+        // parameters.limit = parseInt(parameters.limit) + parameters.limit
 
         console.log('NEXT: ', parameters.page);
 
         const resp = await displayPosts(parameters, style, false, false);
         if (resp.success == false) loadMoreButton.style.display = 'none';
+        // loadedPage = resp
       };
-      pElement.appendChild(loadMoreButton)
-
+      pElement.appendChild(loadMoreButton);
+      pElement.appendChild(document.createTextNode(' | '));
       pElement.appendChild(prevPage);
       pElement.appendChild(document.createTextNode(' | '));
       pElement.appendChild(nextPage);
       pElement.appendChild(document.createTextNode(' '));
 
-      pElement.appendChild(document.createTextNode(`Page: ${currentPage} / ${totalPages} | Posts: ${totalCount} | Limit: ${limit}`));
+      pElement.appendChild(document.createTextNode(`Page: ${currentPage} / ${totalPages} | Posts: ${totalCount}`));
+
+      const limitLabel = document.createElement('label')
+      limitLabel.textContent = 'Limit: '
+      const limitSelect = document.createElement('select')
+      limitSelect.name = 'limit'
+
+      limitSelect.onchange = () => {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('limit', limitSelect.value)
+
+        // currentUrl.searchParams.forEach((value, key) => {
+        //   console.log(`${key}=${value}`);
+        //   parameters[key] = value
+        //   if (key.includes('limit')) 
+        //      parameters[key] = limitSelect.value
+        // });
+        window.location.href = currentUrl.toString();
+        console.log(currentUrl.toString())
+      }
+
+      const limits = [5, 10, 15, 20, 25]
+      limits.forEach(l => {
+        const option = document.createElement('option');
+        option.value = l;
+        option.textContent = l;
+        if (limit == option.value) //highlight
+          option.selected = true;
+        limitSelect.appendChild(option);
+      })
+      pElement.appendChild(document.createTextNode(' | '))
+      pElement.appendChild(limitLabel)
+      pElement.appendChild(limitSelect)
     },
 
   };

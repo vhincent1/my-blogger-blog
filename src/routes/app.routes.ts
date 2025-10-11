@@ -9,6 +9,7 @@ import indexRouter from './homepage/index.ts';
 import authRouter from './auth.routes.ts';
 import postsRouter from './posts.routes.ts';
 import uploadRouter from './upload.routes.ts'
+import rssRouter from './rss.routes.ts'
 
 import { apiLimiter } from '../middleware/limiter.middleware.ts';
 
@@ -37,5 +38,7 @@ app.get('/api/v2', async (req, res) => {
     message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄',
   });
 });
+
+app.use('/rss', rssRouter)
 
 export default app;

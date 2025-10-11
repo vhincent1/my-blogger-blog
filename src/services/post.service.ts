@@ -12,6 +12,7 @@ class PostService {
 
   //filter={type, query}
   //findAll
+  //TODO: remove
   async getPosts(parameters?) {
     try {
       const posts = await this.repository.findAllAsync(parameters);

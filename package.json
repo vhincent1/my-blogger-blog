@@ -38,7 +38,8 @@
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
     "node-html-parser": "^7.0.1",
-    "perf_hooks": "^0.0.1"
+    "perf_hooks": "^0.0.1",
+    "rss": "^1.2.2"
   },
   "devDependencies": {
     "@types/chai": "^5.2.2",

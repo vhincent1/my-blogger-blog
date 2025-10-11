@@ -148,4 +148,8 @@ router.use('/posts', async (req, res) => {
   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
 })
 
+router.use('/labels', async(req, res)=>{
+  
+})
+
 export default router;

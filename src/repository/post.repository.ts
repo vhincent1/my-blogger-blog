@@ -12,8 +12,8 @@ export class PostRepository {
     this.gallery = this.buildGallery();
   }
 
-  //filter={type, query}
-  async findAllAsync(parameters?): Promise<Post[]> {
+  //TODO: REMOVE
+  async findAllAsync(parameters?): Promise<Post[]> { 
     const p = {
       search: parameters?.search || '',
       type: parameters?.type || '',

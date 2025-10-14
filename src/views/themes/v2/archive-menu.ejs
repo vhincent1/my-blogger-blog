@@ -1,2 +1,99 @@
 <div id="archiveMenu"></div>
-<script></script>
+<style>
+  .drop-button {
+    padding: 0;
+    border: none;
+    background: none;
+  }
+  .drop-button:focus {
+    /* background-color: #0e07d2; */
+    /* background-color: #ff0000; */
+    text-decoration: underline;
+  }
+
+  .drop-down {
+  }
+
+  .drop-down-content {
+    display: none;
+  }
+
+  .drop-down-content a {
+    display: block;
+  }
+
+  .show {
+    display: block;
+  }
+</style>
+<script>
+  const Widgets_ArchiveMenu2 = {
+    element: document.getElementById('archiveMenu'),
+    dropDownMonth: (index) => {
+      document.getElementById('drop-down-' + index).classList.toggle('show');
+      // console.log(index);
+    },
+    closeDropDown: (event) => {
+      if (!event.target.matches('.drop-button')) {
+        var dropdowns = document.getElementsByClassName('dropdown-content');
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) openDropdown.classList.remove('show');
+        }
+      }
+    },
+    async init() {
+      const serviceResponse = await blog.getArchive();
+      if (!serviceResponse.success) {
+        Widgets_ArchiveMenu2.element.innerHTML = 'Error loading archive menu';
+        return;
+      }
+      const response = serviceResponse.responseObject;
+      const elements = [];
+
+      let index = 0;
+      response.archive.YTD.forEach((YTD) => {
+        const yearlyLabel = document.createElement('label');
+        yearlyLabel.innerHTML = `<b>${YTD.year}</b><sup>${YTD.total}</sup>`;
+        // Widgets_ArchiveMenu2.element.appendChild(yearlyLabel);
+
+        elements.push(yearlyLabel);
+        elements.push((spacerrr = document.createTextNode(' ')));
+        // console.log(YTD.MTD);
+
+        YTD.MTD.forEach((MTD) => {
+          const button = document.createElement('button');
+          button.className = 'drop-button';
+          button.innerHTML = `${MTD.month.toUpperCase()}<sup>${MTD.total}</sup>`;
+
+          // events
+          button.onclick = () => Widgets_ArchiveMenu2.dropDownMonth(mIndex);
+
+          elements.push(button);
+          elements.push((spacerrr = document.createTextNode(' ')));
+
+          const mIndex = index++;
+
+          const dropDown = document.createElement('div');
+          dropDown.id = 'drop-down-' + mIndex;
+          dropDown.className = 'drop-down-content';
+          //   dropDown.textContent = 'hi' + mIndex + ' ' + MTD.month;
+          MTD.posts.forEach((post) => {
+            const a = document.createElement('a');
+            a.href = '/post/' + post.postId;
+            a.textContent = post.title
+            dropDown.append(a)
+          });
+          elements.push(dropDown);
+        });
+
+        elements.forEach((element) => Widgets_ArchiveMenu2.element.append(element));
+      });
+    },
+  };
+
+  window.addEventListener('load', Widgets_ArchiveMenu2.init);
+  // Close the dropdown if the user clicks outside of it
+  window.onclick = (event) => Widgets_ArchiveMenu2.closeDropDown(event);
+</script>

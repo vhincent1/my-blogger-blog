@@ -80,33 +80,6 @@ router.post('/ping', async (req, res) => {
 router.use('/emojis', emojis);
 router.use('/inbox', inboxRouter);
 
-// router.use('/posts', async (req, res) => {
-//   const t0 = performance.now();
-//   try {
-//     const parameters: Pagination = {
-//       page: parseInt(req.query.page as string) || 0,
-//       limit: parseInt(req.query.limit as string) || 10,
-//       query: req.query.search as string,
-//       type: req.query.type as string,
-//     };
-//     const serviceResponse = await PostService.getPosts(parameters);
-//     const posts = serviceResponse.responseObject
-//     parameters.data = posts
-//     const controller = await pageController.pagination(req, parameters);
-//     if (controller.currentPage > controller.totalPages)
-//       return res.status(404).json({ error: 'Page limit exceeded' });
-//     res.status(serviceResponse.statusCode).json({
-//       items: controller.posts,
-//       nextPageToken: controller.nextPageToken
-//     });
-//   } catch (ex) {
-//     console.error('Failed to fetch data ', ex)
-//     res.status(500).json({ error: 'failed' })
-//   }
-//   const t1 = performance.now();
-//   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
-// });
-
 router.use('/posts/format', async (req, res) => {
   const placeholder = new Post(0)
   placeholder.title = 'Title'
@@ -125,9 +98,9 @@ router.use('/posts', async (req, res) => {
   const t0 = performance.now(); //timer
   const { page, limit, search, type, filter, exclude }: any = req.query
   try {
-    const postsResponse = await PostService.getPostsFiltered({ search, type, filter, exclude });
-    if (postsResponse.success) {
-      const posts: any = postsResponse.responseObject
+    const serviceResponse = await PostService.getPosts({ search, type, filter, exclude });
+    if (serviceResponse.success) {
+      const posts: any = serviceResponse.responseObject
       // ----------------------------------
       const paginationParams = getPaginationParameters(req, {
         page: page || 1,
@@ -136,10 +109,10 @@ router.use('/posts', async (req, res) => {
       const paginatedItems = await getPaginatedData(paginationParams, posts);
       if (paginatedItems.currentPage > paginatedItems.totalPages/*exceeds limit*/
         || paginatedItems.currentPage < 0 /*is negative*/)
-        return res.send(ServiceResponse.failure('Page limit exceeded', null, 404));
-      res.send(ServiceResponse.success<any>('Posts found', paginatedItems))
+        return res.send(ServiceResponse.failure('Page limit exceeded',req.query, null, 404));
+      res.send(ServiceResponse.success<any>('Posts found',req.query, paginatedItems))
     } else {
-      res.send(postsResponse)
+      res.send(serviceResponse)
     }
   } catch (error) {
     res.status(500).json({ message: 'Error fetching items' });
@@ -148,8 +121,37 @@ router.use('/posts', async (req, res) => {
   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
 })
 
-router.use('/labels', async(req, res)=>{
-  
+const childRouter = express.Router({ mergeParams: true });
+router.use('/labels', childRouter, async (req, res) => {
+  const { search, type, exclude, filter}: any = req.query
+  const serviceResponse = await PostService.getSortedLabels(req.query);
+  return res.send(serviceResponse)
+})
+
+childRouter.use('/:author', async (req, res) => {
+  const { author }: any = req.params
+  const serviceResponse = await PostService.getSortedLabels(author);
+  return res.send(serviceResponse)
+})
+
+const archive = express.Router({ mergeParams: true });
+router.use('/archive', archive, async (req, res) => {
+  const { search, type, exclude, filter}: any = req.query
+  const serviceResponse = await PostService.getArchiveCount({ search, type, exclude, filter })
+  res.send(serviceResponse)
+})
+
+const archiveYearly = express.Router({ mergeParams: true });
+archive.use('/:year', archiveYearly, async (req, res) => {
+  const { search, type }: any = req.query
+  const serviceResponse = await PostService.getPostCountByYear({ search, type })
+  console.log('year')
+  res.send(serviceResponse)
+})
+
+archiveYearly.use('/:month', async (req, res) => {
+  console.log('month')
+  res.send('month')
 })
 
 export default router;

@@ -17,7 +17,8 @@
     console.log('max results : ', params.limit);
 
     try {
-      const response = await getPosts(params);
+      const response = await blog.getPosts(params);
+      console.log(response)
       if (response == undefined) {
         //   hasMoreData = false; // server response
         console.error('Err: ', response);

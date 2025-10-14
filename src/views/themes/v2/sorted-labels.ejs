@@ -1,0 +1,26 @@
+<div id="sorted-labels"></div>
+<script>
+  const Widget_SortedLabels = {
+    element: document.getElementById('sorted-labels'),
+    async init() {
+      const serviceResponse = await blog.getLabels();
+      const div = Widget_SortedLabels.element;
+      if (!serviceResponse.success) {
+        div.innerHTML = 'Error loading sorted labels';
+        return;
+      }
+
+      serviceResponse.responseObject.forEach((entry) => {
+        const { label, total } = entry;
+        const a = document.createElement('a');
+        a.href = `/?search=${encodeURIComponent(label)}&type=labels`;
+        a.textContent = label;
+        const sup = document.createElement('sup');
+        sup.textContent = total;
+        div.append(a, sup);
+        div.append((spacerrr = document.createTextNode(' ')));
+      });
+    },
+  };
+  window.addEventListener('load', Widget_SortedLabels.init);
+</script>

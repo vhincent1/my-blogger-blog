@@ -11,27 +11,26 @@
     <a href="<%=common.links.viewPost({id: post.postId})%>"><%=post.title%></a>
     <% }); %>
   </div>
-  <% });%>
-  <% });%>
+  <% });%> <% });%>
 </div>
 <!-- Scripts -->
 <script>
   const Widgets_ArchiveMenu = {
     dropDownMonth: (index) => {
-      document.getElementById("dropDown" + index).classList.toggle("show");
+      document.getElementById('dropDown' + index).classList.toggle('show');
       // console.log(index);
     },
     closeDropDown: (event) => {
-      if (!event.target.matches(".drop-button")) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
+      if (!event.target.matches('.drop-button')) {
+        var dropdowns = document.getElementsByClassName('dropdown-content');
         var i;
         for (i = 0; i < dropdowns.length; i++) {
           var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains("show")) openDropdown.classList.remove("show");
+          if (openDropdown.classList.contains('show')) openDropdown.classList.remove('show');
         }
       }
-    }
-  }
+    },
+  };
   // Close the dropdown if the user clicks outside of it
-  window.onclick = (event) => Widgets_ArchiveMenu.closeDropDown(event)
+  window.onclick = (event) => Widgets_ArchiveMenu.closeDropDown(event);
 </script>

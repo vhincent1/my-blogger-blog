@@ -40,6 +40,7 @@ function getYearlyCount(year) {
   return postCountByYear[year];
 }
 
+
 /*
  *
  *
@@ -60,6 +61,8 @@ function getPostsByDate(month, year) {
   return postsByMonthYear[month + ' ' + year];
 }
 
+// console.log(postsByMonthYear)
+
 // ----------- Archive Menu -----------
 const archiveMenu = [];
 
@@ -70,7 +73,7 @@ function buildMenu() {
     const yearlyPostCount = postCountByYear[year];
     // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
     let YTD = { year: year, total: yearlyPostCount };
-    let MTD = [];
+    let MTD: any = [];
     //monthly
     // key = "Month Year"
     Object.keys(postsByMonthYear).filter((key) => key.includes(year))
@@ -97,6 +100,7 @@ function getArchiveMenu() {
 // console.log(collection);
 
 buildMenu();
+
 //display
 //   let index = 0;
 // archiveMenu.forEach((YTD) => {

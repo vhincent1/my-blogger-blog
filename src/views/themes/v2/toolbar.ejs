@@ -8,7 +8,7 @@
       const status = document.createElement('label');
       status.id = 'status';
 
-      const response = await checkHealth();
+      const response = await blog.checkHealth();
       if (response == null) {
         status.style = 'background: #ff0000;';
         status.textContent = 'NOT OK';
@@ -23,7 +23,7 @@
       const ping = document.createElement('button');
       ping.textContent = 'PING';
       ping.onclick = async () => {
-        const response = await sendPing();
+        const response = await blog.sendPing({});
         ping.textContent = response != null ? response.message : 'ERROR';
       };
 

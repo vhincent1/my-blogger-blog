@@ -7,7 +7,7 @@
 
   let parameters = {
     page: 1,
-    limit: 15,
+    limit: 5,
     search: null,
     type: null
   }
@@ -28,10 +28,13 @@
 
   });
   console.log(parameters)
+
+  const blog = new SimpBlog()
 </script>
 <%- include('../../widgets/nsfw-modal', {init: false}) -%>
 
 <div id='main'>
+  <%- include('sorted-labels') %>
   <%- include('archive-menu') %>
   <%- include('toolbar') %>
   <%- include('search-form') %>

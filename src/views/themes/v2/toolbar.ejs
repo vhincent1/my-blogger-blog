@@ -55,6 +55,7 @@
       };
     },
 
+    isLoading: false,
     async autoScroll() {
       //displayPosts parameter
 
@@ -68,11 +69,13 @@
       input.value = 'yes';
       input.type = 'checkbox';
 
+      // let hasMoreData = true // recieve  from server
+
       window.addEventListener('scroll', async () => {
         if (!myCheckbox.checked) return;
         const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-        if (scrollTop + clientHeight >= scrollHeight - 0 && !isLoading && hasMoreData) {
-          isLoading = true;
+        if (scrollTop + clientHeight >= scrollHeight - 0 && !Widget_Toolbar.isLoading /* && hasMoreData*/) {
+          Widget_Toolbar.isLoading = true;
           parameters.page++;
           await displayPosts({ page: parameters.page, limit: parameters.limit }, style);
         }
@@ -102,16 +105,10 @@
         WidgetPagination.updateLinks();
       };
 
-      const themeOptions = [
-        {
-          name: 'Index',
-          id: 0,
-        },
-        {
-          name: 'Show',
-          id: 1,
-        },
-      ];
+      const themeOptions = [];
+      themeOptions.push({ name: 'Index', id: 0 });
+      themeOptions.push({ name: 'Show', id: 1 });
+
       themeOptions.forEach((optionInfo) => {
         const option = document.createElement('option');
         option.value = optionInfo.id;
@@ -133,16 +130,9 @@
 
   Widget_Toolbar.loadToolbar = async () => {
     const toolbar = document.getElementById('toolbar');
-
     const items = [Widget_Toolbar.autoScroll(), Widget_Toolbar.themeSelect(), Widget_Toolbar.statusBar(), Widget_Toolbar.getInbox()];
-
-    for (const item of items) {
-      for (const elements of Object.values(await item)) {
-        // toolbar.appendChild(document.createTextNode(' '))
-        toolbar.appendChild(elements);
-      }
-    }
+    for (const item of items) for (const elements of Object.values(await item)) toolbar.appendChild(elements);
   };
 
-  window.addEventListener('load', Widget_Toolbar.loadToolbar);
+  window.addEventListener('DOMContentLoaded', Widget_Toolbar.loadToolbar);
 </script>

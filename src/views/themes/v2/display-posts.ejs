@@ -3,11 +3,43 @@
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
+<style>
+  .feed-item h2 {
+    margin-top: 0;
+    font-size: 1.2em;
+  }
+  .feed-item {
+    margin-bottom: 15px;
+    /* padding: 10px;
+    border: 1px solid #ccc; */
+    border-radius: 5px;
+  }
+  .feed-item p {
+    font-size: 0.9em;
+    color: #555;
+    margin: 0px;
+  }
+  /* links */
+  .feed-item a {
+    text-decoration: none;
+    color: #007bff;
+  }
+  .feed-item a:hover {
+    text-decoration: underline;
+  }
+
+  /* detail box */
+  .feed-info p {
+    font-size: 0.9em;
+    color: #555;
+    margin: 0;
+  }
+</style>
 <script>
   //load page
   // const response = displayPosts(parameters, style)
 
-  window.addEventListener('load', async () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     console.log('load');
     loadedPage = displayPosts(parameters, style, false, true);
   });
@@ -18,7 +50,7 @@
 
     try {
       const response = await blog.getPosts(params);
-      console.log(response)
+      console.log(response);
       if (response == undefined) {
         //   hasMoreData = false; // server response
         console.error('Err: ', response);
@@ -38,6 +70,7 @@
         error.id = 'error';
         error.textContent = response.message;
         feedContainer.insertAdjacentElement('afterend', error);
+        console.log('Page limit exceeded');
       } else if (pageFound != null) {
         if (refresh) feedContainer.innerHTML = '';
 
@@ -76,10 +109,19 @@
           posts.forEach((post) => {
             const row = document.createElement('tr');
 
-            const title = document.createElement('td');
-            title.textContent = post.title;
-            row.appendChild(title);
-
+            if (post.title.length > 80) {
+              console.log('hi');
+              const textarea = document.createElement('textarea');
+              textarea.readOnly = true;
+              textarea.style = 'resize: none; width: 99%;';
+              textarea.textContent = post.title;
+              row.appendChild(textarea);
+            } else {
+              const title = document.createElement('td');
+              title.textContent = post.title;
+              row.appendChild(title);
+            }
+            
             const date = document.createElement('td');
             date.textContent = new Date(post.date.published).toLocaleDateString();
             row.appendChild(date);
@@ -105,7 +147,6 @@
             links.appendChild(editp);
             links.appendChild(document.createTextNode(']'));
             row.appendChild(links);
-
             tbody.appendChild(row);
           });
 
@@ -128,12 +169,10 @@
         }
       }
       Widgets_NSFWModal.init();
-      isLoading = false;
+      Widget_Toolbar.isLoading = false;
       return response;
     } catch (error) {
       console.error('Error loading more items:', error);
-      // isLoading = false;
-      // hasMoreData = false;
     }
   }
 
@@ -147,9 +186,8 @@
     const loadMoreButton = document.createElement('button');
     loadMoreButton.textContent = 'LOAD MORE';
     loadMoreButton.onclick = async () => {
-      // parameters.page = parameters.page + 1
-      const copy = { ...parameters };
-      copy.page = parseInt(copy.page) + 1;
+      // const copy = { ...parameters };
+      // copy.page = parseInt(copy.page) + 1;
 
       parameters.page = parseInt(parameters.page) + 1;
 

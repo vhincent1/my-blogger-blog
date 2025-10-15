@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import PostService from '../services/post.service.ts'
 import  { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
-// import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './home.controller.ts';
 
 // Example usage:
 const targetDirectory = './public/images';
@@ -45,10 +44,11 @@ const galleryController = {
       limit: parseInt(req.query.limit) || 50
     });
 
-    const posts = await PostService.getGallery({
+    const serviceResponse = await PostService.getGallery({
       search: req.query.search,
       type: req.query.type
     });
+    const posts = serviceResponse.responseObject
 
     const paginatedResult = await getPaginatedData(parameters, posts)
     const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult)

@@ -175,7 +175,7 @@
     Widgets_ImageModal.modal.style.display = "none";
   }
 
-  window.addEventListener('load', function() {
+  window.addEventListener('DOMContentLoaded', function() {
     Widgets_ImageModal.attachEvents()
     // bookmarklet
     Widgets_ImageModal.openBookmarklet(window.location.hash)

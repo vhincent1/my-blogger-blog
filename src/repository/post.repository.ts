@@ -92,6 +92,28 @@ export class PostRepository {
     const year = new Date(post.date.published).getFullYear();
     return year == priorityYear
   })
+
+  sortedLabels = async(parameters) => {
+    let data = await this.findAllPostsAsync(parameters)
+    function countTagOccurrences(tagsArray) {
+      const tagCounts = {};
+      for (const tag of tagsArray) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      return tagCounts;
+    }
+    let allLabels: any = [];
+    data?.forEach((post: Post) => allLabels = allLabels.concat(post.labels));
+
+    const uniqueTags = [...new Set(allLabels)];
+    // console.log(uniqueTags)
+    const labelCount = countTagOccurrences(allLabels.sort().reverse());
+    // Convert the object into an array of objects for easier consumption
+
+    const result: any = Object.keys(labelCount).map((label) => ({
+      label,
+      total: labelCount[label],
+    }));
+    return result
+  }
 }
 
 //test

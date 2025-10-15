@@ -55,6 +55,7 @@
       let index = 0;
       response.archive.YTD.forEach((YTD) => {
         const yearlyLabel = document.createElement('label');
+        // yearlyLabel.setAttribute('for', 'yearly')
         yearlyLabel.innerHTML = `<b>${YTD.year}</b><sup>${YTD.total}</sup>`;
         // Widgets_ArchiveMenu2.element.appendChild(yearlyLabel);
 
@@ -93,7 +94,7 @@
     },
   };
 
-  window.addEventListener('load', Widgets_ArchiveMenu2.init);
+  window.addEventListener('DOMContentLoaded', Widgets_ArchiveMenu2.init);
   // Close the dropdown if the user clicks outside of it
   window.onclick = (event) => Widgets_ArchiveMenu2.closeDropDown(event);
 </script>

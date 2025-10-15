@@ -2,7 +2,6 @@
 <div id="pagination"></div>
 <script>
   const WidgetPagination = {
-    // currentPage: parameters.page,
     // element: document.getElementById('pagination')
     async updateLinks() {
       //widget params
@@ -11,7 +10,8 @@
 
       const serviceResponse = await loadedPage;
       if (!serviceResponse.success) {
-        pElement.innerHTML = serviceResponse.message; //'Error loading pagination widget';
+        //page limit exceeded
+       // pElement.innerHTML = serviceResponse.message; //'Error loading pagination widget';
         return;
       }
       const response = serviceResponse.responseObject;
@@ -37,11 +37,6 @@
       const loadMoreButton = document.createElement('label');
       loadMoreButton.textContent = 'LOAD MORE';
       loadMoreButton.onclick = async () => {
-        // parameters.page = parameters.page + 1
-        // const copy = {
-        //   ...parameters
-        // };
-        // copy.page = parseInt(copy.page) + 1;
 
         parameters.page = parseInt(parameters.page) + 1;
         // parameters.limit = parseInt(parameters.limit) + parameters.limit
@@ -96,5 +91,5 @@
 
   };
 
-  window.addEventListener('load', WidgetPagination.updateLinks);
+  window.addEventListener('DOMContentLoaded', WidgetPagination.updateLinks);
 </script>

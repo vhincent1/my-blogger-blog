@@ -47,47 +47,30 @@ class PostService {
     }
   }
 
-  //TODO: service response
-  async getGallery(parameters?) {
+  async getGallery(parameters?): Promise<ServiceResponse<any>> {
     let data = []
     const targetIds: any = []
     const serviceResponse = await this.getPosts(parameters)
-    if (serviceResponse.success) {
-      const posts: any = serviceResponse.responseObject
-      for (const post of posts) targetIds.push(post.id)
-      const gallery = await this.repository.getGallery()
-      data = gallery.filter(result => targetIds.includes(result.postId))
+    try {
+      if (serviceResponse.success) {
+        const posts: any = serviceResponse.responseObject
+        for (const post of posts) targetIds.push(post.id)
+        const gallery = await this.repository.getGallery()
+        data = gallery.filter(result => targetIds.includes(result.postId))
+      }
+    } catch (err) {
+      return ServiceResponse.failure<any>('Error building gallery', parameters, data)
     }
-    return data
+    return ServiceResponse.success<any>('Build gallery', parameters, data)
   }
 
-
   async getSortedLabels(parameters?): Promise<ServiceResponse<any>> {
-    function countTagOccurrences(tagsArray) {
-      const tagCounts = {};
-      for (const tag of tagsArray) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-      return tagCounts;
-    }
-
-    const serviceResponse = await this.getPosts(parameters)
-    if (serviceResponse.success) {
-      const posts: Post[] | null = serviceResponse.responseObject
-
-      let allLabels: any = [];
-      posts?.forEach((post: Post) => allLabels = allLabels.concat(post.labels));
-
-      const uniqueTags = [...new Set(allLabels)];
-      // console.log(uniqueTags)
-      const labelCount = countTagOccurrences(allLabels.sort().reverse());
-      // Convert the object into an array of objects for easier consumption
-
-      const result: any = Object.keys(labelCount).map((label) => ({
-        label,
-        total: labelCount[label],
-      }));
+    try {
+      const result = await this.repository.sortedLabels(parameters)
       return ServiceResponse.success<Post>('Get sorted labels', parameters, result);
+    } catch (err) {
+      return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NO_CONTENT);
     }
-    return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NO_CONTENT);
   }
 
   async getPostCountByYear(parameters?): Promise<ServiceResponse<any>> {

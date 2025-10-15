@@ -2,9 +2,6 @@
 <script>
   let style = <%=viewIndex%> ? 0 : 1
 
-  let hasMoreData = true
-  let isLoading = false
-
   let parameters = {
     page: 1,
     limit: 5,
@@ -39,7 +36,6 @@
   <%- include('toolbar') %>
   <%- include('search-form') %>
   <%- include('navigation') %>
-
   <%- include('display-posts') %>
   <%- include('pagination') %>
 </div>

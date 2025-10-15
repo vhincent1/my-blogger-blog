@@ -1,11 +1,10 @@
 <%- include('../../partials/header', {title: 'RSS Feed'}) -%>
-
-<!-- Body -->
 <h1>Latest Articles from RSS Feed📡🛰️</h1>
 
 <!-- Index view -->
-<% if(viewIndex){  %>
+<% if(viewIndex){ %>
 <style>
+  
   table {
     /* width: 100%; */
   }
@@ -17,12 +16,12 @@
   }
 </style>
 <div class="feed-item">
-  <table id='indexTable' style="width:100%">
+  <table id="indexTable" style="width: 100%">
     <tr>
       <th>Title</th>
-      <th style="width:5%">Published</th>
-      <th style="width:1%">Size</th>
-      <th style="width:40%">Links</th>
+      <th style="width: 5%">Published</th>
+      <th style="width: 1%">Size</th>
+      <th style="width: 40%">Links</th>
     </tr>
     <% paginationResult.data.forEach(post => { %>
     <tr>
@@ -31,31 +30,29 @@
       <td><%= post.size.total %><sup>(<%= post.size.format %>)</sup></td>
       <td>[<a href="<%=common.links.viewPost({id: post.id})%>">view</a>][<a href="<%=common.links.editPost(post)%>">edit</a>]</td>
     </tr>
-    <% }); %> 
+    <% }); %>
   </table>
 </div>
 
 <% } else { %>
+  
 <!-- Posts view -->
 <% paginationResult.data.forEach((post) => { %>
 <div class="feed-item">
   <a href="<%= common.links.viewPost({id: post.id}) %>">
     <h2><%= post.title %></h2>
   </a>
-<!-- <p>This is a summary of the first example article.</p>
+  <!-- <p>This is a summary of the first example article.</p>
     <p>Published: <%= //post.date.published %></p> -->
-<%- post.content -%>
+  <%- post.content -%>
 </div>
-<% }); %>
+<% }); %> 
 <% } %>
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
 <!-- Pagination -->
-<%- include('../../widgets/pagination') -%>
-<%- include('../../widgets/autoscroll',{
-  currentPage: paginationResult.currentPage, 
-  limit: paginationResult.limit,
-  style: viewIndex? 0 : 1}) -%>
+<%- include('pagination') -%> 
+<%- include('autoscroll',{ currentPage: paginationResult.currentPage, limit: paginationResult.limit, style: viewIndex? 0 : 1}) -%>
 <!-- Footer -->
 <%- include('../../partials/footer') -%>

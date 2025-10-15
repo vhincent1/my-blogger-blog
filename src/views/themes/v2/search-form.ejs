@@ -16,7 +16,7 @@
 
       currentType = '';
       // currentLimit = response ? response.limit : 5;
-      currentLimit = parameters.limit
+      currentLimit = parameters.limit;
 
       // search input
       const searchLabel = document.createElement('label');
@@ -31,7 +31,7 @@
 
       form.appendChild(searchLabel);
       form.appendChild(searchInput);
-      form.appendChild(document.createTextNode(' '));
+      form.appendChild((space = document.createTextNode(' ')));
 
       // Search Type
       const searchTypeLabel = document.createElement('label');
@@ -47,14 +47,15 @@
         const option = document.createElement('option');
         option.value = optionInfo.toLowerCase();
         option.textContent = optionInfo;
-        if(currentLimit == option.value)//highlight
-        option.selected = true;
+        if (currentLimit == option.value)
+          //highlight
+          option.selected = true;
         searchTypeSelector.appendChild(option);
       });
 
       form.appendChild(searchTypeLabel);
       form.appendChild(searchTypeSelector);
-      form.appendChild(document.createTextNode(' '));
+      form.appendChild((space = document.createTextNode(' ')));
 
       // limit
       const labelLimit = document.createElement('label');
@@ -76,16 +77,16 @@
 
       form.appendChild(labelLimit);
       form.appendChild(selectLimit);
-      form.appendChild(document.createTextNode(' '));
+      form.appendChild((space = document.createTextNode(' ')));
 
       const submit = document.createElement('button');
       submit.type = 'submit';
       submit.textContent = 'Search';
 
-      form.appendChild(document.createTextNode(' '));
+      form.appendChild((spacee = document.createTextNode(' ')));
       form.appendChild(submit);
-    }
-  }
+    },
+  };
   //widget params
-  window.addEventListener('load', Widget_SearchForm.load);
+  window.addEventListener('DOMContentLoaded', Widget_SearchForm.load);
 </script>

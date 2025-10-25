@@ -7,7 +7,7 @@
     "start": "node --import=tsx --env-file=.env src/app.ts",
     "dev": "nodemon --env-file=.env src/app.ts",
     "api": "curl -H \"Accept: application/json\" -X GET http://localhost:3000/api/v1",
-    "api:blogger": "node --import=tsx --env-file=.env src/lib/blogger.lib.ts",
+    "api:blogger": "node --import=tsx --env-file=.env src/lib/blogger.lib.js",
     "api:simp": "",
     "build": "terser src/lib/simpblog.lib.js -o public/js/simpblog.min.js --compress --mangle",
     "test:database": "node --env-file=.env src/database/index.database.js",

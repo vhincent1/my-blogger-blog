@@ -19,13 +19,13 @@ route.get('/search', async (req, res) => {
   res.render('search')
 })
 route.get('/v2', async (req, res) => {
-  res.render('themes/v2/index', {viewIndex: false})
+  res.render('themes/v2/index', {theme: 1, limit:5})
 })
 
 route.get('/v2/index', async (req, res) => {
   const { limit, page } = req.query
   // console.log(req.query)
-  res.render('themes/v2/index', {viewIndex: true})
+  res.render('themes/v2/index', {theme: 0, limit: 25})
 })
 
 import jwt from 'jsonwebtoken';

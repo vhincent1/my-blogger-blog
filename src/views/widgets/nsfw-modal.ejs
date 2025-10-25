@@ -3,13 +3,14 @@
     display: none;
   }
 </style>
+<!-- NSFW widget -->
 <script>
-  const Widgets_NSFWModal = {
-    element: document.querySelectorAll('nsfw'),
+  const Widget_NSFWModal = {
+    // element: document.querySelectorAll('nsfw'),
     async init() {
       document.querySelectorAll('nsfw').forEach((element, index) => {
         const div = document.createElement('div');
-        div.id = 'nsfw-modal' + index
+        div.id = 'nsfw-modal' + index;
 
         const prompt = document.createElement('div');
         prompt.textContent = 'I am 18+ years old or older';
@@ -37,12 +38,12 @@
           element.style.display = 'none';
         }
       });
-    },
+    }
   };
 </script>
 
 <%if(init) {%>
 <script>
-  window.addEventListener('DOMContentLoaded', Widgets_NSFWModal.init);
+  window.addEventListener('DOMContentLoaded', Widget_NSFWModal.init);
 </script>
 <%}%>

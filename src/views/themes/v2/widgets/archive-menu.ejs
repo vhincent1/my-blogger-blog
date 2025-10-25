@@ -27,7 +27,7 @@
   }
 </style>
 <script>
-  const Widgets_ArchiveMenu2 = {
+  const Widget_ArchiveMenu2 = {
     element: document.getElementById('archiveMenu'),
     dropDownMonth: (index) => {
       document.getElementById('drop-down-' + index).classList.toggle('show');
@@ -46,7 +46,7 @@
     async init() {
       const serviceResponse = await blog.getArchive();
       if (!serviceResponse.success) {
-        Widgets_ArchiveMenu2.element.innerHTML = 'Error loading archive menu';
+        Widget_ArchiveMenu2.element.innerHTML = 'Error loading archive menu';
         return;
       }
       const response = serviceResponse.responseObject;
@@ -69,7 +69,7 @@
           button.innerHTML = `${MTD.month.toUpperCase()}<sup>${MTD.total}</sup>`;
 
           // events
-          button.onclick = () => Widgets_ArchiveMenu2.dropDownMonth(mIndex);
+          button.onclick = () => Widget_ArchiveMenu2.dropDownMonth(mIndex);
 
           elements.push(button);
           elements.push((spacerrr = document.createTextNode(' ')));
@@ -89,12 +89,12 @@
           elements.push(dropDown);
         });
 
-        elements.forEach((element) => Widgets_ArchiveMenu2.element.append(element));
+        elements.forEach((element) => Widget_ArchiveMenu2.element.append(element));
       });
     },
   };
 
-  window.addEventListener('DOMContentLoaded', Widgets_ArchiveMenu2.init);
+  window.addEventListener('DOMContentLoaded', Widget_ArchiveMenu2.init);
   // Close the dropdown if the user clicks outside of it
-  window.onclick = (event) => Widgets_ArchiveMenu2.closeDropDown(event);
+  window.onclick = (event) => Widget_ArchiveMenu2.closeDropDown(event);
 </script>

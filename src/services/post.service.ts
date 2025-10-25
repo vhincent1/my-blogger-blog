@@ -1,4 +1,5 @@
-import Post from '../model/Post.model.ts';
+import {Post} from '../model/Post.model.ts';
+
 import { ServiceResponse } from '../model/ServiceResponse.model.ts';
 import { PostRepository } from '../repository/post.repository.ts';
 import { StatusCodes } from 'http-status-codes';

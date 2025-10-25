@@ -6,10 +6,12 @@ import fetch from 'node-fetch';
 import parser from 'node-html-parser';
 
 import appConfig from '../app.config.ts';
-import PostModel from '../model/Post.model.ts';
+import { Post } from '../model/Post.model.ts';
+
 const parameters = appConfig.blogger;
 
 // ------------------------- Blogger api ---------------------------
+
 const blogger = google.blogger({
   version: 'v3',
   auth: parameters.apiKey,
@@ -46,6 +48,7 @@ async function fetchAllBloggerPosts() {
   console.log('All posts fetched:', allPosts.length);
   return allPosts;
 }
+
 // -----------------------------------------------------------
 
 async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
@@ -139,6 +142,7 @@ async function convertBloggerPosts(exportedData, config) {
   let author;
   for (let index = 0; index < bloggerData.length; index++) {
     const bloggerPost = bloggerData[index];
+
     //insert post id
     // bloggerPost.index = index;
 
@@ -161,6 +165,7 @@ async function convertBloggerPosts(exportedData, config) {
     bloggerPost.content = document.toString();
 
     // grab/update image files
+    // ------------- Download images -------------
     const imageFiles = [];
     const imgElement = document.querySelectorAll('img');
     if (imgElement.length > 0) {
@@ -214,20 +219,12 @@ async function convertBloggerPosts(exportedData, config) {
           if (!(await checkFileExistence(savePath))) {
             const error = await downloadImage(originalSource, savePath);
             if (config.errorLog) {
-              if (error)
-                await fs.appendFile(
-                  config.errorLog,
-                  JSON.stringify(
-                    {
-                      postId: index,
-                      author: bloggerPost.author.displayName,
-                      imageSource: originalSource,
-                      error: error.toString(),
-                    },
-                    null,
-                    2
-                  )
-                );
+              if (error) await fs.appendFile(config.errorLog, JSON.stringify({
+                postId: index,
+                author: bloggerPost.author.displayName,
+                imageSource: originalSource,
+                error: error.toString(),
+              }, null, 2));
 
               if (error) {
                 console.log('ERROR');
@@ -239,9 +236,10 @@ async function convertBloggerPosts(exportedData, config) {
         }
       });
     }
+    // --------------------------
 
     // new template
-    const post = new PostModel(index);
+    const post = new Post(index);
     post.author = bloggerPost.author.displayName;
     post.title = bloggerPost.title;
     post.content = bloggerPost.content;
@@ -249,6 +247,7 @@ async function convertBloggerPosts(exportedData, config) {
     post.date = { published: bloggerPost.published, updated: bloggerPost.updated };
     if (imageFiles.length > 0) post.media = { images: imageFiles };
     post.source = { url: bloggerPost.url };
+    // post.comments = bloggerPost.comments;
     convertedPosts.push(post);
 
     author = post.author;
@@ -294,7 +293,7 @@ async function inspectPosts(jsonData, id) {
         const imgSrc = img.getAttribute('src');
         imageUrls.push(imgSrc);
 
-        console.log(imgSrc)
+        console.log(imgSrc);
 
         try {
           const filename = path.basename(new URL(imgSrc).pathname);
@@ -334,7 +333,7 @@ async function inspectPosts(jsonData, id) {
     //     videos: youtubeVideos,
     //   });
     // }
-    console.log(post.content)
+    console.log(post.content);
   });
 
   console.log('Total Media Posts: ' + imagePosts.length);

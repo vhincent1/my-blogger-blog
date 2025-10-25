@@ -14,7 +14,7 @@ const CONFIG = {
     // where to save/display exported media (updates <img src> tags)
     exportConfig: {
       enabled: true,
-      uploadPath: './public/content/',
+      uploadPath: './public/content/', // folder path
       hostPath: '/content/', // img src tags
       // hostPath: 'http://127.0.0.1:3000/content/',
       // hostPath: 'http://192.168.40.220:3000/content/',

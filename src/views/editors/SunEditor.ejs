@@ -1,13 +1,13 @@
-<link href="/js/suneditor//suneditor.min.css" rel="stylesheet">
+<link href="/js/suneditor//suneditor.min.css" rel="stylesheet" />
 <textarea id="myEditor"></textarea>
 <script src="/js/suneditor/suneditor.min.js"></script>
 <script>
-  const SunEditor = {}
+  const SunEditor = {};
   // Initialize SunEditor on the client-side
   SunEditor.editor = SUNEDITOR.create('myEditor', {
-    width: "auto",
-    height: "auto",
-    value: '<%- content %>',
+    width: 'auto',
+    height: 'auto',
+    // value: '<%= //content %>',
     // plugins: plugins,
     buttonList: [
       ['undo', 'redo'],
@@ -19,15 +19,19 @@
       '/', // Line break
       ['outdent', 'indent'],
       ['align', 'horizontalRule', 'list', 'lineHeight'],
-      ['table', 'link', 'image', 'video', 'audio' /** ,'math' */ ], // You must add the 'katex' library at options to use the 'math' plugin.
+      ['table', 'link', 'image', 'video', 'audio' /** ,'math' */], // You must add the 'katex' library at options to use the 'math' plugin.
       /** ['imageGallery'] */ // You must add the "imageGalleryUrl".
       ['fullScreen', 'showBlocks', 'codeView'],
       ['preview', 'print'],
       ['save'],
       /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
-    ]
-  })
-  SunEditor.editor.onSave = function(contents, core) {
-    console.log(contents)
+    ],
+  });
+
+  SunEditor.editor.setContents(unescapeHTMLWithDOM('<%=content%>'))
+
+  /* on save */
+  SunEditor.editor.onSave = function (contents, core) {
+    console.log('todo: save');
   };
 </script>

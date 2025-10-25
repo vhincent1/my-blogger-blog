@@ -1,45 +1,206 @@
 <!DOCTYPE html>
 <html>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<!-- chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+
+<!-- chart.js time adapter -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
 <body>
-  <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+  <canvas id="myChart" style="width: 100%; max-width: 600px; height: 100px"></canvas>
 
   <script>
     const xValues = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150];
-
     const yValues = [7, 8, 8, 9, 9, 9, 10, 11, 14, 14, 15];
 
-    new Chart("myChart", {
-      type: "line",
+    const chart = new Chart('myChart', {
+      type: 'line',
       data: {
         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
         datasets: [{
           label: 'Posts',
           fill: false,
           lineTension: 0,
-          backgroundColor: "rgba(0,0,255,1.0)",
-          borderColor: "rgba(0,0,255,0.1)",
-          data: yValues
-        }]
+          backgroundColor: 'rgba(0,0,255,1.0)',
+          borderColor: 'rgba(0,0,255,0.1)',
+          data: yValues,
+        }, {
+          label: 'News',
+          fill: false,
+          lineTension: 0,
+          backgroundColor: 'rgba(0, 255, 58, 0.7)', //https://rgbacolorpicker.com/
+          borderColor: 'rgba(0, 255, 58, 0.7)',
+          data: yValues,
+        }, ],
       },
       options: {
         legend: {
           display: true,
-          text: 'ee'
+          text: 'ee',
         },
         scales: {
-          yAxes: [{
-            ticks: {
-              min: 6,
-              max: 16
-            }
-          }],
-        }
-      }
-    });
-  </script>
+          x: {
 
+            title: {
+              display: true,
+              text: 'Date',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'value',
+            },
+          },
+        },
+      },
+    });
+
+    const data = {
+      datasets: [{
+        label: 'My Data',
+        borderColor: 'rgb(255, 99, 132)',
+        data: [{
+            x: "2024-01-01",
+            y: 10
+          },
+          {
+            x: "2024-01-05",
+            y: 15
+          },
+          {
+            x: "2024-01-10",
+            y: 8
+          },
+          {
+            x: "2024-01-15",
+            y: 20
+          }
+        ],
+      }]
+    };
+
+    const config = {
+      type: 'line',
+      data: data,
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day', // Display units per day
+              tooltipFormat: 'MMM D, YYYY', // Format for tooltips
+              displayFormats: { // Custom display formats for different units
+                day: 'MMM D',
+                month: 'MMM YYYY'
+              }
+            },
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Value'
+            }
+          }
+        },
+      },
+    };
+  </script>
+  <!-- Time Scale chart -->
+  <canvas id="myCharts" style="width: 100%; max-width: 600px; height: 100px"></canvas>
+  <script>
+    const data2 = {
+      datasets: [{
+          label: 'My Data',
+          borderColor: 'rgb(255, 99, 132)',
+          cubicInterpolationMode: 'monotone',
+          tension: 0.4,
+          data: [{
+              x: "2024-01-01",
+              y: 10
+            },
+            {
+              x: "2024-01-05",
+              y: 15
+            },
+            {
+              x: "2024-01-10",
+              y: 8
+            },
+            {
+              x: "2024-01-15",
+              y: 20
+            }
+          ],
+        },
+        {
+          label: 'News',
+          borderColor: 'rgba(0, 255, 58, 0.7)',
+          cubicInterpolationMode: 'monotone',
+          tension: 0.4,
+          data: [{
+              x: "2024-01-01",
+              y: 10
+            },
+            {
+              x: "2024-01-02",
+              y: 15
+            },
+            {
+              x: "2024-01-15",
+              y: 8
+            },
+            {
+              x: "2024-01-20",
+              y: 20
+            }
+          ],
+        }
+      ]
+    };
+
+    const config2 = {
+      type: 'line',
+      data: data2,
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day', // Display units per day
+              tooltipFormat: 'MMM d, yyyy', // Format for tooltips
+              displayFormats: { // Custom display formats for different units
+                day: 'MMM d',
+                month: 'MMM yyyy'
+              }
+            },
+            title: {
+              display: true,
+              text: 'Date' // year
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'post count'
+            }
+          }
+        },
+      },
+    };
+
+    const myChart = new Chart(
+      document.getElementById('myCharts'),
+      config2
+    );
+  </script>
 </body>
 
 </html>

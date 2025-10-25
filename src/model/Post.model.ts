@@ -1,4 +1,4 @@
-class Post {
+export class Post {
   public id: number;
   constructor(id: number) {
     this.id = id;
@@ -9,6 +9,7 @@ class Post {
   public labels: string[];
   public date: PostDate; //published, updated
   public author: string;
+  public comments?: undefined;
 
   public source?: undefined; //url
   public media?: any; //images, videos
@@ -16,12 +17,17 @@ class Post {
   public size: undefined
 }
 
-interface PostDate {
+export interface PostDate {
   published: Date,
   updated: Date
 }
 
-export default Post;
+export interface PostParameters {
+  search: string,
+  type: string,
+  filter?: string,
+  exclude?: string,
+}
 
 // type MyType = {
 //     id: number;

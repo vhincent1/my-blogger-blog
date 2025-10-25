@@ -1,5 +1,5 @@
 import database from '../database/index.database.ts';
-import Post from '../model/Post.model.ts';
+import {Post, type PostParameters} from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
 
@@ -18,7 +18,7 @@ export class PostRepository {
   }
 
   //searchPosts
-  async findAllPostsAsync(parameters?): Promise<any> {
+  async findAllPostsAsync(parameters?: PostParameters): Promise<any> {
     const p = {
       search: parameters?.search || '',
       type: parameters?.type || '',
@@ -93,7 +93,7 @@ export class PostRepository {
     return year == priorityYear
   })
 
-  sortedLabels = async(parameters) => {
+  sortedLabels = async(parameters?: PostParameters) => {
     let data = await this.findAllPostsAsync(parameters)
     function countTagOccurrences(tagsArray) {
       const tagCounts = {};

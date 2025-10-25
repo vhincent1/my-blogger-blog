@@ -44,7 +44,7 @@
     loadedPage = displayPosts(parameters, style, false, true);
   });
 
-  async function displayPosts(params = { page, limit, search, type }, style = 0, refresh = false, a) {
+  async function displayPosts(params = { page, limit, search, type }, style = 0, refresh = false, showHeader) {
     console.log('current page: ', params.page);
     console.log('max results : ', params.limit);
 
@@ -99,7 +99,7 @@
           const header4 = document.createElement('th');
           header4.textContent = 'Links';
 
-          if (a) {
+          if (showHeader) {
             tbody.appendChild(header1);
             tbody.appendChild(header2);
             tbody.appendChild(header3);
@@ -121,7 +121,7 @@
               title.textContent = post.title;
               row.appendChild(title);
             }
-            
+
             const date = document.createElement('td');
             date.textContent = new Date(post.date.published).toLocaleDateString();
             row.appendChild(date);
@@ -160,15 +160,13 @@
             // console.log(item);
             const feedItem = document.createElement('div');
             feedItem.classList.add('feed-item');
-            feedItem.innerHTML = `
-            <a href='/post/${post.id}'><h2>${post.title}</h2></a>
-            ${post.content}
-            `;
+            feedItem.innerHTML = `<a href='/post/${post.id}'><h2>${post.title}</h2></a>
+            ${post.content}`;
             feedContainer.appendChild(feedItem);
           });
         }
       }
-      Widgets_NSFWModal.init();
+      Widget_NSFWModal.init();
       Widget_Toolbar.isLoading = false;
       return response;
     } catch (error) {

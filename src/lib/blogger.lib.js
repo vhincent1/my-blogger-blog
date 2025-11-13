@@ -7,6 +7,7 @@ import parser from 'node-html-parser';
 
 import appConfig from '../app.config.ts';
 import { Post } from '../model/Post.model.ts';
+import { start } from 'repl';
 
 const parameters = appConfig.blogger;
 
@@ -140,11 +141,13 @@ async function convertBloggerPosts(exportedData, config) {
   const imageDatabase = [];
   const errors = [];
   let author;
+  let startingIndex = 0;
   for (let index = 0; index < bloggerData.length; index++) {
+    startingIndex++; // 1 
     const bloggerPost = bloggerData[index];
 
     //insert post id
-    // bloggerPost.index = index;
+    // bloggerPost.id = index
 
     // fix empty titles
     if (bloggerPost.title.length == 0) bloggerPost.title = 'untitled';
@@ -219,12 +222,20 @@ async function convertBloggerPosts(exportedData, config) {
           if (!(await checkFileExistence(savePath))) {
             const error = await downloadImage(originalSource, savePath);
             if (config.errorLog) {
-              if (error) await fs.appendFile(config.errorLog, JSON.stringify({
-                postId: index,
-                author: bloggerPost.author.displayName,
-                imageSource: originalSource,
-                error: error.toString(),
-              }, null, 2));
+              if (error)
+                await fs.appendFile(
+                  config.errorLog,
+                  JSON.stringify(
+                    {
+                      postId: index,
+                      author: bloggerPost.author.displayName,
+                      imageSource: originalSource,
+                      error: error.toString(),
+                    },
+                    null,
+                    2
+                  )
+                );
 
               if (error) {
                 console.log('ERROR');
@@ -239,11 +250,15 @@ async function convertBloggerPosts(exportedData, config) {
     // --------------------------
 
     // new template
-    const post = new Post(index);
+    const post = new Post(startingIndex);
     post.author = bloggerPost.author.displayName;
     post.title = bloggerPost.title;
     post.content = bloggerPost.content;
-    post.labels = bloggerPost.labels;
+    if (bloggerPost.labels == undefined) {
+      post.labels = ['undefined'];
+    } else {
+      post.labels = bloggerPost.labels;
+    }
     post.date = { published: bloggerPost.published, updated: bloggerPost.updated };
     if (imageFiles.length > 0) post.media = { images: imageFiles };
     post.source = { url: bloggerPost.url };
@@ -365,38 +380,46 @@ async function inspectPosts(jsonData, id) {
   });
 }
 
+async function convert() {
+  if (await checkFileExistence(exportFile)) {
+    let data = await fs.readFile(exportFile, 'utf8');
+    const result = await convertBloggerPosts(JSON.parse(data), parameters.exportConfig);
+
+    const convertedData = result.convertedPosts;
+    data = JSON.stringify(convertedData.reverse(), null, 2);
+
+    await fs.writeFile(convertedFile, data, 'utf8');
+    console.log('Saved to: ', convertedFile);
+    console.log('errors: ' + Object.keys(result.errors));
+
+    // image database
+    // console.log('author: ' + result.author)
+    // await fs.writeFile('./public/db.json', JSON.stringify(result.imageDatabase, null, 2), 'utf8');
+  } else {
+    console.log('no data found');
+  }
+}
+
+async function exportBlog() {
+  console.log('Fetching from Blogger...');
+  const data = await fetchAllBloggerPosts();
+  console.log('Total posts: ' + data.length);
+  // await writeJsonFile(parameters.exported, data);
+  const jsonString = JSON.stringify(data, null, 2);
+  await fs.writeFile(exportFile, jsonString, 'utf8');
+  console.log('Saved to ' + exportFile);
+}
+
 // run
 const exportFile = parameters.exported;
 const convertedFile = parameters.new;
 const command = process.argv[2];
 switch (command) {
   case 'convert':
-    if (await checkFileExistence(exportFile)) {
-      let data = await fs.readFile(exportFile, 'utf8');
-      const result = await convertBloggerPosts(JSON.parse(data), parameters.exportConfig);
-
-      const convertedData = result.convertedPosts;
-      data = JSON.stringify(convertedData.reverse(), null, 2);
-
-      await fs.writeFile(convertedFile, data, 'utf8');
-      console.log('Saved to: ', convertedFile);
-      console.log('errors: ' + Object.keys(result.errors));
-
-      // image database
-      // console.log('author: ' + result.author)
-      // await fs.writeFile('./public/db.json', JSON.stringify(result.imageDatabase, null, 2), 'utf8');
-    } else {
-      console.log('no data found');
-    }
+    convert();
     break;
   case 'export':
-    console.log('Fetching from Blogger...');
-    const data = await fetchAllBloggerPosts();
-    console.log('Total posts: ' + data.length);
-    // await writeJsonFile(parameters.exported, data);
-    const jsonString = JSON.stringify(data, null, 2);
-    await fs.writeFile(exportFile, jsonString, 'utf8');
-    console.log('Saved to ' + exportFile);
+    exportBlog();
     break;
   case 'inspect':
     const inspectFile = parameters.new;

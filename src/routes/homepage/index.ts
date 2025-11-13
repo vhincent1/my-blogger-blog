@@ -83,7 +83,7 @@ function verifyToken(req, res, next) {
 }
 
 // Protected route
-route.get('/protected', verifyToken, (req, res) => {
+route.get('/protected', verifyToken, (req: any, res) => {
   res.json({
     message: `Welcome, ${req.user.username}! This is a protected route.`,
   });

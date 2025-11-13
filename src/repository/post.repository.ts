@@ -3,7 +3,7 @@ import {Post, type PostParameters} from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
 
-export const posts: Post[] = await database.getAllBlogPosts();
+const posts: Post[] = await database.getAllBlogPosts();
 
 export class PostRepository {
   private gallery: any;
@@ -19,19 +19,21 @@ export class PostRepository {
 
   //searchPosts
   async findAllPostsAsync(parameters?: PostParameters): Promise<any> {
+    
+    // console.log('p, ',parameters)
     const p = {
       search: parameters?.search || '',
       type: parameters?.type || '',
       filter: parameters?.filter || null,
       exclude: parameters?.exclude || null
     }
-    // console.log(p)
     let data: any
     switch (p.type) {
       case 'content':
         data = posts.filter((post) => post.content.includes(p.search));
         break;
       case 'labels':
+        //TODO: this breaks when post.labels == undefined
         data = posts.filter((post) => post.labels.includes(p.search));
         break;
       case 'title':
@@ -51,7 +53,7 @@ export class PostRepository {
     if (p.exclude) data = await truncate(p.exclude, data)
 
     // remove empty objects
-    data = data.filter(post => Object.keys(post).length > 0);
+    // data = data.filter(post => Object.keys(post).length > 0);
     return data
   }
   async getGallery() {
@@ -62,9 +64,11 @@ export class PostRepository {
   private async generateIds() {
     let posts = await this.findAllPostsAsync();
     posts = posts.reverse();
+
+    let startIndex = 1
     for (let index = 0; index < posts.length; index++) {
       const post: any = posts[index];
-      post.id = index;
+      post.id = startIndex++;
       post.size = buildSizeTable(post);
     }
     posts = posts.reverse();

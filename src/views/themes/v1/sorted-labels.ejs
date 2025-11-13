@@ -1,8 +1,12 @@
+<% 
+let pathName = ''
+if(path) pathName = path
+%>
 <!-- Search labels -->
 <div class="labels">
   <% common.navbar.getSortedLabels().forEach(label => { %>
   <!-- <a href="/search/label/<%=//encodeURIComponent(label.name)%>"> -->
-  <a href="<%=common.links.searchLabel(encodeURIComponent(label.name))%>"><%=label.name%></a><sup><%=label.count%></sup>
+  <a href="<%=common.links.searchLabel(encodeURIComponent(label.name), pathName)%>"><%=label.name%></a><sup><%=label.count%></sup>
   <% }); %>
   <br />
 </div>

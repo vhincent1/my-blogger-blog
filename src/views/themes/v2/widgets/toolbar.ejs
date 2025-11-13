@@ -93,7 +93,7 @@
       select.name = 'type';
       select.onchange = async () => {
         const loadedParams = await loadedPage;
-        const totalPages = loadedParams.responseObject.totalPages;
+        const totalPages = await loadedParams.responseObject.totalPages;
         parameters.page = 1;
         // if(parameters.page > totalPages) parameters.page = 1
 

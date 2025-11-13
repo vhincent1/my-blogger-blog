@@ -7,3 +7,5 @@ public/dist/*
 public/content/*
 public/images/*
 public/videos/*
+
+*.db

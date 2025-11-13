@@ -1,16 +1,20 @@
 import type { PaginationParams, PaginatedResult, PaginatedQuery } from '../model/Pagination.model.ts';
 
 export function getPaginationParameters(req, defaults): PaginationParams {
-  let page, limit
+  let page, limit, search, type
   if (req) {
     page = parseInt(req.query.page as string) || defaults.page;
     limit = parseInt(req.query.limit as string) || defaults.limit;
+    search = req.query.search as string
+    type = req.query.type as string
   } else {
     page = defaults.page
     limit = defaults.limit
+    search = ''
+    type = ''
   }
   const offset = (page - 1) * limit;
-  return { page, limit, offset };
+  return { page, limit, offset , search, type};
 }
 
 export async function getPaginatedData<T extends Array<any>>(params: PaginationParams, data: T): Promise<PaginatedResult<T>> {

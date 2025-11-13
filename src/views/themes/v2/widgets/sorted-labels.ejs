@@ -10,7 +10,7 @@
         return;
       }
 
-      serviceResponse.responseObject.forEach((entry) => {
+     await serviceResponse.responseObject.forEach((entry) => {
         const { label, total } = entry;
         const a = document.createElement('a');
         a.href = `/?search=${encodeURIComponent(label)}&type=labels`;

@@ -1,6 +1,6 @@
 export class Post {
-  public id: number;
-  constructor(id: number) {
+  public id: number | null;
+  constructor(id: number | null) {
     this.id = id;
   }
   public title: string;
@@ -11,7 +11,7 @@ export class Post {
   public author: string;
   public comments?: undefined;
 
-  public source?: undefined; //url
+  public source?: any; //url
   public media?: any; //images, videos
 
   public size: undefined

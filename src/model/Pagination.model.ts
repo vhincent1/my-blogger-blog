@@ -2,6 +2,8 @@ export interface PaginationParams {
   page: number;
   limit: number;
   offset: number;
+  search: string;
+  type: string;
 }
 
 export interface PaginatedResult<T> {

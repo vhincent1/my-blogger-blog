@@ -14,7 +14,7 @@
        // pElement.innerHTML = serviceResponse.message; //'Error loading pagination widget';
         return;
       }
-      const response = serviceResponse.responseObject;
+      const response = await serviceResponse.responseObject;
 
       const currentPage = response.currentPage;
       const totalPages = response.totalPages;

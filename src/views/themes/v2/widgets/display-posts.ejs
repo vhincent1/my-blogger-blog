@@ -58,7 +58,7 @@
       }
       // const posts = response.responseObject.data;
 
-      const pageFound = response.responseObject;
+      const pageFound = await response.responseObject;
       const feedContainer = document.getElementById('rss-feed-container');
 
       let error = document.getElementById('error');
@@ -74,7 +74,7 @@
       } else if (pageFound != null) {
         if (refresh) feedContainer.innerHTML = '';
 
-        const posts = pageFound.data;
+        const posts = await pageFound.data;
         if (style == 0) {
           // index view
           // const tableContainer = document.getElementById('rss-feed-container');
@@ -123,7 +123,7 @@
             }
 
             const date = document.createElement('td');
-            date.textContent = new Date(post.date.published).toLocaleDateString();
+            date.textContent = new Date(post.date.published).toLocaleString();
             row.appendChild(date);
 
             const size = document.createElement('td');
@@ -192,7 +192,7 @@
       console.log('NEXT: ', parameters.page);
 
       const resp = await displayPosts(parameters, style, false, false);
-      if (resp.success == false) div.innerHTML = '';
+      if (resp.success == false) div.innerHTML = 'Error response';
     };
     div.appendChild(loadMoreButton);
 

@@ -100,7 +100,7 @@ router.use('/posts', async (req, res) => {
   try {
     const serviceResponse = await PostService.getPosts({ search, type, filter, exclude });
     if (serviceResponse.success) {
-      const posts: any = serviceResponse.responseObject
+      const posts: any = await serviceResponse.responseObject
       // ----------------------------------
       const paginationParams = getPaginationParameters(req, {
         page: page || 1,
@@ -122,10 +122,8 @@ router.use('/posts', async (req, res) => {
 })
 
 router.use('/average', async (req, res) => {
-
   const serviceResponse = await PostService.getPosts();
   const posts: any = serviceResponse.responseObject
-
 
   // const calculateAverageDate = (posts) => {
 
@@ -159,49 +157,37 @@ router.use('/average', async (req, res) => {
   // }).format(averageDate);
 
   function getAverageTimeOfDay(dateArray) {
-    if (!Array.isArray(dateArray) || dateArray.length === 0) {
+    if (!Array.isArray(dateArray) || dateArray.length === 0)
       return null; // Handle empty or invalid input
-    }
-
     let totalMilliseconds = 0;
-
     for (const date of dateArray) {
       if (!(date instanceof Date) || isNaN(date.getTime())) {
         console.warn("Invalid date object encountered in array:", date);
         continue; // Skip invalid date objects
       }
-
       // Get milliseconds since midnight for each date
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const seconds = date.getSeconds();
       const milliseconds = date.getMilliseconds();
-
       const timeInMilliseconds =
         hours * 3600 * 1000 +
         minutes * 60 * 1000 +
         seconds * 1000 +
         milliseconds;
-
       totalMilliseconds += timeInMilliseconds;
     }
-
-    if (dateArray.length === 0) {
+    if (dateArray.length === 0)
       return null; // All dates were invalid or array became empty after filtering
-    }
-
     const averageMilliseconds = totalMilliseconds / dateArray.length;
-
     // Convert the average milliseconds back into a time string or Date object
     // Create a base date (e.g., January 1, 2000) and add the average time
     const baseDate = new Date(2000, 0, 1); // Year, Month (0-indexed), Day
     baseDate.setTime(baseDate.getTime() + averageMilliseconds);
-
     // Format the time as desired (e.g., HH:MM:SS)
     const averageHours = baseDate.getHours().toString().padStart(2, '0');
     const averageMinutes = baseDate.getMinutes().toString().padStart(2, '0');
     const averageSeconds = baseDate.getSeconds().toString().padStart(2, '0');
-
     return `${averageHours}:${averageMinutes}:${averageSeconds}`;
   }
   const timestamps = posts.map(post => {
@@ -210,8 +196,6 @@ router.use('/average', async (req, res) => {
     return date;
   });
   const averageTimeOfDay = getAverageTimeOfDay(timestamps)
-
-
   // 6. Return the result
   res.json({
     averageTimeOfDay

@@ -52,14 +52,16 @@
 <div id="rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
+<!-- Folder -->
 <div class="feed-item">
   <h2>images/avatars/NFTs</h2>
   <% images.forEach(image => {%>
   <img class="widget-image-open-modal" id="myImg" src="<%=image.path%>" alt="<%=image.fileName%>" style="width:200px">
   <%});%>
 </div>
+<!-- Index -->
 <div class="feed-item">
-  <h2>Index</h2>
+  <h2><%-include('themes/v1/sorted-labels', {path: 'gallery'})-%></h2>
   <section id="photos">
     <%paginationResult.data.forEach(result => { for(const image of result.images){%>
     <%const caption = '<a href='+common.links.viewPost({id: result.postId})+'>'+result.title+'</a>'%>

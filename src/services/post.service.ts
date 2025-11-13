@@ -1,4 +1,4 @@
-import {Post} from '../model/Post.model.ts';
+import { Post } from '../model/Post.model.ts';
 
 import { ServiceResponse } from '../model/ServiceResponse.model.ts';
 import { PostRepository } from '../repository/post.repository.ts';
@@ -13,61 +13,53 @@ class PostService {
     this.repository = repository;
   }
 
-  async getPosts(parameters?): Promise<ServiceResponse<Post[] | null>> {
+  async getPosts(parameters?): Promise<ServiceResponse<Promise<Post[] | null>>> {
     try {
-      const posts = await this.repository.findAllPostsAsync(parameters);
-      if (!posts || posts.length === 0)
-        return ServiceResponse.failure('No Posts found', parameters, null, StatusCodes.NO_CONTENT);
-      return ServiceResponse.success<Post[]>('Posts found', parameters, posts);
+      // TODO:
+      const posts = this.repository.findAllPostsAsync(parameters);
+      // const posts = await this.repository.findAllPostsAsync(parameters);
+      if (!posts) return ServiceResponse.failure('No Posts found', parameters, Promise.resolve(null), StatusCodes.NO_CONTENT);
+      return ServiceResponse.success<Promise<Post[]>>('Posts found', parameters, posts);
     } catch (ex) {
       const errorMessage = `Error finding all posts: $${(ex as Error).message}`;
       console.log(errorMessage);
-      return ServiceResponse.failure(
-        'An error occurred while retrieving posts.',
-        parameters,
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
+      return ServiceResponse.failure('An error occurred while retrieving posts.', parameters, Promise.resolve(null), StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
   //findById
   async getPostById(id: number): Promise<ServiceResponse<Post | null>> {
     try {
-      const post = await this.repository.findByIdAsync(id)
+      const post = await this.repository.findByIdAsync(id);
       if (post == null) return ServiceResponse.failure('Post not found', id, null, StatusCodes.NOT_FOUND);
       return ServiceResponse.success<Post>('Post found', id, post);
     } catch (ex) {
       const errorMessage = `Error finding post: ${id}: $${(ex as Error).message}`;
       console.log(errorMessage);
-      return ServiceResponse.failure(
-        'An error occurred while retrieving a post.', id,
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
+      return ServiceResponse.failure('An error occurred while retrieving a post.', id, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
   async getGallery(parameters?): Promise<ServiceResponse<any>> {
-    let data = []
-    const targetIds: any = []
-    const serviceResponse = await this.getPosts(parameters)
+    let data = [];
+    const targetIds: any = [];
+    const serviceResponse = await this.getPosts(parameters);
     try {
       if (serviceResponse.success) {
-        const posts: any = serviceResponse.responseObject
-        for (const post of posts) targetIds.push(post.id)
-        const gallery = await this.repository.getGallery()
-        data = gallery.filter(result => targetIds.includes(result.postId))
+        const posts: any = await serviceResponse.responseObject;
+        for (const post of posts) targetIds.push(post.id);
+        const gallery = await this.repository.getGallery();
+        data = gallery.filter((result) => targetIds.includes(result.postId));
       }
     } catch (err) {
-      return ServiceResponse.failure<any>('Error building gallery', parameters, data)
+      return ServiceResponse.failure<any>('Error building gallery', parameters, err);
     }
-    return ServiceResponse.success<any>('Build gallery', parameters, data)
+    return ServiceResponse.success<any>('Build gallery', parameters, data);
   }
 
   async getSortedLabels(parameters?): Promise<ServiceResponse<any>> {
     try {
-      const result = await this.repository.sortedLabels(parameters)
+      const result = await this.repository.sortedLabels(parameters);
       return ServiceResponse.success<Post>('Get sorted labels', parameters, result);
     } catch (err) {
       return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NO_CONTENT);
@@ -75,9 +67,9 @@ class PostService {
   }
 
   async getPostCountByYear(parameters?): Promise<ServiceResponse<any>> {
-    const serviceResponse = await this.getPosts(parameters)
+    const serviceResponse = await this.getPosts(parameters);
     if (serviceResponse.success) {
-      const posts: Post[] | null = serviceResponse.responseObject
+      const posts: Post[] | null = await serviceResponse.responseObject;
       const postCountByYear: any = posts?.reduce((acc, post) => {
         const year = new Date(post.date.published).getFullYear();
         acc[year] = (acc[year] || 0) + 1;
@@ -89,9 +81,9 @@ class PostService {
   }
 
   async getPostsByMonthYear(parameters?): Promise<ServiceResponse<any>> {
-    const serviceResponse = await this.getPosts(parameters)
+    const serviceResponse = await this.getPosts(parameters);
     if (serviceResponse.success) {
-      const posts: Post[] | null = serviceResponse.responseObject
+      const posts: Post[] | null = await serviceResponse.responseObject;
       const postsByMonthYear: any = posts?.reduce((groups, post) => {
         const date = new Date(post.date.published);
         const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
@@ -112,56 +104,58 @@ class PostService {
 
   async getArchiveCount(parameters?) {
     let serviceResponse = await this.getPostCountByYear(parameters);
-    const postCountByYear = serviceResponse.responseObject
+    const postCountByYear = serviceResponse.responseObject;
 
-    serviceResponse = await this.getPostsByMonthYear(parameters)
-    const postsByMonthYear = serviceResponse.responseObject
+    serviceResponse = await this.getPostsByMonthYear(parameters);
+    const postsByMonthYear = serviceResponse.responseObject;
 
-    let archiveCount: any = []
+    let archiveCount: any = [];
     const template: any = {
       parameters,
       archive: {
-        YTD: undefined
-      }
-    }
+        YTD: undefined,
+      },
+    };
     try {
-      Object.keys(postCountByYear).reverse().forEach((year) => {
-        // yearly
-        const yearlyPostCount = postCountByYear[year];
-        // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
-        let YTD: any = {
-          year: parseInt(year),
-          total: yearlyPostCount,
-          MTD: undefined
-        };
-        let MTD: any = [];
-        //monthly
-        // key = "Month Year"
-        Object.keys(postsByMonthYear).filter((key) => key.includes(year))
-          .reverse() // descending order
-          .forEach(async (key) => {
-            const posts = postsByMonthYear[key];
-            const month = key.replace(' ' + year, '');
-            const monthCount = posts.length;
-            const template: any = {
-              month,
-              total: monthCount,
-              posts
-            }
-            MTD.push(template)
+      Object.keys(postCountByYear)
+        .reverse()
+        .forEach((year) => {
+          // yearly
+          const yearlyPostCount = postCountByYear[year];
+          // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
+          let YTD: any = {
+            year: parseInt(year),
+            total: yearlyPostCount,
+            MTD: undefined,
+          };
+          let MTD: any = [];
+          //monthly
+          // key = "Month Year"
+          Object.keys(postsByMonthYear)
+            .filter((key) => key.includes(year))
+            .reverse() // descending order
+            .forEach(async (key) => {
+              const posts = postsByMonthYear[key];
+              const month = key.replace(' ' + year, '');
+              const monthCount = posts.length;
+              const template: any = {
+                month,
+                total: monthCount,
+                posts,
+              };
+              MTD.push(template);
 
-            // filters
-            if (parameters.exclude)
-              MTD = await truncate(parameters.exclude, MTD)
+              // filters
+              if (parameters.exclude) MTD = await truncate(parameters.exclude, MTD);
 
-            YTD.MTD = MTD;
-          });
-        //update
-        archiveCount.push(YTD);
-      });
-      template.archive.YTD = archiveCount
+              YTD.MTD = MTD;
+            });
+          //update
+          archiveCount.push(YTD);
+        });
+      template.archive.YTD = archiveCount;
 
-      return ServiceResponse.success<any>('Archive count', parameters, template)
+      return ServiceResponse.success<any>('Archive count', parameters, template);
     } catch (err) {
       return ServiceResponse.failure('Archive count', parameters, err, StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -176,7 +170,6 @@ class PostService {
   //   }
   // }
 
-
   /*
   // Sort in ascending order (oldest to newest)
     data.sort((a, b) => {
@@ -185,12 +178,10 @@ class PostService {
     return dateA - dateB;
     });
    */
-
 }
 
 // curl -X POST http://localhost:3000/products/update-stock -H 'Content-Type: application/json' -d '{'id': 1, 'quantity': -3}' &
 
-const service = new PostService(new PostRepository);
+const service = new PostService(new PostRepository());
 const posts = await service.getPosts();
 export default service;
-

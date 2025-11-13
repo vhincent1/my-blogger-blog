@@ -41,7 +41,7 @@ const CONFIG = {
   // EJS template
   ejs: {
     links: {
-      searchLabel: (item) => `/?search=${item}&type=labels`,
+      searchLabel: (item, path) => `/${path}?search=${item}&type=labels`,
       viewPost: (post) => `/post/${post.id}`,
       editPost: (post) => `/post/${post.id}/edit`,
       createPost: '/post',

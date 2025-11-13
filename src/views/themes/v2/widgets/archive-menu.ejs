@@ -49,7 +49,7 @@
         Widget_ArchiveMenu2.element.innerHTML = 'Error loading archive menu';
         return;
       }
-      const response = serviceResponse.responseObject;
+      const response = await serviceResponse.responseObject;
       const elements = [];
 
       let index = 0;

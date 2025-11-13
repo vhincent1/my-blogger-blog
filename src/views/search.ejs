@@ -1,22 +1,20 @@
 <%- include('partials/header', {title: 'Search'}) -%>
+<%- include('themes/v1/sorted-labels') %>
 <!-- Body -->
 <h1>Search</h1>
-<div id="rss-feed-container">
-  <!-- RSS feed items will be dynamically inserted here -->
-</div>
-<div class="feed-item">
-  <!-- <form id="searchForm">
+<!-- <div id="rss-feed-container"> -->
+<!-- RSS feed items will be dynamically inserted here -->
+<!-- </div> -->
+<!-- <div class="feed-item"> -->
+<!-- <form id="searchForm">
     <label for="searchInput">Search:</label>
     <input type="search" id="searchInput" name="q" placeholder="Enter your query..." />
     <button type="submit">Search</button>
   </form> -->
 
-  <div id="searchResults">
-    <!-- Search results will be displayed here -->
-  </div>
-</div>
-
-<script>
+<!-- <div id="searchResults"></div>
+</div> -->
+<!-- <script>
   // const searchInput = document.getElementById('searchInput');
   // const searchResults = document.getElementById('searchResults');
   // const items = ['Apple', 'Banana', 'Orange', 'Grape', 'Strawberry']; // Example data
@@ -51,14 +49,18 @@
   //   event.preventDefault(); // Prevent default form submission
   //   filterResults();
   // });
-</script>
+ </script> -->
 
 <!-- v2 -->
 <div class="feed-item">
   <input type="text" id="searchInput" placeholder="Search...">
+  <label for="type"> In:</label>
+  <select id="type" name="type">
+    <option value="title">Title</option>
+    <option value="content">Content</option>
+    <option value="labels">Labels</option>
+  </select>
   <button id="searchButton">Search</button>
-  <div id="resultsContainer"></div>
-
   <div id="searchResults">
     <!-- Search results will be displayed here -->
   </div>
@@ -71,7 +73,7 @@
 
   const searchInput = document.getElementById('searchInput');
   const searchButton = document.getElementById('searchButton');
-  const resultsContainer = document.getElementById('resultsContainer');
+  const resultsContainer = document.getElementById('searchResults');
 
   searchButton.addEventListener('click', performSearch);
   searchInput.addEventListener("keypress", async function(event) {
@@ -87,32 +89,33 @@
 
     try {
       const response = await fetch(apiUrl);
-      if (!response.ok)  throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      displayResults(data);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const serviceResponse = await response.json();
+
+      displayResults(serviceResponse);
     } catch (error) {
       console.error('Error fetching search results:', error);
       resultsContainer.innerHTML = '<p>Error loading results.</p>';
     }
   }
 
-  function displayResults(results) {
-    const posts = results.data
+  async function displayResults(serviceResponse) {
+    console.log('sr: ', serviceResponse)
+    const responseObject = serviceResponse.responseObject
+
     resultsContainer.innerHTML = ''; // Clear previous results
 
-    if (results.length === 0 || !results.success) {
+    if (!serviceResponse.success) {
       resultsContainer.innerHTML = '<p>No results found.</p>';
       return;
     }
+    const posts = await responseObject.data
 
     posts.forEach(result => {
       const resultItem = document.createElement('div');
       resultItem.classList.add('search-result-item'); // Add a class for styling
       // Assuming each result object has 'title' and 'description' properties
-      resultItem.innerHTML = `
-                <h3>${result.title}</h3>
-                <p>${result.date}</p>
-            `;
+      resultItem.innerHTML = `<h3>${result.title}</h3><p>${result.date.published}</p>`;
       resultsContainer.appendChild(resultItem);
     });
   }

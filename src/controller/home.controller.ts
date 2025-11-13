@@ -28,7 +28,6 @@ import { getPaginationParameters, getPaginatedQueryDetails, getPaginatedData } f
 // src/controllers/UserController.js
 class HomeController {
   async list(req, res, viewingIndex, limit) {
-    res.set('Cache-Control', 'public, max-age=3600');
     // search query
     // const parameters: Pagination = {
     //   page: parseInt(req.query.page) || 0,
@@ -37,12 +36,11 @@ class HomeController {
     //   type: req.query.type,
     // };
     const parameters = getPaginationParameters(req, { page: 1, limit });
-    const serviceResponse = await PostService.getPosts({
-      search: req.query.search,
-      type: req.query.type
-    });
+    // console.log(parameters)
+    const serviceResponse = await PostService.getPosts(parameters);
+    // console.log('Service: ', serviceResponse)
     if (serviceResponse.success) {
-      const posts: any = serviceResponse.responseObject;
+      const posts: any = await serviceResponse.responseObject;
       const paginatedResult = await getPaginatedData(parameters, posts)
       const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult)
       // parameters.data = posts;
@@ -60,6 +58,7 @@ class HomeController {
         });
       }
     } else {
+      // console.log('internal error')
       res.status(serviceResponse.statusCode).send(serviceResponse)
     }
   }

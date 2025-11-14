@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import path from 'path';
+// color text
+import chalk from 'chalk';
 //express
 import express from 'express';
 import session from 'express-session';
@@ -12,8 +14,7 @@ import cors from 'cors';
 import routes from './routes/app.routes.ts';
 //middleware
 import * as middlewares from './middleware/errorhandler.middleware.ts';
-// color text
-import chalk from 'chalk';
+import { handleShutdown } from './middleware/shutdown.middleware.ts';
 
 const app = express();
 const port = process.env.PORT;
@@ -36,7 +37,8 @@ app.use(cookieParser());
 app.use(cors());
 
 import expressStatusMonitorMiddleware from './middleware/express-status-monitor.middleware.ts';
-app.use(expressStatusMonitorMiddleware); 
+import type { Server, IncomingMessage, ServerResponse } from 'http';
+app.use(expressStatusMonitorMiddleware);
 
 // Or, configure CORS to allow specific origins:
 // app.use(cors({
@@ -136,7 +138,8 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 const server = app.listen(port, () => {
   /* eslint-disable no-console */
-  console.log(`Listening: ` + chalk.bgBlue.white(`http://localhost:${port}`));
+  // console.log(`${chalk.bgYellow.black('Listening:')} ` + chalk.bgBlue.white(`http://localhost:${port}`));
+  console.log(`${chalk.bgBlue.white(`Listening: http://localhost:${port}`)}`);
 
   // const memoryUsage = process.memoryUsage();
   // console.log('Memory Usage:', memoryUsage);
@@ -153,17 +156,17 @@ server.on('error', (err: any) => {
   }
   process.exit(1);
 });
-const onCloseSignal = () => {
-  console.log('sigint received, shutting down');
-  server.close(() => {
-    console.log('server closed');
-    process.exit();
-  });
-  setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
 
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+process.on('SIGINT', () => handleShutdown(server, 'SIGINT'));
+process.on('SIGTERM', () => handleShutdown(server, 'SIGTERM'));
+// process.on('uncaughtException', (err) => {
+//   console.error('Uncaught Exception:', err);
+//   handleShutdown('uncaughtException'); // Attempt graceful shutdown on unhandled errors
+// });
+// process.on('unhandledRejection', (reason, promise) => {
+//   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+//   handleShutdown('unhandledRejection'); // Attempt graceful shutdown on unhandled promise rejections
+// });
 
 export default app;
 //# sourceMappingURL=app.js.map

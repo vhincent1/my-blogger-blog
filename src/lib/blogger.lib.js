@@ -53,6 +53,7 @@ async function fetchAllBloggerPosts() {
 // -----------------------------------------------------------
 
 async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
+  console.log('Downloading image to', savePath);
   for (let i = 0; i < retries; i++)
     try {
       const response = await fetch(imageUrl);
@@ -61,6 +62,7 @@ async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
       const arrayBuffer = await blob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       await fs.writeFile(savePath, buffer);
+      return { success: true };
     } catch (error) {
       if (i < retries - 1) {
         await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
@@ -140,10 +142,9 @@ async function convertBloggerPosts(exportedData, config) {
   const convertedPosts = [];
   const imageDatabase = [];
   const errors = [];
-  let author;
   let startingIndex = 0;
   for (let index = 0; index < bloggerData.length; index++) {
-    startingIndex++; // 1 
+    startingIndex++; // 1
     const bloggerPost = bloggerData[index];
 
     //insert post id
@@ -184,13 +185,13 @@ async function convertBloggerPosts(exportedData, config) {
         if (config) {
           if (!config.enabled) return;
           // update image sources
-          const hostURL = config.storageDir(config.hostPath, bloggerPost, index);
+          const hostURL = config.storageDir(config.hostPath, bloggerPost, startingIndex);
           img.setAttribute('src', encodeURI(hostURL + '/' + filename));
           // update new image urls
           bloggerPost.content = document.toString();
 
           // configure paths
-          const storagePath = config.storageDir(config.uploadPath, bloggerPost, index);
+          const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
           await fs.mkdir(storagePath, { recursive: true });
           // if (bloggerPost.index == 522) {
           //   const ifExists = await checkFileExistence(savePath)
@@ -222,24 +223,16 @@ async function convertBloggerPosts(exportedData, config) {
           if (!(await checkFileExistence(savePath))) {
             const error = await downloadImage(originalSource, savePath);
             if (config.errorLog) {
-              if (error)
-                await fs.appendFile(
-                  config.errorLog,
-                  JSON.stringify(
-                    {
-                      postId: index,
-                      author: bloggerPost.author.displayName,
-                      imageSource: originalSource,
-                      error: error.toString(),
-                    },
-                    null,
-                    2
-                  )
-                );
-
+              const errorInfo = {
+                postId: index,
+                author: bloggerPost.author.displayName,
+                imageSource: originalSource,
+                error: error.toString(),
+              };
+              // prettier-ignore
               if (error) {
-                console.log('ERROR');
-                console.log('error ' + error);
+                await fs.appendFile(config.errorLog, JSON.stringify(errorInfo, null, 2));
+                console.log('Error downloading image:', error);
                 // errors.push(1)
               }
             }
@@ -264,8 +257,6 @@ async function convertBloggerPosts(exportedData, config) {
     post.source = { url: bloggerPost.url };
     // post.comments = bloggerPost.comments;
     convertedPosts.push(post);
-
-    author = post.author;
   }
   // return {
   //   convertedPosts: convertedPosts.reverse(),
@@ -307,9 +298,7 @@ async function inspectPosts(jsonData, id) {
       imageTags.forEach(async (img) => {
         const imgSrc = img.getAttribute('src');
         imageUrls.push(imgSrc);
-
         console.log(imgSrc);
-
         try {
           const filename = path.basename(new URL(imgSrc).pathname);
         } catch (err) {
@@ -359,9 +348,7 @@ async function inspectPosts(jsonData, id) {
   const exportInspect = parameters.exportConfig.inspectLog;
   if (exportInspect) {
     let manualDownloadInfo = [];
-    uploadedVideos.forEach((post) => {
-      manualDownloadInfo.push({ postId: post.id, author: post.author, sourceUrl: post.source });
-    });
+    uploadedVideos.forEach((post) => manualDownloadInfo.push({ postId: post.id, author: post.author, sourceUrl: post.source }));
     //todo toggle
     console.log(exportInspect);
     await fs.writeFile(exportInspect, JSON.stringify(manualDownloadInfo, null, 1));
@@ -380,17 +367,23 @@ async function inspectPosts(jsonData, id) {
   });
 }
 
+import SQLiteDatabase from '../database/sqlite.database.ts';
+import JSONDatabase from '../database/json.database.ts'
 async function convert() {
   if (await checkFileExistence(exportFile)) {
     let data = await fs.readFile(exportFile, 'utf8');
     const result = await convertBloggerPosts(JSON.parse(data), parameters.exportConfig);
 
     const convertedData = result.convertedPosts;
-    data = JSON.stringify(convertedData.reverse(), null, 2);
+    // data = JSON.stringify(convertedData.reverse(), null, 2);
+    // await fs.writeFile(convertedFile, data, 'utf8');
 
-    await fs.writeFile(convertedFile, data, 'utf8');
+    JSONDatabase.importPosts(convertedFile, convertedData)
     console.log('Saved to: ', convertedFile);
-    console.log('errors: ' + Object.keys(result.errors));
+    // console.log('errors: ' + Object.keys(result.errors));
+    
+    console.log('Import to sqlite3 db');
+    SQLiteDatabase.importPosts(convertedData);
 
     // image database
     // console.log('author: ' + result.author)

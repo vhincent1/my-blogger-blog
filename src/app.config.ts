@@ -26,8 +26,9 @@ const CONFIG = {
   },
 
   database: {
-    type: 'json', // storage type
+    type: 'sqlite', // storage type : json, sqlite
     file: './public/dist/new.json', // blog posts data
+    sqlite3: './database/database.db',
     // uploaded media path
     uploadPath: process.cwd() + '/public/content/',
     // host: 'http://127.0.0.1:3000', // host

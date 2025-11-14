@@ -14,7 +14,7 @@
   <p>Updated: <%= new Date(post.date.updated).toLocaleDateString() %> <%= new Date(post.date.updated).toTimeString() %></p>
   <p>Text: <%= post.size.content %>(<%= post.size.format %>) Images: <%=post.size.images%>(<%= post.size.format %>)</p>
   <%if(post.source) {%>
-  <p>Original URL: <a href="<%=post.source.url%>"><%=post.source.url%></a></p>
+  <p>Original URL: <a href="<%=post.source%>"><%=post.source%></a></p>
   <%}%>
 </div>
 <!-- Pagination -->

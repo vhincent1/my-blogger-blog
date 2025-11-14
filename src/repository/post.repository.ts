@@ -1,5 +1,5 @@
 import database from '../database/index.database.ts';
-import {Post, type PostParameters} from '../model/Post.model.ts';
+import { Post, type PostParameters } from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
 
@@ -19,15 +19,14 @@ export class PostRepository {
 
   //searchPosts
   async findAllPostsAsync(parameters?: PostParameters): Promise<any> {
-    
     // console.log('p, ',parameters)
     const p = {
       search: parameters?.search || '',
       type: parameters?.type || '',
       filter: parameters?.filter || null,
-      exclude: parameters?.exclude || null
-    }
-    let data: any
+      exclude: parameters?.exclude || null,
+    };
+    let data: any;
     switch (p.type) {
       case 'content':
         data = posts.filter((post) => post.content.includes(p.search));
@@ -40,21 +39,21 @@ export class PostRepository {
         data = posts.filter((post) => post.title.includes(p.search));
         break;
       case 'author':
-        data = posts.filter(post => post.author.includes(p.search))
+        data = posts.filter((post) => post.author.includes(p.search));
         break;
       default:
         //type not found
-        data = posts
+        data = posts;
         break;
     }
     // properties to only show
-    if (p.filter) data = await filter(p.filter, data)
+    if (p.filter) data = await filter(p.filter, data);
     // properties to exclude/truncate
-    if (p.exclude) data = await truncate(p.exclude, data)
+    if (p.exclude) data = await truncate(p.exclude, data);
 
     // remove empty objects
     // data = data.filter(post => Object.keys(post).length > 0);
-    return data
+    return data;
   }
   async getGallery() {
     return this.gallery;
@@ -65,7 +64,7 @@ export class PostRepository {
     let posts = await this.findAllPostsAsync();
     posts = posts.reverse();
 
-    let startIndex = 1
+    let startIndex = 1;
     for (let index = 0; index < posts.length; index++) {
       const post: any = posts[index];
       post.id = startIndex++;
@@ -92,20 +91,21 @@ export class PostRepository {
     return gallery;
   }
 
+  // prettier-ignore
   filterByYear = async (priorityYear?) => posts?.filter((post) => {
     const year = new Date(post.date.published).getFullYear();
-    return year == priorityYear
-  })
+    return year == priorityYear;
+  });
 
-  sortedLabels = async(parameters?: PostParameters) => {
-    let data = await this.findAllPostsAsync(parameters)
+  sortedLabels = async (parameters?: PostParameters) => {
+    let data = await this.findAllPostsAsync(parameters);
     function countTagOccurrences(tagsArray) {
       const tagCounts = {};
       for (const tag of tagsArray) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
       return tagCounts;
     }
     let allLabels: any = [];
-    data?.forEach((post: Post) => allLabels = allLabels.concat(post.labels));
+    data?.forEach((post: Post) => (allLabels = allLabels.concat(post.labels)));
 
     const uniqueTags = [...new Set(allLabels)];
     // console.log(uniqueTags)
@@ -116,8 +116,23 @@ export class PostRepository {
       label,
       total: labelCount[label],
     }));
-    return result
-  }
+    return result;
+  };
+
+  // // Filter posts by the target tag
+  // const targetTag = "art";
+  // const taggedPosts = blogPosts.filter((post) => post.labels.includes(targetTag));
+  // // console.log(taggedPosts.length);
+
+  // // Sort posts by date (most recent first)
+  // const newestPost = blogPosts.sort(
+  //   (a, b) => new Date(b.published) - new Date(a.published)
+  // );
+
+  // async sortedPost() {
+  //   const ascendingOrder = this.blogPosts.sort((a, b) => a.id - b.id);
+  //   const descendingOrder = this.blogPosts.sort((a, b) => b.id - a.id);
+  // }
 }
 
 //test

@@ -1,25 +1,27 @@
-export interface PostsTable {
-  post_id: any;
+interface Table {}
+
+export interface Posts extends Table {
+  id: any;
   user_id: any;
   title: any;
   content: any;
   labels: any;
   created_at: any;
   updated_at: any;
-  is_published: any;
   source: any;
+  status: any;
 }
 
-export const PostsTemplate: PostsTable = {
-  post_id: undefined,
+export const PostsTable: Posts = {
+  id: undefined,
   user_id: undefined,
   title: undefined,
   content: undefined,
   labels: undefined,
   created_at: Date,
   updated_at: Date,
-  is_published: undefined,
   source: undefined,
+  status: undefined,
 };
 
 /**

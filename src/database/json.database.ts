@@ -1,7 +1,9 @@
 import * as fs from 'node:fs/promises';
-// import { Mutex } from 'async-mutex';
+import { Mutex } from 'async-mutex';
+import appConfig from '../app.config.ts';
+import type { Post } from '../model/Post.model.ts';
 
-// const dbMutex = new Mutex();
+const dbMutex = new Mutex();
 
 async function readJsonFile(filePath) {
   try {
@@ -30,7 +32,65 @@ async function writeJsonFile(filePath, data) {
   }
 }
 
-export { readJsonFile, writeJsonFile };
+// export { readJsonFile, writeJsonFile };
+class JSONDatabase {
+  config; //type,file,host
+  blogPosts;
+  // users;
+  // comments;
+  constructor(config) {
+    this.config = config;
+  }
+
+  async importPosts(file, data){
+    await writeJsonFile(file, data)
+  }
+
+  async load() {
+    const release = await dbMutex.acquire();
+    try {
+      this.blogPosts = await readJsonFile(this.config.file);
+    } catch (error) {
+      console.log('Database error: ', error);
+    } finally {
+      release();
+    }
+  }
+
+  //select
+  async getAllBlogPosts() {
+    return this.blogPosts;
+  }
+
+  //insert
+  async createPost(post) {
+    const release = await dbMutex.acquire();
+    try {
+      this.blogPosts.push(post);
+    } catch (error) {
+      console.log('Database error: ', error);
+    } finally {
+      release();
+    }
+  }
+
+  //update
+  async savePosts() {
+    const release = await dbMutex.acquire();
+    try {
+      await writeJsonFile(appConfig.database.file, this.blogPosts);
+    } catch (error) {
+      console.log('Database error: ', error);
+    } finally {
+      release();
+    }
+  }
+
+  //delete
+  async delete() {}
+}
+
+export default new JSONDatabase(appConfig.database);
 
 // --- API Endpoints with Mutex Protection ---
 /*

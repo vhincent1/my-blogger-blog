@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import type { Post } from '../model/Post.model.ts';
 
-import { type PostsTable, PostsTemplate, buildDuplicateKeyUpdateClause } from '../model/Tables.model.ts';
+import { type Posts, PostsTable, buildDuplicateKeyUpdateClause } from '../model/Tables.model.ts';
 
 class MySQLDatabase {
   pool: any;
@@ -26,9 +26,9 @@ class MySQLDatabase {
     //   return console.error('Error: ', serviceResponse);
     // }
     const is_published = 1; // 0 - draft 1 - published
-    const values = [posts.map((post: Post) => [post.id, 0, post.title, post.content, post.labels.toString(), post.date.published, post.date.updated, is_published, post.source.url])];
-    const columns = Object.keys(PostsTemplate).join(', ');
-    const updateClause = buildDuplicateKeyUpdateClause(PostsTemplate);
+    const values = [posts.map((post: Post) => [post.id, 0, post.title, post.content, post.labels.toString(), post.date.published, post.date.updated, post.source.url,is_published])];
+    const columns = Object.keys(PostsTable).join(', ');
+    const updateClause = buildDuplicateKeyUpdateClause(PostsTable);
     const query = `INSERT INTO posts (${columns})  VALUES ? ON DUPLICATE KEY UPDATE ${updateClause}`;
     // console.log(query)
     // const placeholders = Object.keys(PostsTemplate).map(() => '?').join(', ');
@@ -45,21 +45,21 @@ class MySQLDatabase {
 
   async savePost(post: Post) {
     const is_published = 1; // 0 - draft 1 - published
-    const values: PostsTable = {
-      post_id: post.id,
+    const values: Posts = {
+      id: post.id,
       user_id: 0,
       title: post.title,
       content: post.content,
       labels: post.labels.toString(),
       created_at: post.date.published,
       updated_at: post.date.updated,
-      is_published: is_published,
       source: post.source?.url,
+      status: is_published,
     };
     // console.log('values: ', values);
-    const columns = Object.keys(PostsTemplate).join(', ');
+    const columns = Object.keys(PostsTable).join(', ');
     // const updateClause = buildDuplicateKeyUpdateClause(PostsTemplate);
-    const placeholders = Object.keys(PostsTemplate)
+    const placeholders = Object.keys(PostsTable)
       .map(() => '?')
       .join(', ');
     const query = `INSERT INTO posts (${columns}) VALUES ${placeholders}`;

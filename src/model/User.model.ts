@@ -1,14 +1,22 @@
 class User {
   public id: number;
   public username: string;
-  public password?: string
-  // public email?: string
+  public password?: string; //hash
+  public email?: string;
+  public date: any = {
+    registered: undefined,
+  };
+  public role: number = UserRole.USER;
 
-  constructor(id: number, username: string, password: string) {
+  constructor(id: number, username: string) {
     this.id = id;
     this.username = username;
-    this.password = password;
   }
+}
+
+enum UserRole {
+  USER = 0,
+  MOD = 1,
 }
 
 export default User;

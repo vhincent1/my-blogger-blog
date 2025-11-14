@@ -8,7 +8,7 @@ import { describe } from 'mocha';
 import express, { type Express } from 'express'
 
 import PostService from "../services/post.service.ts";
-import PostModel from "../model/Post.model.ts"; // Import the service we want to test
+// import Post from "../model/Post.model.ts"; 
 
 describe("Post Service", () => {
 

@@ -5,28 +5,36 @@ export class Post {
   }
   public title: string;
   public content: string;
-
   public labels: string[];
-  public date: PostDate; //published, updated
+  public date: PostDate = {
+    published: new Date(),
+    updated: new Date(),
+  };
   public author: string;
-  public comments?: undefined;
+  public status: PostStatus = PostStatus.PUBLISHED;
 
+  public comments?: undefined;
   public source?: any; //url
   public media?: any; //images, videos
+  public size?: undefined;
+}
 
-  public size: undefined
+export enum PostStatus {
+  DRAFT = 0,
+  PUBLISHED = 1,
+  DELETED = 2,
 }
 
 export interface PostDate {
-  published: Date,
-  updated: Date
+  published: Date;
+  updated: Date;
 }
 
 export interface PostParameters {
-  search: string,
-  type: string,
-  filter?: string,
-  exclude?: string,
+  search: string;
+  type: string;
+  filter?: string;
+  exclude?: string;
 }
 
 // type MyType = {

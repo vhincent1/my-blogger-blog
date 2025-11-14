@@ -14,6 +14,7 @@ export function buildSizeTable(post) {
     for (const filename of post.media.images) {
       // console.log(decodeURIComponent(filename))
       const imagePath = appConfig.database.contentPath(appConfig.database.uploadPath, post) + decodeURIComponent(filename);
+      // console.log(imagePath)
       if (fs.existsSync(imagePath)) {
         const size = fs.statSync(imagePath).size;
         totalImageSize += size;
@@ -77,7 +78,7 @@ export function format(post) {
   // <img> tags
   const img = document.querySelectorAll('img');
   img.forEach((element) => {
-    const originalSource = element.getAttribute('src');
+    const originalSource: any = element.getAttribute('src');
     const base = new URL(originalSource).pathname;
     //decodeURIComponent
     const filename = path.basename(base);

@@ -8,4 +8,4 @@ public/content/*
 public/images/*
 public/videos/*
 
-*.db
+database/*

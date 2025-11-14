@@ -32,8 +32,8 @@ CREATE TABLE posts (
     labels VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    is_published BOOLEAN DEFAULT TRUE,
-    source VARCHAR(255)
+    source VARCHAR(255),
+    status INT DEFAULT 1
     -- FOREIGN KEY (user_id) REFERENCES Users(user_id)
     -- FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
 );

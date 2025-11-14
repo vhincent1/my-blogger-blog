@@ -149,8 +149,8 @@ class SQLiteDatabase {
     };
 
     const user: User | null = this.findUserById(row.user_id);
-    // if (user) 
-    post.author = 'VHINCENT'
+    if (user) post.author = user.username
+    // post.author = 'VHINCENT'
 
     post.status = row.status;
     post.source = row.source;

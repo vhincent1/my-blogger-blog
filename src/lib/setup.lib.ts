@@ -21,10 +21,12 @@ import sqliteDb from '../database/sqlite.database.ts';
 // sqliteDb.importPosts(posts);
 
 const post = sqliteDb.findPostById(262)
+const user = sqliteDb.findUserById(1)
+console.log(user?.username)
 // console.log(post)
 
-import { buildSizeTable } from '../utils/post.utils.ts';
-console.log(buildSizeTable(post))
+// import { buildSizeTable } from '../utils/post.utils.ts';
+// console.log(buildSizeTable(post))
 
 // import fs from 'fs'
 

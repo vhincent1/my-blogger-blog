@@ -7,7 +7,6 @@ import parser from 'node-html-parser';
 
 import appConfig from '../app.config.ts';
 import { Post } from '../model/Post.model.ts';
-import { start } from 'repl';
 
 const parameters = appConfig.blogger;
 
@@ -38,7 +37,7 @@ async function getBloggerPosts(pageToken = null) {
 }
 
 // Example usage for fetching all pages
-async function fetchAllBloggerPosts() {
+export async function fetchAllBloggerPosts() {
   let allPosts = [];
   let currentPageToken = null;
   do {
@@ -52,10 +51,10 @@ async function fetchAllBloggerPosts() {
 
 // -----------------------------------------------------------
 
-async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
-  console.log('Downloading image to', savePath);
-  for (let i = 0; i < retries; i++)
-    try {
+export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
+  console.log('Downloading image');
+  //prettier-ignore
+  for (let i = 0; i < retries; i++) try { 
       const response = await fetch(imageUrl);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
@@ -137,10 +136,12 @@ async function downloadImage2(imageUrl, destPath) {
  * hostPath:   'http://127.0.0.1:3000/images/'
  * }
  */
-async function convertBloggerPosts(exportedData, config) {
+export async function convertBloggerPosts(exportedData, config) {
   const bloggerData = exportedData.reverse();
   const convertedPosts = [];
   const imageDatabase = [];
+
+  const imagesToDownload = [];
   const errors = [];
   let startingIndex = 0;
   for (let index = 0; index < bloggerData.length; index++) {
@@ -178,9 +179,16 @@ async function convertBloggerPosts(exportedData, config) {
         const imagePath = new URL(originalSource).pathname;
         const baseFileName = path.basename(imagePath);
         const filename = decodeURIComponent(baseFileName);
-        // imageFiles.push({ path: imagePath.replace(baseFileName, ''), filename });
 
         imageFiles.push(filename);
+        const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
+        const data = {
+          author: bloggerPost.author.displayName,
+          index: startingIndex,
+          source: originalSource,
+          path: path.resolve(storagePath, filename),
+        };
+        imagesToDownload.push(data);
 
         if (config) {
           if (!config.enabled) return;
@@ -219,27 +227,32 @@ async function convertBloggerPosts(exportedData, config) {
           //   // imageDatabase.push(result)
           // }
 
-          // download images
-          if (!(await checkFileExistence(savePath))) {
-            const error = await downloadImage(originalSource, savePath);
-            if (config.errorLog) {
-              const errorInfo = {
-                postId: index,
-                author: bloggerPost.author.displayName,
-                imageSource: originalSource,
-                error: error.toString(),
-              };
-              // prettier-ignore
-              if (error) {
-                await fs.appendFile(config.errorLog, JSON.stringify(errorInfo, null, 2));
-                console.log('Error downloading image:', error);
-                // errors.push(1)
-              }
-            }
-          }
+          const data = { author: bloggerPost.author.displayName, index: startingIndex, source: originalSource, path: savePath };
+          // console.log()
+          // imagesToDownload.push(1);
+          // console.log('i',imagesToDownload.length)
+          // // download images
+          // if (!(await checkFileExistence(savePath))) {
+          //   const error = await downloadImage(originalSource, savePath);
+          //   if (config.errorLog) {
+          //     const errorInfo = {
+          //       postId: index,
+          //       author: bloggerPost.author.displayName,
+          //       imageSource: originalSource,
+          //       error: error.toString(),
+          //     };
+          //     // prettier-ignore
+          //     if (error) {
+          //       await fs.appendFile(config.errorLog, JSON.stringify(errorInfo, null, 2));
+          //       console.log('Error downloading image:', error);
+          //       // errors.push(1)
+          //     }
+          //   }
+          // }
         }
       });
     }
+
     // --------------------------
 
     // new template
@@ -258,15 +271,33 @@ async function convertBloggerPosts(exportedData, config) {
     // post.comments = bloggerPost.comments;
     convertedPosts.push(post);
   }
-  // return {
-  //   convertedPosts: convertedPosts.reverse(),
-  //   imageDatabase: imageDatabase,
-  //   author: author
-  // };
-  return { convertedPosts, errors };
+
+  // download images
+  // console.log('Downloading', imagesToDownload.length, 'Images');
+  // imagesToDownload.forEach(async (o) => {
+  //   if (!(await checkFileExistence(o.path))) {
+  //     const error = await downloadImage(o.source, o.path);
+  //     if (config.errorLog) {
+  //       const errorInfo = {
+  //         postId: o.index,
+  //         author: o.author,
+  //         imageSource: o.source,
+  //         error: error.toString(),
+  //       };
+  //       if (error) {
+  //         await fs.appendFile(config.errorLog, JSON.stringify(errorInfo, null, 2));
+  //         console.log('Error downloading image:', error);
+  //         // errors.push(1)
+  //       }
+  //     }
+  //   }
+  // });
+  // console.log('Done downloading');
+
+  return { convertedPosts, imagesToDownload, errors };
 }
 
-async function checkFileExistence(folderPath) {
+export async function checkFileExistence(folderPath) {
   try {
     await fs.access(folderPath, fs.constants.F_OK); // F_OK checks if the file/folder exists
     return true;
@@ -368,7 +399,7 @@ async function inspectPosts(jsonData, id) {
 }
 
 import SQLiteDatabase from '../database/sqlite.database.ts';
-import JSONDatabase from '../database/json.database.ts'
+import JSONDatabase from '../database/json.database.ts';
 async function convert() {
   if (await checkFileExistence(exportFile)) {
     let data = await fs.readFile(exportFile, 'utf8');
@@ -378,10 +409,10 @@ async function convert() {
     // data = JSON.stringify(convertedData.reverse(), null, 2);
     // await fs.writeFile(convertedFile, data, 'utf8');
 
-    JSONDatabase.importPosts(convertedFile, convertedData)
+    JSONDatabase.importPosts(convertedFile, convertedData);
     console.log('Saved to: ', convertedFile);
     // console.log('errors: ' + Object.keys(result.errors));
-    
+
     console.log('Import to sqlite3 db');
     SQLiteDatabase.importPosts(convertedData);
 
@@ -393,7 +424,7 @@ async function convert() {
   }
 }
 
-async function exportBlog() {
+export async function exportBlog() {
   console.log('Fetching from Blogger...');
   const data = await fetchAllBloggerPosts();
   console.log('Total posts: ' + data.length);
@@ -402,33 +433,37 @@ async function exportBlog() {
   await fs.writeFile(exportFile, jsonString, 'utf8');
   console.log('Saved to ' + exportFile);
 }
-
 // run
 const exportFile = parameters.exported;
 const convertedFile = parameters.new;
-const command = process.argv[2];
-switch (command) {
-  case 'convert':
-    convert();
-    break;
-  case 'export':
-    exportBlog();
-    break;
-  case 'inspect':
-    const inspectFile = parameters.new;
-    if (await checkFileExistence(inspectFile)) {
-      const data = await fs.readFile(inspectFile, 'utf8');
-      const postId = process.argv[3];
-      inspectPosts(JSON.parse(data), postId);
-    }
-    break;
-  default:
-    console.log('Run arguments: (export | convert | inspect)');
-    console.log('export -> downloads blogger data');
-    console.log('convert -> converts exported data');
-    console.log('inspect <post_id> -> post information');
-    break;
+async function run() {
+  const command = process.argv[2];
+  switch (command) {
+    case 'convert':
+      convert();
+      break;
+    case 'export':
+      exportBlog();
+      break;
+    case 'inspect':
+      const inspectFile = parameters.new;
+      if (await checkFileExistence(inspectFile)) {
+        const data = await fs.readFile(inspectFile, 'utf8');
+        const postId = process.argv[3];
+        inspectPosts(JSON.parse(data), postId);
+      }
+      break;
+    default:
+      console.log('Run arguments: (export | convert | inspect)');
+      console.log('export -> downloads blogger data');
+      console.log('convert -> converts exported data');
+      console.log('inspect <post_id> -> post information');
+      break;
+  }
 }
+
+// const run = process.argv[2];
+if (process.argv[2]) run();
 
 // const url = 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents10.jpg';
 // const folderPath = './public/dist/export/' + 1;

@@ -20,9 +20,9 @@ import sqliteDb from '../database/sqlite.database.ts';
 // const posts = await getPosts();
 // sqliteDb.importPosts(posts);
 
-const post = sqliteDb.findPostById(262)
-const user = sqliteDb.findUserById(1)
-console.log(user?.username)
+// const post = sqliteDb.findPostById(262)
+// const user = sqliteDb.findUserById(1)
+// console.log(user?.username)
 // console.log(post)
 
 // import { buildSizeTable } from '../utils/post.utils.ts';
@@ -39,5 +39,89 @@ console.log(user?.username)
 // const db = new MySQLDatabase();
 // await db.getAllBlogPosts();
 
-console.log('done');
-process.exit(0);
+// console.log('done');
+// process.exit(0);
+
+import appConfig from '../app.config.ts';
+import { downloadImage, checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from './blogger.lib.js';
+import fs from 'fs/promises';
+
+// exportBlog();
+
+const exportBlogger = new Promise(async (resolve, reject) => {
+  // Simulate an asynchronous operation
+  // setTimeout(async () => {
+
+  const file = appConfig.blogger.exported;
+  if (await checkFileExistence(file)) {
+    console.log('Using exported data');
+    const data = await fs.readFile(file, 'utf8');
+    return resolve(JSON.parse(data));
+  }
+
+  console.log('Fetching all posts from Blogger API...');
+  const bloggerPosts = await fetchAllBloggerPosts();
+  const jsonString = JSON.stringify(bloggerPosts, null, 2);
+  await fs.writeFile(file, jsonString, 'utf8');
+  console.log('Saved to ' + file);
+  // const success = true; // Change to false to simulate rejection
+  // if (success) {
+  //   resolve('Data successfully fetched!');
+  // } else {
+  //   reject('Error: Failed to fetch data.');
+  // }
+  return resolve(bloggerPosts);
+  // }, 2000);
+});
+
+exportBlogger
+  .then(
+    (bloggerPosts: any) => {
+      console.log('Posts fetched:', bloggerPosts.length);
+      const result = convertBloggerPosts(bloggerPosts, appConfig.blogger.exportConfig);
+      return result;
+    },
+    (error) => {
+      console.error('Failure:', error);
+      throw new Error('Further error processing');
+    }
+  )
+  // download pictures
+  .then(async (processedResult: any) => {
+    console.log('Downloading', processedResult.imagesToDownload.length, 'images');
+    const promises = processedResult.imagesToDownload.map(async (o) => {
+      if (!(await checkFileExistence(o.path))) {
+        const error = await downloadImage(o.source, o.path);
+        if (appConfig.blogger.exportConfig.errorLog) {
+          const errorInfo = {
+            postId: o.index,
+            author: o.author,
+            imageSource: o.source,
+            error: error.toString(),
+          };
+          if (error) {
+            await fs.appendFile(appConfig.blogger.exportConfig.errorLog, JSON.stringify(errorInfo, null, 2));
+            console.log('Error downloading image:', error);
+          }
+        }
+      }
+      return 0;
+    });
+    await Promise.all(promises); // Wait for all promises to resolve
+    console.log('--- Done ---');
+    return processedResult;
+  })
+  // import to database
+  .then(async (processedResult: any) => {
+    const result = await processedResult;
+    if (result.convertedPosts) {
+      console.log('Import to sqlite3 db');
+      sqliteDb.importPosts(result.convertedPosts);
+    } else if (result.errors) {
+      console.log('Errors:',result.errors)
+    }
+    console.log('Done');
+  })
+  .catch((finalError) => {
+    console.error('Caught a final error:', finalError);
+  });

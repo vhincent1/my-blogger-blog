@@ -75,6 +75,7 @@ export async function downloadImage(imageUrl, savePath, retries = 5, delay = 100
     }
 }
 
+//TODO: unused
 async function downloadImage2(imageUrl, destPath) {
   try {
     const response = await fetch(imageUrl);
@@ -129,6 +130,7 @@ async function downloadImage2(imageUrl, destPath) {
     // throw error;
   }
 }
+// -----------------------------------------------------------
 
 /*
  * config = {
@@ -179,8 +181,8 @@ export async function convertBloggerPosts(exportedData, config) {
         const imagePath = new URL(originalSource).pathname;
         const baseFileName = path.basename(imagePath);
         const filename = decodeURIComponent(baseFileName);
-
         imageFiles.push(filename);
+ 
         const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
         const data = {
           author: bloggerPost.author.displayName,
@@ -398,8 +400,10 @@ async function inspectPosts(jsonData, id) {
   });
 }
 
+//TODO databases
 import SQLiteDatabase from '../database/sqlite.database.ts';
 import JSONDatabase from '../database/json.database.ts';
+
 async function convert() {
   if (await checkFileExistence(exportFile)) {
     let data = await fs.readFile(exportFile, 'utf8');

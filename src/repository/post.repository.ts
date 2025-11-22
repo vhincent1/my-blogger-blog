@@ -3,14 +3,21 @@ import { Post, type PostParameters } from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
 
-const posts: Post[] = await database.getAllBlogPosts();
+let posts: Post[] = await database.getAllBlogPosts();
+
+// repo -> database
 
 export class PostRepository {
+  // private posts: Post[]
   private gallery: any;
 
   constructor() {
-    this.generateIds(); // generate post ids
+    this.generateMetaData(); 
     this.gallery = this.buildGallery();
+  }
+
+  async updatePosts() {
+    posts = await database.getAllBlogPosts();
   }
 
   async findByIdAsync(id: number): Promise<Post | null> {
@@ -19,6 +26,7 @@ export class PostRepository {
 
   //searchPosts
   async findAllPostsAsync(parameters?: PostParameters): Promise<any> {
+    // this.posts = await database.getAllBlogPosts();
     // console.log('p, ',parameters)
     const p = {
       search: parameters?.search || '',
@@ -59,8 +67,8 @@ export class PostRepository {
     return this.gallery;
   }
 
-  // generates post ids
-  private async generateIds() {
+  // generates post ids, sizes, etc
+  private async generateMetaData() {
     let posts = await this.findAllPostsAsync();
     posts = posts.reverse();
 

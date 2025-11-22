@@ -1,7 +1,7 @@
 import {Post} from '../model/Post.model.ts';
 import PostService from '../services/post.service.ts';
 
-const sr = await PostService.getPosts()
+const sr = await PostService.getPosts({meta: {source: 'navbar/controller'}})
 const blogPosts: any = await sr.responseObject;
 
 // ----------- Label Menu -----------

@@ -2,13 +2,34 @@ import SQLite3 from 'better-sqlite3';
 import fs from 'fs';
 import { PostStatus, Post } from '../model/Post.model.ts';
 import { PostsTable, type Posts } from '../model/Tables.model.ts';
+import { type DatabaseI } from './index.database.ts';
 import User from '../model/User.model.ts';
 
-class SQLiteDatabase {
+//TODO: post sizes
+
+class SQLiteDatabase implements DatabaseI {
   db;
   constructor(config) {
     this.db = new SQLite3(config.sqlite3);
     this.db.pragma('journal_mode = WAL');
+  }
+  load(): void {
+    // throw new Error('Method not implemented.');
+  }
+
+  close(): void {
+    if (this.db && !this.db.open) {
+      // Check if db exists and is already closed (db.open is false after close)
+      console.log('Database already closed.');
+      return;
+    }
+    if (this.db)
+      try {
+        this.db.close();
+        console.log('Database connection closed gracefully.');
+      } catch (err) {
+        console.error('Error closing database:', err);
+      }
   }
 
   setup() {
@@ -23,23 +44,15 @@ class SQLiteDatabase {
     }
   }
 
-  closeDatabase() {
-    if (this.db && !this.db.open) {
-      // Check if db exists and is already closed (db.open is false after close)
-      console.log('Database already closed.');
-      return;
-    }
-    if (this.db) {
-      try {
-        this.db.close();
-        console.log('Database connection closed gracefully.');
-      } catch (err) {
-        console.error('Error closing database:', err);
-      }
-    }
-  }
-
   importPosts(posts: Post[]) {
+    // Insert sample data if the table is empty
+    // const count = db.prepare('SELECT COUNT(*) AS count FROM users').get().count;
+    // if (count === 0) {
+    //   const insert = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
+    //   for (let i = 1; i <= 50; i++) {
+    //     insert.run(`User ${i}`, `user${i}@example.com`);
+    //   }
+    // }
     let checkTable = this.db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get('posts');
     if (!checkTable) {
       console.error("posts table doesn't exist, use setup()");
@@ -149,7 +162,7 @@ class SQLiteDatabase {
     };
 
     const user: User | null = this.findUserById(row.user_id);
-    if (user) post.author = user.username
+    if (user) post.author = user.username;
     // post.author = 'VHINCENT'
 
     post.status = row.status;
@@ -179,11 +192,6 @@ class SQLiteDatabase {
     return this.#mapRowToPost(row);
   }
 
-  findAllPosts() {
-    const statement = this.db.prepare('SELECT * FROM posts');
-    const rows = statement.all();
-    return rows.map((row) => this.#mapRowToPost(row));
-  }
 
   findUserById(id: number) {
     const statement = this.db.prepare('SELECT * FROM users WHERE id = ?');

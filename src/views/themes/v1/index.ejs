@@ -27,7 +27,7 @@
     <tr>
       <td><%= post.title%></td>
       <td><%= new Date(post.date.published).toLocaleDateString() %></td>
-      <td><%= post.size.total %><sup>(<%= post.size.format %>)</sup></td>
+      <td><%= post.size.total.count %><sup>(<%= post.size.total.format %>)</sup></td>
       <td>[<a href="<%=common.links.viewPost({id: post.id})%>">view</a>][<a href="<%=common.links.editPost(post)%>">edit</a>]</td>
     </tr>
     <% }); %>

@@ -35,14 +35,15 @@ class HomeController {
     //   query: req.query.search,
     //   type: req.query.type,
     // };
-    const parameters = getPaginationParameters(req, { page: 1, limit });
+    const parameters: any = getPaginationParameters(req, { page: 1, limit });
     // console.log(parameters)
+    parameters.meta = { source: 'home/controller/list' };
     const serviceResponse = await PostService.getPosts(parameters);
     // console.log('Service: ', serviceResponse)
     if (serviceResponse.success) {
       const posts: any = await serviceResponse.responseObject;
-      const paginatedResult = await getPaginatedData(parameters, posts)
-      const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult)
+      const paginatedResult = await getPaginatedData(parameters, posts);
+      const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult);
       // parameters.data = posts;
 
       // console.log('RESPONSE: ', serviceResponse);
@@ -54,12 +55,12 @@ class HomeController {
         res.status(serviceResponse.statusCode).render('themes/v1/index', {
           pagination: paginationQueryDetails,
           paginationResult: paginatedResult,
-          viewIndex: viewingIndex
+          viewIndex: viewingIndex,
         });
       }
     } else {
       // console.log('internal error')
-      res.status(serviceResponse.statusCode).send(serviceResponse)
+      res.status(serviceResponse.statusCode).send(serviceResponse);
     }
   }
   create(req, res) {
@@ -80,9 +81,7 @@ const c = new HomeController();
 
 const homepageController = {
   getFrontPage: async (req, res) => c.list(req, res, false, 5),
-  getIndex: async (req, res) => c.list(req, res, true, 100)
+  getIndex: async (req, res) => c.list(req, res, true, 100),
 };
 
-export {
-  homepageController
-};
+export { homepageController };

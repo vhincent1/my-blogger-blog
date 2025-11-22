@@ -2,6 +2,9 @@ import * as fs from 'node:fs/promises';
 import { Mutex } from 'async-mutex';
 import appConfig from '../app.config.ts';
 import type { Post } from '../model/Post.model.ts';
+import type { DatabaseI } from './index.database.ts';
+
+import { filter, truncate } from '../utils/array.utils.ts';
 
 const dbMutex = new Mutex();
 
@@ -9,7 +12,6 @@ async function readJsonFile(filePath) {
   try {
     const data = await fs.readFile(filePath, 'utf8');
     const jsonData = JSON.parse(data);
-    // console.log('JSON data:', jsonData.length);
     return jsonData;
   } catch (error: any) {
     switch (error.code) {
@@ -33,7 +35,7 @@ async function writeJsonFile(filePath, data) {
 }
 
 // export { readJsonFile, writeJsonFile };
-class JSONDatabase {
+class JSONDatabase implements DatabaseI {
   config; //type,file,host
   blogPosts;
   // users;
@@ -42,8 +44,13 @@ class JSONDatabase {
     this.config = config;
   }
 
-  async importPosts(file, data){
-    await writeJsonFile(file, data)
+  close(): void {
+    // throw new Error('Method not implemented.');
+    console.log('close')
+  }
+
+  async importPosts(file, data) {
+    writeJsonFile(file, data);
   }
 
   async load() {
@@ -58,8 +65,9 @@ class JSONDatabase {
   }
 
   //select
-  async getAllBlogPosts() {
-    return this.blogPosts;
+   getAllBlogPosts(): Post[] {
+    const posts: Post[] = this.blogPosts
+    return posts.reverse();
   }
 
   //insert

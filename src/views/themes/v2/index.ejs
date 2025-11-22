@@ -1,7 +1,6 @@
 <%- include('../../partials/header', {title: 'RSS Feed'}) -%>
 <script>
   let style = <%=theme%>;
-
   let parameters = {
     page: 1,
     limit: parseInt(<%=limit%>),
@@ -17,19 +16,18 @@
     // if (!key) newURL.searchParams.append(key, value);
     console.log(`${key}=${value}`);
     parameters[key] = value
-
     if (key.includes('theme')) {
       style = value
       console.log('theme updated')
     }
-
   });
   console.log(parameters)
 
   const blog = new SimpBlog()
 </script>
 
-<div id='main'>
+<div id="main">
+  <!-- prettier-ignore -->
   <%- include('widgets/sorted-labels') %>
   <%- include('widgets/archive-menu') %>
   <%- include('widgets/toolbar') %>

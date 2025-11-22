@@ -1,3 +1,4 @@
+// Client
 class SimpBlog {
   key;
   host;
@@ -5,7 +6,7 @@ class SimpBlog {
 
   constructor(key, host) {
     this.key = key;
-    this.host = host || 'http://localhost:3000';
+    this.host = host || `http://${window.location.host}` || 'http://localhost:3000'; // 'http://'+window.location.host
     this.#config = {
       healthContext: '/api/v1/health',
       postsContext: '/api/v1/posts',
@@ -25,7 +26,6 @@ class SimpBlog {
       search: null,
       type: null,
     }, reqParams) {
-
     const url = new URL(context, this.host);
 
     if (parameters != undefined) {
@@ -46,12 +46,12 @@ class SimpBlog {
   getLabels = async (parameters) => this.#getContext(this.#config.labelsContext, parameters);
   checkHealth = async () => this.#getContext(this.#config.healthContext);
   getArchive = async () => this.#getContext(this.#config.archiveContext);
-  sendPing = async (misc) => this.#getContext(this.#config.pingContext, null, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(misc),
-  });
-
+  sendPing = async (misc) =>
+    this.#getContext(this.#config.pingContext, null, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(misc),
+    });
   getPosts = async (parameters) => this.#getContext(this.#config.postsContext, parameters);
 
   async getAllPosts(params = { page: 1, maxResultsPerPage: 5 }, callback) {
@@ -79,13 +79,14 @@ class SimpBlog {
     return result;
   }
 
+  // unused
   async fetchAllPages(url, accumulatedItems = []) {
     const response = await fetch(url);
     const data = await response.json();
 
     const currentItems = accumulatedItems.concat(data.data);
     if (data.nextPageToken) {
-      const nextUrl = `http://localhost:3000/api/v1/posts/?limit=1&page=${data.nextPageToken}`;
+      const nextUrl = `${this.host}/api/v1/posts/?limit=1&page=${data.nextPageToken}`;
       return fetchAllPages(nextUrl, currentItems);
     } else return currentItems;
   }

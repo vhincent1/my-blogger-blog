@@ -77,7 +77,7 @@
         if (scrollTop + clientHeight >= scrollHeight - 0 && !Widget_Toolbar.isLoading /* && hasMoreData*/) {
           Widget_Toolbar.isLoading = true;
           parameters.page++;
-          await displayPosts({ page: parameters.page, limit: parameters.limit }, style);
+          await displayPosts({ page: parameters.page, limit: parameters.limit }, { style });
         }
       });
       return { label, input };
@@ -99,7 +99,7 @@
 
         console.log('hi', select.value);
         // loadedPage =
-        displayPosts(parameters, select.value, (refresh = true), true);
+        displayPosts(parameters, { style: select.value, showHeader: true, refresh: true });
         style = select.value;
         currentUrl.searchParams.set('theme', select.value);
         WidgetPagination.updateLinks();

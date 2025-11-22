@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import PostService from '../services/post.service.ts'
-import  { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
+import PostService from '../services/post.service.ts';
+import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
 
 // Example usage:
 const targetDirectory = './public/images';
@@ -11,9 +11,9 @@ function readDirectoryRecursively(directoryPath) {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(currentPath, encodeURIComponent(entry.name));
-      const hostPath = fullPath.replace('public', '')
-      const fileExt = path.extname(entry.name)
-      const fileName = entry.name.replace(fileExt, '')
+      const hostPath = fullPath.replace('public', '');
+      const fileExt = path.extname(entry.name);
+      const fileName = entry.name.replace(fileExt, '');
       // console.log(fileName)
       if (entry.isDirectory()) {
         filesAndFolders.push({ type: 'directory', path: hostPath });
@@ -33,12 +33,10 @@ function readDirectoryRecursively(directoryPath) {
 // } else {
 //     console.log('This is not a recognized image file extension.');
 // }
-const allItems = readDirectoryRecursively(targetDirectory).filter(item => path.extname(item.path) == '.png');
-
+const allItems = readDirectoryRecursively(targetDirectory).filter((item) => path.extname(item.path) == '.png');
 
 const galleryController = {
   index: async (req, res) => {
-
     const parameters = getPaginationParameters(req, {
       page: 1,
       limit: parseInt(req.query.limit) || 50
@@ -46,19 +44,18 @@ const galleryController = {
 
     const serviceResponse = await PostService.getGallery({
       search: req.query.search,
-      type: req.query.type
+      type: req.query.type,
     });
-    const posts = serviceResponse.responseObject
+    const posts = serviceResponse.responseObject;
 
-    const paginatedResult = await getPaginatedData(parameters, posts)
-    const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult)
+    const paginatedResult = await getPaginatedData(parameters, posts);
+    const paginationQueryDetails = getPaginatedQueryDetails(req, paginatedResult);
 
     // parameters.data = posts
 
     // const pagination = await pageController.pagination(req, parameters);
-    if (paginatedResult.currentPage > paginatedResult.totalPages)
-      return res.status(404).json({ error: 'Page limit exceeded' });
-    res.render('gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult, });
+    if (paginatedResult.currentPage > paginatedResult.totalPages) return res.status(404).json({ error: 'Page limit exceeded' });
+    res.render('gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
   },
 };
 

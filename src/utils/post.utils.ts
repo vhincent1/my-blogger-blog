@@ -19,8 +19,7 @@ export function buildSizeTable(post) {
         const size = fs.statSync(imagePath).size;
         totalImageSize += size;
       } else {
-        // console.log('post: '+post.id)
-        // console.log('doesnt exist: ' + imagePath)
+        // console.log(`[buildSizeTable(${post.id})] doesnt exist: ${imagePath}`);
       }
     }
 
@@ -29,16 +28,18 @@ export function buildSizeTable(post) {
   // size of post
   const jsonString = JSON.stringify(post, (key, value) => {
     if (key === 'media') return undefined; //ignore media field
+    if (key === 'size') return undefined; //ignore size field
     return value;
   });
   const byteSize = Buffer.byteLength(jsonString, 'utf8');
-//   post.size = {
+
+  //   post.size = {
   return {
     id: post.id,
-    content: fileFormat.fileSizeInKb(byteSize),
-    images: fileFormat.fileSizeInKb(totalImageSize),
-    total: fileFormat.fileSizeInKb(byteSize + totalImageSize),
-    format: 'Kb',
+    content: fileFormat.formatBytes(byteSize),
+    images: fileFormat.formatBytes(totalImageSize),
+    total: fileFormat.formatBytes(byteSize + totalImageSize),
+    // format: 'Kb',
   };
 }
 
@@ -47,9 +48,9 @@ export function buildGallery(post) {
   const imagesInPost: any = [];
   const img = document.querySelectorAll('img');
 
-  const nsfw = document.querySelectorAll('nsfw') //widget
-  let isNSFW = nsfw.length > 0? true : false
-  
+  const nsfw = document.querySelectorAll('nsfw'); //widget
+  let isNSFW = nsfw.length > 0 ? true : false;
+
   if (img.length > 0) {
     img.forEach((element) => {
       const originalSource = element.getAttribute('src');
@@ -67,13 +68,15 @@ export function buildGallery(post) {
       // }
     });
     // gallery.push({ postId: post.id, images: imagesInPost });
-    return { postId: post.id, title:post.title, images: imagesInPost, isNSFW }
+    return { postId: post.id, title: post.title, images: imagesInPost, isNSFW };
   }
   return {};
 }
 
 export function format(post) {
   const document = parser.parse(post.content);
+
+  //resize <youtube> videos
 
   // <img> tags
   const img = document.querySelectorAll('img');
@@ -102,4 +105,3 @@ export function format(post) {
     }
   });
 }
-

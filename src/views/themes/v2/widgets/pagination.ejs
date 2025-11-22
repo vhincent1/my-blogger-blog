@@ -43,7 +43,7 @@
 
         console.log('NEXT: ', parameters.page);
 
-        const resp = await displayPosts(parameters, style, false, false);
+        const resp = await displayPosts(parameters, {style, showHeader:false, refresh:false});
         if (resp.success == false) loadMoreButton.style.display = 'none';
         // loadedPage = resp
       };

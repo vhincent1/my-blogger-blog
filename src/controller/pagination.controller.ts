@@ -1,20 +1,20 @@
 import type { PaginationParams, PaginatedResult, PaginatedQuery } from '../model/Pagination.model.ts';
 
 export function getPaginationParameters(req, defaults): PaginationParams {
-  let page, limit, search, type
+  let page, limit, search, type;
   if (req) {
     page = parseInt(req.query.page as string) || defaults.page;
     limit = parseInt(req.query.limit as string) || defaults.limit;
-    search = req.query.search as string
-    type = req.query.type as string
+    search = req.query.search as string;
+    type = req.query.type as string;
   } else {
-    page = defaults.page
-    limit = defaults.limit
-    search = ''
-    type = ''
+    page = defaults.page;
+    limit = defaults.limit;
+    search = '';
+    type = '';
   }
   const offset = (page - 1) * limit;
-  return { page, limit, offset , search, type};
+  return { page, limit, offset, search, type };
 }
 
 export async function getPaginatedData<T extends Array<any>>(params: PaginationParams, data: T): Promise<PaginatedResult<T>> {
@@ -28,11 +28,11 @@ export async function getPaginatedData<T extends Array<any>>(params: PaginationP
 
   const paginatedResults = items.slice(offset, offset + limit);
   const totalItems = items.length;
-  const totalPages = Math.ceil(totalItems / limit)// -1; //todo cheapfix (last page is blank page)
+  const totalPages = Math.ceil(totalItems / limit); // -1; //todo cheapfix (last page is blank page)
 
   function generateNextPageToken() {
-    if (page > totalPages) return null
-    return page < totalPages ? page + 1 : null
+    if (page > totalPages) return null;
+    return page < totalPages ? page + 1 : null;
   }
 
   return {
@@ -41,7 +41,7 @@ export async function getPaginatedData<T extends Array<any>>(params: PaginationP
     totalPages,
     currentPage: page,
     limit,
-    nextPageToken: generateNextPageToken()
+    nextPageToken: generateNextPageToken(),
   };
 }
 
@@ -59,8 +59,7 @@ export function getPaginatedQueryDetails(req, paginatedResult): PaginatedQuery {
   if (queries.length == 0) {
     currentUrl += '?page=' + paginatedResult.currentPage;
   } else {
-    if (!currentUrl.includes('page='))
-      currentUrl += '&page=' + paginatedResult.currentPage;
+    if (!currentUrl.includes('page=')) currentUrl += '&page=' + paginatedResult.currentPage;
   }
   const nextPageURL = currentUrl.replace(pageQuery, nextQuery);
   const previousPageURL = currentUrl.replace(pageQuery, prevQuery);
@@ -72,5 +71,5 @@ export function getPaginatedQueryDetails(req, paginatedResult): PaginatedQuery {
     previousPageURL: previousPageURL,
     // original URL
     originalURL: req.originalUrl, //form
-  }
+  };
 }

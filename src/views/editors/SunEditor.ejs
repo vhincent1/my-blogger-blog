@@ -6,7 +6,7 @@
   // Initialize SunEditor on the client-side
   SunEditor.editor = SUNEDITOR.create('myEditor', {
     width: 'auto',
-    height: 'auto',
+    height: '50vh',
     // value: '<%= //content %>',
     // plugins: plugins,
     buttonList: [
@@ -27,6 +27,7 @@
       /** ['dir', 'dir_ltr', 'dir_rtl'] */ // "dir": Toggle text direction, "dir_ltr": Right to Left, "dir_rtl": Left to Right
     ],
   });
+
 
   SunEditor.editor.setContents(unescapeHTMLWithDOM('<%=content%>'))
 

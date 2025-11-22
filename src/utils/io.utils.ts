@@ -21,11 +21,22 @@ async function getFileSize(filePath) {
   }
 }
 
+function formatBytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  // return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  return { count: parseFloat((bytes / Math.pow(k, i)).toFixed(dm)), format: sizes[i] };
+}
+
 const fileSizeInMegabytes = (fileSizeInBytes) => fileSizeInBytes / (1024 * 1024);
 const fileSizeInKb = (fileSizeInBytes) => (fileSizeInBytes / 1024).toFixed(1);
 
 const fileFormat = {
   fileSizeInMegabytes,
   fileSizeInKb,
+  formatBytes,
 };
 export { checkFileExistence, getFileSize, fileFormat };

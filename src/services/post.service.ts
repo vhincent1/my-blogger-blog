@@ -15,7 +15,8 @@ class PostService {
 
   async getPosts(parameters?): Promise<ServiceResponse<Promise<Post[] | null>>> {
     try {
-      // TODO:
+      // TODO: parameters.meta
+      console.log('getPosts: ', parameters.meta)
       const posts = this.repository.findAllPostsAsync(parameters);
       // const posts = await this.repository.findAllPostsAsync(parameters);
       if (!posts) return ServiceResponse.failure('No Posts found', parameters, Promise.resolve(null), StatusCodes.NO_CONTENT);
@@ -43,6 +44,7 @@ class PostService {
   async getGallery(parameters?): Promise<ServiceResponse<any>> {
     let data = [];
     const targetIds: any = [];
+    if (parameters) parameters.meta = { source: 'getGallery' };
     const serviceResponse = await this.getPosts(parameters);
     try {
       if (serviceResponse.success) {
@@ -67,6 +69,7 @@ class PostService {
   }
 
   async getPostCountByYear(parameters?): Promise<ServiceResponse<any>> {
+    if (parameters) parameters.meta = { source: 'getPostCountByYear' };
     const serviceResponse = await this.getPosts(parameters);
     if (serviceResponse.success) {
       const posts: Post[] | null = await serviceResponse.responseObject;
@@ -81,6 +84,7 @@ class PostService {
   }
 
   async getPostsByMonthYear(parameters?): Promise<ServiceResponse<any>> {
+    if (parameters) parameters.meta = { source: 'getPostsByMonthYear' };
     const serviceResponse = await this.getPosts(parameters);
     if (serviceResponse.success) {
       const posts: Post[] | null = await serviceResponse.responseObject;
@@ -183,5 +187,5 @@ class PostService {
 // curl -X POST http://localhost:3000/products/update-stock -H 'Content-Type: application/json' -d '{'id': 1, 'quantity': -3}' &
 
 const service = new PostService(new PostRepository());
-const posts = await service.getPosts();
+// const posts = await service.getPosts();
 export default service;

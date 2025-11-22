@@ -1,6 +1,7 @@
 // import PostService from '../services/post.service.ts';
 // import { Post } from '../model/Post.model.ts';
 
+//TODO databases
 import sqliteDb from '../database/sqlite.database.ts';
 
 // async function getPosts() {

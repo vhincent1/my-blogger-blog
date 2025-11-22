@@ -12,7 +12,7 @@
   }); %> <%-labels%></p>
   <p>Published: <%= new Date(post.date.published).toLocaleDateString() %> <%= new Date(post.date.published).toTimeString() %></p>
   <p>Updated: <%= new Date(post.date.updated).toLocaleDateString() %> <%= new Date(post.date.updated).toTimeString() %></p>
-  <p>Text: <%= post.size.content %>(<%= post.size.format %>) Images: <%=post.size.images%>(<%= post.size.format %>)</p>
+  <p>Text: <%= post.size.content.count %>(<%= post.size.content.format %>) Images: <%=post.size.images.count%>(<%= post.size.images.format %>)</p>
   <%if(post.source) {%>
   <p>Original URL: <a href="<%=post.source%>"><%=post.source%></a></p>
   <%}%>

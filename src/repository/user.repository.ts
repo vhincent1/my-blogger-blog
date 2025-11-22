@@ -1,4 +1,3 @@
-import SQLiteDatabase from '../database/sqlite.database.ts';
 
 class UserRepository {
   users = [

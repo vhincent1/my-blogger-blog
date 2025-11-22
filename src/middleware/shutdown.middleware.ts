@@ -1,7 +1,10 @@
+import database from "../database/index.database.ts";
+
 const handleShutdown = (server, signal) => {
   console.log('sigint received, shutting down');
 
   //closeDatabase()
+  database.close()
   server.close(() => {
     console.log('server closed');
     process.exit();

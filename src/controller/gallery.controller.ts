@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import PostService from '../services/post.service.ts';
 import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
+import { filter } from 'compression';
 
 // Example usage:
 const targetDirectory = './public/images';
@@ -39,12 +40,13 @@ const galleryController = {
   index: async (req, res) => {
     const parameters = getPaginationParameters(req, {
       page: 1,
-      limit: parseInt(req.query.limit) || 50
+      limit: parseInt(req.query.limit) || 50,
     });
 
     const serviceResponse = await PostService.getGallery({
       search: req.query.search,
       type: req.query.type,
+      filter: 'id'
     });
     const posts = serviceResponse.responseObject;
 
@@ -55,7 +57,7 @@ const galleryController = {
 
     // const pagination = await pageController.pagination(req, parameters);
     if (paginatedResult.currentPage > paginatedResult.totalPages) return res.status(404).json({ error: 'Page limit exceeded' });
-    res.render('gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
+    res.render('themes/v1/gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
   },
 };
 

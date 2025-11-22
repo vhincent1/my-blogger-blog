@@ -1,4 +1,4 @@
-<%- include('partials/header', {title: 'Gallery'}) -%>
+<%- include('../../partials/header', {title: 'Gallery'}) -%>
 <style>
   #photos {
     line-height: 0;
@@ -61,7 +61,7 @@
 </div>
 <!-- Index -->
 <div class="feed-item">
-  <h2><%-include('themes/v1/sorted-labels', {path: 'gallery'})-%></h2>
+  <h2><%-include('sorted-labels', {path: 'gallery'})-%></h2>
   <section id="photos">
     <%paginationResult.data.forEach(result => { for(const image of result.images){%>
     <%const caption = '<a href='+common.links.viewPost({id: result.postId})+'>'+result.title+'</a>'%>
@@ -72,6 +72,6 @@
     <%});%>
   </section>
 </div>
-<%-include('themes/v1/pagination')-%>
-<%-include('themes/v1/image-modal')-%>
-<%-include('partials/footer')-%>
+<%-include('pagination')-%>
+<%-include('image-modal')-%>
+<%-include('../../partials/footer')-%>

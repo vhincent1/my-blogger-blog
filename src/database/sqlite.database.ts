@@ -192,6 +192,13 @@ class SQLiteDatabase implements DatabaseI {
     return this.#mapRowToPost(row);
   }
 
+  //   findAllPosts() {
+  getAllBlogPosts(): Post[] {
+    console.log('getAllBlogPosts()');
+    const statement = this.db.prepare('SELECT * FROM posts');
+    const rows = statement.all().reverse();
+    return rows.map((row) => this.#mapRowToPost(row));
+  }
 
   findUserById(id: number) {
     const statement = this.db.prepare('SELECT * FROM users WHERE id = ?');

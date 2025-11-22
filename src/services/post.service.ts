@@ -16,7 +16,7 @@ class PostService {
   async getPosts(parameters?): Promise<ServiceResponse<Promise<Post[] | null>>> {
     try {
       // TODO: parameters.meta
-      console.log('getPosts: ', parameters.meta)
+      console.log('getPosts: ', parameters.meta);
       const posts = this.repository.findAllPostsAsync(parameters);
       // const posts = await this.repository.findAllPostsAsync(parameters);
       if (!posts) return ServiceResponse.failure('No Posts found', parameters, Promise.resolve(null), StatusCodes.NO_CONTENT);
@@ -50,8 +50,9 @@ class PostService {
       if (serviceResponse.success) {
         const posts: any = await serviceResponse.responseObject;
         for (const post of posts) targetIds.push(post.id);
+
         const gallery = await this.repository.getGallery();
-        data = gallery.filter((result) => targetIds.includes(result.postId));
+        data = gallery.getEntries().filter((result) => targetIds.includes(result.postId));
       }
     } catch (err) {
       return ServiceResponse.failure<any>('Error building gallery', parameters, err);
@@ -121,9 +122,8 @@ class PostService {
       },
     };
     try {
-      Object.keys(postCountByYear)
-        .reverse()
-        .forEach((year) => {
+      //prettier-ignore
+      Object.keys(postCountByYear).reverse().forEach((year) => {
           // yearly
           const yearlyPostCount = postCountByYear[year];
           // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
@@ -135,10 +135,10 @@ class PostService {
           let MTD: any = [];
           //monthly
           // key = "Month Year"
-          Object.keys(postsByMonthYear)
-            .filter((key) => key.includes(year))
-            .reverse() // descending order
-            .forEach(async (key) => {
+
+          //prettier-ignore
+          Object.keys(postsByMonthYear).filter((key) => key.includes(year))
+            .reverse()/*descending order*/.forEach(async (key) => {
               const posts = postsByMonthYear[key];
               const month = key.replace(' ' + year, '');
               const monthCount = posts.length;

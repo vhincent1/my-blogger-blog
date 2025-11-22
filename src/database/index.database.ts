@@ -3,9 +3,7 @@ import { Post } from '../model/Post.model.ts';
 import SQLiteDatabase from './sqlite.database.ts';
 import JSONDatabase from './json.database.ts';
 
-abstract class db{
 
-}
 
 class Database implements DatabaseI {
   config; //type

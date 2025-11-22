@@ -5,6 +5,7 @@ import { fileFormat } from './io.utils.ts';
 // content formatting
 import parser from 'node-html-parser';
 import path from 'path';
+import type { GalleryEntry } from '../model/Gallery.model.ts';
 
 // generates size of post
 export function buildSizeTable(post) {
@@ -68,10 +69,12 @@ export function buildGallery(post) {
       // }
     });
     // gallery.push({ postId: post.id, images: imagesInPost });
-    return { postId: post.id, title: post.title, images: imagesInPost, isNSFW };
+    const entry: GalleryEntry = { postId: post.id, title: post.title, images: imagesInPost, isNSFW }
+    return entry;
   }
-  return {};
+  return null;
 }
+
 
 export function format(post) {
   const document = parser.parse(post.content);

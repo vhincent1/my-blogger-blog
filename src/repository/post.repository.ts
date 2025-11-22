@@ -2,6 +2,7 @@ import database from '../database/index.database.ts';
 import { Post, type PostParameters } from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
+import { Gallery } from '../model/Gallery.model.ts';
 
 let posts: Post[] = await database.getAllBlogPosts();
 
@@ -12,12 +13,12 @@ export class PostRepository {
   private gallery: any;
 
   constructor() {
-    this.generateMetaData(); 
+    this.generateMetaData();
     this.gallery = this.buildGallery();
   }
 
   async updatePosts() {
-    posts = await database.getAllBlogPosts();
+    posts = database.getAllBlogPosts();
   }
 
   async findByIdAsync(id: number): Promise<Post | null> {
@@ -64,6 +65,7 @@ export class PostRepository {
     return data;
   }
   async getGallery() {
+    // console.log('g:',await this.gallery)
     return this.gallery;
   }
 
@@ -90,13 +92,14 @@ export class PostRepository {
   //   }
   //image sources
   private async buildGallery() {
-    const gallery: any = [];
+    const entries: any = [];
     const posts = await this.findAllPostsAsync();
     for (let index = 0; index < posts.length; index++) {
       const post = posts[index];
-      gallery.push(buildGallery(post));
+      const galleryEntry = buildGallery(post);
+      if (galleryEntry) entries.push(galleryEntry);
     }
-    return gallery;
+    return new Gallery(entries);
   }
 
   // prettier-ignore

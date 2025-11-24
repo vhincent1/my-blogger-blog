@@ -1,4 +1,4 @@
-<%- include('../../partials/header', {title: 'RSS Feed'}) -%>
+<%- include('../partials/header', {title: 'RSS Feed'}) -%>
 <h1>Latest Articles from RSS Feed📡🛰️</h1>
 
 <!-- Index view -->
@@ -55,4 +55,4 @@
 <%- include('pagination') -%> 
 <%- include('autoscroll',{ currentPage: paginationResult.currentPage, limit: paginationResult.limit, style: viewIndex? 0 : 1}) -%>
 <!-- Footer -->
-<%- include('../../partials/footer') -%>
+<%- include('../partials/footer') -%>

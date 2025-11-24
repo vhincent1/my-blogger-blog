@@ -1,15 +1,17 @@
-import appConfig from '../app.config.ts'
-import PostService from '../services/post.service.ts'
+import appConfig from '../app.config.ts';
+import PostService from '../services/post.service.ts';
 
 // import { navbarController } from './navbar.controller.ts';
 // import { homepageController } from './home.controller.ts';
 
 async function publishPost(req, res, editting = false) {
   const postId = parseInt(req.params.postId);
-  const serviceResponse = await PostService.getPostById(postId)
+  const serviceResponse = await PostService.getPostById(postId);
   // console.log(serviceResponse)
-  const create = !serviceResponse.success 
-  res.render('edit-post', { post: serviceResponse.responseObject, editting: editting});
+  const create = !serviceResponse.success;
+  if (editting == false) {
+    res.render('v1/publish', { post: null, editting });
+  } else res.render('v1/publish', { post: serviceResponse.responseObject, editting: editting });
 }
 
 const postsController = {
@@ -17,16 +19,15 @@ const postsController = {
   getEditPost: async (req, res) => publishPost(req, res, true),
   getViewPost: async (req, res) => {
     const postId = parseInt(req.params.postId);
-    const serviceResponse = await PostService.getPostById(postId)
-    if (!serviceResponse.success) 
-      return res.status(serviceResponse.statusCode).render('404', { errorMessage: 'Post not found' })
+    const serviceResponse = await PostService.getPostById(postId);
+    if (!serviceResponse.success) return res.status(serviceResponse.statusCode).render('404', { errorMessage: 'Post not found' });
 
     res.status(serviceResponse.statusCode).render('view-post', {
       post: serviceResponse.responseObject,
       nextPost: postId + 1,
       prevPost: postId - 1,
       // findPage: findPage(postId, 5, 0)
-    })
+    });
   },
 };
 

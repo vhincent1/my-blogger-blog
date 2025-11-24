@@ -1,4 +1,4 @@
-// Client
+// Client-side lib
 class SimpBlog {
   key;
   host;

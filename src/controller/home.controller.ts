@@ -52,7 +52,7 @@ class HomeController {
       if (paginatedResult.currentPage > paginatedResult.totalPages) {
         res.status(404).render('404', { errorMessage: 'Not found' });
       } else {
-        res.status(serviceResponse.statusCode).render('themes/v1/index', {
+        res.status(serviceResponse.statusCode).render('v1/index', {
           pagination: paginationQueryDetails,
           paginationResult: paginatedResult,
           viewIndex: viewingIndex,

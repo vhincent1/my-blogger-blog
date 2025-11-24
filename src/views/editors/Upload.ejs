@@ -1,0 +1,261 @@
+<style>
+  .error {
+    background: FIREBRICK;
+    color: WHITE;
+  }
+  ul.tree,
+  ul.tree ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    font-family: monospace;
+  }
+  ul.tree {
+    display: inline-block;
+    background-color: #eee;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  ul.tree ul {
+    position: relative;
+    margin-left: 10px;
+  }
+  ul.tree ul:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 2px;
+    height: 6px;
+    width: 0;
+    border-left: 1px solid #888;
+  }
+  ul.tree li {
+    position: relative;
+    margin: 0;
+    padding-left: 12px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 1.2;
+  }
+  ul.tree > li {
+    padding-left: 0;
+  }
+  ul.tree ul li:not(:last-child):before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 0;
+    height: 100%;
+    border-left: 1px solid #888;
+  }
+  ul.tree ul li:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 7px;
+    left: 0;
+    width: 8px;
+    height: 0;
+    border-top: 1px solid #888;
+  }
+</style>
+<b>Upload</b>
+
+<form id="folderInput" action="upload/upload-folder" method="post" enctype="multipart/form-data">
+  <input id="folderName" type="hidden" name="folderName" value="" />
+  <input type="file" name="folder" multiple webkitdirectory directory />
+  <button type="submit">submit</button>
+</form>
+
+<div id="status">
+  <div class="error"><% if(typeof error !== 'undefined'){%> <%=error.message%><% } %></div>
+  <div id="folder-list-container">
+    <!-- The folder list will be generated here by JavaScript -->
+  </div>
+</div>
+
+<script>
+  function validateUploadSize(files, limitMB) {
+    let totalSize = 0;
+    for (let i = 0; i < files.length; i++) totalSize += files[i].size;
+    const limitBytes = limitMB * 1024 * 1024; // Convert MB to bytes
+    if (totalSize > limitBytes) {
+      alert(`Total upload size exceeds the limit of ${limitMB} MB.`);
+      return false;
+    }
+    return true;
+  }
+
+  // Example usage with an input type="file" element with the "webkitdirectory" attribute
+  //   document.getElementById('folderInput').addEventListener('change', function (event) {
+  //     const files = event.target.files;
+  //     if (validateUploadSize(files, 50)) {
+  //       // Limit to 50 MB
+  //       // Proceed with upload
+  //       console.log('Files are within the size limit. Proceeding with upload.');
+  //     } else {
+  //       // Clear the input or display an error
+  //       event.target.value = null;
+  //     }
+  //   });
+
+  document.getElementById('folderInput').addEventListener('change', function (event) {
+    const files = event.target.files;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const relativePath = file.webkitRelativePath; // e.g., "myFolder/subfolder/image.jpg"
+      // Now you can upload each file individually, preserving the folder structure
+      // by including relativePath in your upload request to the server.
+      uploadFileToServer(file, relativePath);
+    }
+
+    updateStatus(files);
+  });
+
+  function updateStatus(files) {
+    console.log('update');
+    console.log('files:', files);
+    const element = document.getElementById('status');
+    // Get the container element where the list will be added
+    const container = document.getElementById('folder-list-container');
+
+    function createFolderTree(paths) {
+      const tree = [];
+      const nodesMap = new Map(); // Map to quickly find nodes by their full path
+      // Helper function to determine if a segment looks like a file
+      function isFile(segmentName) {
+        // A simple heuristic: check for a dot followed by characters (at least one)
+        // that are not a slash. This is not foolproof but works for common cases.
+        return /\.[^/]+$/.test(segmentName);
+      }
+      // Helper function to create a new node
+      function createNode(name, parentPath = '', nodeType = 'folder') {
+        const fullPath = parentPath ? `${parentPath}/${name}` : name;
+        const node = {
+          name: name,
+          path: fullPath,
+          type: nodeType,
+        };
+        // Only folders should have a children array
+        if (nodeType === 'folder') node.children = [];
+        return node;
+      }
+      // It's good practice to sort paths for consistent tree generation
+      // and potentially better cache locality with the map.
+      paths.sort();
+      for (const path of paths) {
+        const segments = path.split('/');
+        let currentLevelNodes = tree; // Reference to the array of nodes at the current level
+        let currentPath = ''; // Full path to the current parent node
+        for (let i = 0; i < segments.length; i++) {
+          const segmentName = segments[i];
+          const segmentFullPath = i === 0 ? segmentName : `${currentPath}/${segmentName}`;
+          // Determine the type for the current segment
+          // Only the LAST segment in a path can be a file
+          const nodeType = i === segments.length - 1 && isFile(segmentName) ? 'file' : 'folder';
+          // Check if this node already exists in our map
+          let existingNode = nodesMap.get(segmentFullPath);
+          if (!existingNode) {
+            // If not, create it
+            existingNode = createNode(segmentName, currentPath, nodeType);
+            nodesMap.set(segmentFullPath, existingNode);
+            // Add to the current level. If currentLevelNodes is the top-level 'tree' or
+            // a 'children' array of a parent, push the new node.
+            currentLevelNodes.push(existingNode);
+            // Optional: Keep children sorted
+            currentLevelNodes.sort((a, b) => {
+              // Sort folders before files, then by name
+              if (a.type === 'folder' && b.type === 'file') return -1;
+              if (a.type === 'file' && b.type === 'folder') return 1;
+              return a.name.localeCompare(b.name);
+            });
+          } else {
+            // Important: If a path like "a/b" was processed and determined to be a 'file'
+            // based on "a/b/file.txt", but then "a/b/c" comes, "a/b" must become a 'folder'.
+            // This scenario is common if files and folders share names.
+            // For simplicity here, we assume if an existingNode already has children, it's a folder.
+            // A more robust solution might re-evaluate its type based on subsequent paths.
+            if (existingNode.type === 'file' && nodeType === 'folder') {
+              existingNode.type = 'folder';
+              existingNode.children = []; // Add children array if it's now a folder
+            }
+          }
+          // Move down to the children of the current node if it's a folder
+          if (existingNode.type === 'folder') {
+            currentLevelNodes = existingNode.children;
+          } else {
+            // If it's a file, it cannot have children, so we break the inner loop
+            // for this path, as subsequent segments (if any) are irrelevant for this file.
+            // This should ideally not happen if paths are correctly formed (file is last segment).
+            break;
+          }
+          currentPath = segmentFullPath; // Update currentPath for the next segment
+        }
+      }
+      return tree;
+    }
+
+    //filter out
+    files = Array.from(files).filter((f) => f.name != '.DS_Store');
+
+    // Function to recursively create the folder list
+    function createFolderList(data) {
+      const ul = document.createElement('ul');
+      data.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = item.name;
+
+        if (item.type === 'folder' && item.children) {
+          // Add a class for styling folders if needed
+          li.classList.add('folder');
+          // Recursively create nested lists for subfolders
+          li.appendChild(createFolderList(item.children));
+        } else {
+          // Add a class for styling files if needed
+          li.classList.add('file');
+        }
+        ul.appendChild(li);
+      });
+      return ul;
+    }
+    const tree = createFolderTree(files.map((file) => file.webkitRelativePath));
+    folderData = [];
+    folderData.push(tree[0]);
+    // Create the folder list and append it to the container
+    const folderListElement = createFolderList(folderData);
+    folderListElement.id = 'folderList';
+    folderListElement.className = 'tree';
+
+    const check = document.getElementById('folderList');
+    if (check) check.remove();
+    container.appendChild(folderListElement);
+  }
+
+  function uploadFileToServer(file, path) {
+    // This is where you'd implement your actual upload logic.
+    // You can use Fetch API or XMLHttpRequest to send the file and its relative path
+    // to your server-side endpoint.
+
+    const folderName = document.getElementById('folderName');
+    // folderName.value = getFolderName(path);
+
+    console.log(`Uploading file: ${file.name} to path: ${path}`);
+    // Example using Fetch API:
+    // const formData = new FormData();
+    // formData.append('file', file);
+    // formData.append('path', path);
+    //
+    // fetch('/upload-endpoint', {
+    //     method: 'POST',
+    //     body: formData
+    // })
+    // .then(response => response.json())
+    // .then(data => console.log('Upload success:', data))
+    // .catch(error => console.error('Upload error:', error));
+  }
+</script>

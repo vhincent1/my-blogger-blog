@@ -57,7 +57,7 @@ const galleryController = {
 
     // const pagination = await pageController.pagination(req, parameters);
     if (paginatedResult.currentPage > paginatedResult.totalPages) return res.status(404).json({ error: 'Page limit exceeded' });
-    res.render('themes/v1/gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
+    res.render('v1/gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
   },
 };
 

@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { filter, truncate } from '../utils/array.utils.ts';
 
+
 class PostService {
   repository: PostRepository;
 
@@ -50,7 +51,6 @@ class PostService {
       if (serviceResponse.success) {
         const posts: any = await serviceResponse.responseObject;
         for (const post of posts) targetIds.push(post.id);
-
         const gallery = await this.repository.getGallery();
         data = gallery.getEntries().filter((result) => targetIds.includes(result.postId));
       }
@@ -74,11 +74,15 @@ class PostService {
     const serviceResponse = await this.getPosts(parameters);
     if (serviceResponse.success) {
       const posts: Post[] | null = await serviceResponse.responseObject;
+
       const postCountByYear: any = posts?.reduce((acc, post) => {
         const year = new Date(post.date.published).getFullYear();
         acc[year] = (acc[year] || 0) + 1;
         return acc;
       }, {});
+
+      // const postCountByYear: any = this.repository.postCountByYear()
+
       return ServiceResponse.success<Post>('Post count by Year', parameters, postCountByYear);
     }
     return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NOT_FOUND);
@@ -96,6 +100,7 @@ class PostService {
         groups[monthYear].push({ postId: post.id, title: post.title });
         return groups;
       }, {});
+      // const postsByMonthYear: any = this.repository.postsByMonthYear()
       return ServiceResponse.success<Post>('Get posts by Month Year', parameters, postsByMonthYear);
     }
     return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NOT_FOUND);
@@ -113,6 +118,23 @@ class PostService {
 
     serviceResponse = await this.getPostsByMonthYear(parameters);
     const postsByMonthYear = serviceResponse.responseObject;
+
+    interface ArchiveMenu {
+      parameters: any;
+      archive;
+    }
+
+    interface YearToDateMenu {
+      year: number;
+      total: number;
+      MTD: MonthToDateEntry[];
+    }
+
+    interface MonthToDateEntry {
+      month: number;
+      total: number;
+      posts: any;
+    }
 
     let archiveCount: any = [];
     const template: any = {

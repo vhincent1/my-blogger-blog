@@ -52,6 +52,8 @@ class Database implements DatabaseI {
     console.log('Closing database')
     this.db.close();
   }
+
+ 
 }
 
 enum Type { 

@@ -22,7 +22,15 @@ export class Post {
 export enum PostStatus {
   DRAFT = 0,
   PUBLISHED = 1,
-  DELETED = 2,
+  DELETED = 2
+}
+
+export function getPostStatusByName(value) {
+  const name = value.toUpperCase();
+  //prettier-ignore
+  if (Object.prototype.hasOwnProperty.call(PostStatus, name) 
+    && typeof PostStatus[name] === 'number') return PostStatus[name];
+  return PostStatus.DRAFT;
 }
 
 export interface PostDate {

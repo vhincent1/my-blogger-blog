@@ -130,6 +130,27 @@ export class PostRepository {
     return result;
   };
 
+  //
+  postCountByYear = async (parameters) => {
+    let data = await this.findAllPostsAsync(parameters);
+    return data?.reduce((acc, post) => {
+      const year = new Date(post.date.published).getFullYear();
+      acc[year] = (acc[year] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  postsByMonthYear = async (parameters) => {
+    let data = await this.findAllPostsAsync(parameters);
+    return data?.reduce((groups, post) => {
+      const date = new Date(post.date.published);
+      const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+      if (!groups[monthYear]) groups[monthYear] = [];
+      groups[monthYear].push({ postId: post.id, title: post.title });
+      return groups;
+    }, {});
+  };
+
   // // Filter posts by the target tag
   // const targetTag = "art";
   // const taggedPosts = blogPosts.filter((post) => post.labels.includes(targetTag));

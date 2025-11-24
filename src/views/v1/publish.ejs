@@ -1,4 +1,23 @@
-<%- include('partials/header', {title: 'Edit'}) -%> <% const title = editting? post.title : ''; const labels = editting? post.labels : ''; const content = editting? post.content : ''; %>
+<%- include('../partials/header', {title: 'Edit'}) -%>
+<!-- prettier-ignore -->
+<%
+// if(typeof post === 'undefined' && typeof editting === 'undefined'){
+// const post = null
+// const editting = false
+// }
+const title = editting? post.title : ''; 
+const labels = editting? post.labels : '';
+const content = editting? post.content : '';
+
+//error
+let err = undefined
+if(typeof error === 'undefined'){
+  
+} else {
+  err = error
+}
+
+%>
 <head>
   <style>
     textarea {
@@ -101,12 +120,15 @@
   <button class="tablinks" onclick="openTab(event, 'Pell')">Pell</button>
   <button class="tablinks" onclick="openTab(event, 'SunEditor')">SunEditor</button>
   <button class="tablinks" onclick="openTab(event, 'WYSIHTML')">WYSIHTML (Text Only)</button>
+  <button class="tablinks" onclick="openTab(event, 'Upload')">Upload</button>
 </div>
 <div id="Info" class="tabcontent">Select an editor</div>
-<div id="Raw" class="tabcontent"><%- include('editors/RawEditor', {content}) %></div>
-<div id="Pell" class="tabcontent"><%- include('editors/PellEditor', {content}) %></div>
-<div id="SunEditor" class="tabcontent"><%- include('editors/SunEditor', {content}) %></div>
-<div id="WYSIHTML" class="tabcontent"><%- include('editors/WYSIHtml', {content}) %></div>
+<div id="Raw" class="tabcontent"><%- include('../editors/RawEditor', {content}) %></div>
+<div id="Pell" class="tabcontent"><%- include('../editors/PellEditor', {content}) %></div>
+<div id="SunEditor" class="tabcontent"><%- include('../editors/SunEditor', {content}) %></div>
+<div id="WYSIHTML" class="tabcontent"><%- include('../editors/WYSIHtml', {content}) %></div>
+<div id="Upload" class="tabcontent"><%- include('../editors/Upload', {error: err})
+ %></div>
 <script>
   // Get the element with id="defaultOpen" and click on it
   document.getElementById('defaultOpen').click();
@@ -227,4 +249,4 @@
   autocomplete(document.getElementById('labels'), labels);
 </script>
 <!-- Footer -->
-<%- include('partials/footer') -%>
+<%- include('../partials/footer') -%>

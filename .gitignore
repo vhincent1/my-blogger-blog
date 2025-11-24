@@ -7,5 +7,6 @@ public/dist/*
 public/content/*
 public/images/*
 public/videos/*
+public/uploads/*
 
 database/*

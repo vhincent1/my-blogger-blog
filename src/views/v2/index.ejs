@@ -1,4 +1,4 @@
-<%- include('../../partials/header', {title: 'RSS Feed'}) -%>
+<%- include('../partials/header', {title: 'RSS Feed'}) -%>
 <script>
   let style = <%=theme%>;
   let parameters = {
@@ -33,7 +33,7 @@
   <%- include('widgets/toolbar') %>
   <%- include('widgets/search-form') %>
   <%- include('widgets/navigation') %>
-  <%- include('../../widgets/nsfw-modal', {init: false}) -%>
+  <%- include('../widgets/nsfw-modal', {init: false}) -%>
   <%- include('widgets/display-posts') %>
   <%- include('widgets/pagination') %>
 </div>

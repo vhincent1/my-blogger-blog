@@ -1,0 +1,5 @@
+title: title
+/* 
+a comment */
+labels: a label, label
+status: draft // published, draft

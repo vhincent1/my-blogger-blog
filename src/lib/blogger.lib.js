@@ -182,7 +182,7 @@ export async function convertBloggerPosts(exportedData, config) {
         const baseFileName = path.basename(imagePath);
         const filename = decodeURIComponent(baseFileName);
         imageFiles.push(filename);
- 
+
         const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
         const data = {
           author: bloggerPost.author.displayName,
@@ -257,7 +257,7 @@ export async function convertBloggerPosts(exportedData, config) {
 
     // --------------------------
 
-    // new template
+    // new Post() template
     const post = new Post(startingIndex);
     post.author = bloggerPost.author.displayName;
     post.title = bloggerPost.title;
@@ -271,6 +271,7 @@ export async function convertBloggerPosts(exportedData, config) {
     if (imageFiles.length > 0) post.media = { images: imageFiles };
     post.source = { url: bloggerPost.url };
     // post.comments = bloggerPost.comments;
+    post.category = 0;
     convertedPosts.push(post);
   }
 

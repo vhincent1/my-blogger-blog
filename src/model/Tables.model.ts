@@ -8,6 +8,7 @@ export interface Posts extends Table {
   labels: any;
   created_at: any;
   updated_at: any;
+  category: any;
   source: any;
   status: any;
 }
@@ -20,6 +21,7 @@ export const PostsTable: Posts = {
   labels: undefined,
   created_at: Date,
   updated_at: Date,
+  category: undefined,
   source: undefined,
   status: undefined,
 };

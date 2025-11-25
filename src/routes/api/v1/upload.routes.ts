@@ -5,7 +5,6 @@ import { StatusCodes } from 'http-status-codes';
 
 const route = express.Router();
 
-import path from 'path';
 import fs from 'fs';
 
 const storage = multer.diskStorage({

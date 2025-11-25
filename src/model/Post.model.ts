@@ -12,6 +12,7 @@ export class Post {
   };
   public author: string;
   public status: PostStatus = PostStatus.PUBLISHED;
+  public category: number = 0;
 
   public comments?: undefined;
   public source?: any; //url
@@ -44,23 +45,3 @@ export interface PostParameters {
   filter?: string;
   exclude?: string;
 }
-
-// type MyType = {
-//     id: number;
-//     name: string;
-// }
-
-// type MyGroupType = {
-//     [key:string]: MyType;
-// }
-// var obj: MyGroupType = {
-//     "0": { "id": 0, "name": "Available" },
-//     "1": { "id": 1, "name": "Ready" },
-//     "2": { "id": 2, "name": "Started" }
-// };
-// // or if you make it an array
-// var arr: MyType[] = [
-//     { "id": 0, "name": "Available" },
-//     { "id": 1, "name": "Ready" },
-//     { "id": 2, "name": "Started" }
-// ];

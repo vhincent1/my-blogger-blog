@@ -2,7 +2,9 @@
 // import { Post } from '../model/Post.model.ts';
 
 //TODO databases
-import sqliteDb from '../database/sqlite.database.ts';
+// import SQLiteDatabase from '../database/sqlite.database.ts';
+import database from '../database/index.database.ts';
+// sqliteDb.setup()
 
 // async function getPosts() {
 //   const serviceResponse = await PostService.getPosts();
@@ -93,18 +95,19 @@ exportBlogger
     const promises = processedResult.imagesToDownload.map(async (o) => {
       if (!(await checkFileExistence(o.path))) {
         const error = await downloadImage(o.source, o.path);
-        if (appConfig.blogger.exportConfig.errorLog) {
-          const errorInfo = {
-            postId: o.index,
-            author: o.author,
-            imageSource: o.source,
-            error: error.toString(),
-          };
+        if (appConfig.blogger.exportConfig.errorLog)
           if (error) {
+            const errorInfo = {
+              postId: o.index,
+              author: o.author,
+              imageSource: o.source,
+              error: error.toString(),
+            };
             await fs.appendFile(appConfig.blogger.exportConfig.errorLog, JSON.stringify(errorInfo, null, 2));
-            console.log('Error downloading image:', error);
+            console.log('Error downloading image:', error.message);
           }
-        }
+      } else {
+        // console.log('already downloaded')
       }
       return 0;
     });
@@ -116,10 +119,15 @@ exportBlogger
   .then(async (processedResult: any) => {
     const result = await processedResult;
     if (result.convertedPosts) {
-      console.log('Import to sqlite3 db');
-      sqliteDb.importPosts(result.convertedPosts);
+      switch (appConfig.database.type) {
+        case 'sqlite':
+          database.setup();
+          database.importPosts(result.convertedPosts);
+          console.log('Import to sqlite3 db');
+          break;
+      }
     } else if (result.errors) {
-      console.log('Errors:',result.errors)
+      console.log('Errors:', result.errors);
     }
     console.log('Done');
   })

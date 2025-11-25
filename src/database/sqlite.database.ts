@@ -14,7 +14,7 @@ class SQLiteDatabase implements DatabaseI {
     this.db.pragma('journal_mode = WAL');
   }
   load(): void {
-    // throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
   close(): void {
@@ -37,10 +37,10 @@ class SQLiteDatabase implements DatabaseI {
       const sqlScript = fs.readFileSync('./public/schema/schema.sqlite.sql', 'utf8');
       this.db.exec(sqlScript);
       console.log('Schema created');
-      this.db.close();
+      // this.db.close();
     } catch (error) {
       console.log('Failed to initialize database:', error);
-      process.exit(1);
+      // process.exit(1);
     }
   }
 
@@ -77,6 +77,7 @@ class SQLiteDatabase implements DatabaseI {
           labels: post.labels.toString(),
           created_at: new Date(post.date.published).toISOString(),
           updated_at: new Date(post.date.updated).toISOString(),
+          category: post.category,
           source: post.source?.url,
           status: PostStatus.PUBLISHED,
         };
@@ -123,6 +124,7 @@ class SQLiteDatabase implements DatabaseI {
       labels: post.labels.toString(),
       created_at: new Date(post.date.published).toISOString(),
       updated_at: new Date(post.date.updated).toISOString(),
+      category: post.category,
       source: post.source?.url,
       status: PostStatus.PUBLISHED,
     };
@@ -160,6 +162,7 @@ class SQLiteDatabase implements DatabaseI {
       published: new Date(row.created_at),
       updated: new Date(row.updated_at),
     };
+    post.category = row.category;
 
     const user: User | null = this.findUserById(row.user_id);
     if (user) post.author = user.username;

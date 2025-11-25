@@ -9,9 +9,11 @@ import { filter, truncate } from '../utils/array.utils.ts';
 const dbMutex = new Mutex();
 
 async function readJsonFile(filePath) {
+  console.log('reading')
   try {
     const data = await fs.readFile(filePath, 'utf8');
     const jsonData = JSON.parse(data);
+    console.log(jsonData.length)
     return jsonData;
   } catch (error: any) {
     switch (error.code) {
@@ -44,16 +46,25 @@ class JSONDatabase implements DatabaseI {
     this.config = config;
   }
 
-  close(): void {
-    // throw new Error('Method not implemented.');
-    console.log('close')
+  setup(): void {
+    throw new Error('Method not implemented.');
   }
 
-  async importPosts(file, data) {
+  close(): void {
+    // throw new Error('Method not implemented.');
+    console.log('close');
+  }
+
+  async importPosts2(file, data) {
     writeJsonFile(file, data);
   }
 
+  importPosts(posts){
+    throw new Error('Method not implemented.');
+  }
+
   async load() {
+    // console.log('loading');
     const release = await dbMutex.acquire();
     try {
       this.blogPosts = await readJsonFile(this.config.file);
@@ -65,8 +76,9 @@ class JSONDatabase implements DatabaseI {
   }
 
   //select
-   getAllBlogPosts(): Post[] {
-    const posts: Post[] = this.blogPosts
+  getAllBlogPosts(): Post[] {
+    // this.load()
+    const posts: Post[] = this.blogPosts;
     return posts.reverse();
   }
 
@@ -97,8 +109,8 @@ class JSONDatabase implements DatabaseI {
   //delete
   async delete() {}
 }
-
-export default new JSONDatabase(appConfig.database);
+const database = new JSONDatabase(appConfig.database)
+export default database;
 
 // --- API Endpoints with Mutex Protection ---
 /*

@@ -40,14 +40,15 @@ INSERT INTO
         role
     )
 VALUES
-    (2, 'VHINCENT', '', '', CURRENT_TIMESTAMP, 1);
+    (2, 'VHINCENT', '', '', CURRENT_TIMESTAMP, 1); -- BOOLEAN TRUE is 1 in SQLite
 
--- BOOLEAN TRUE is 1 in SQLite
 -- Table for storing blog post categories (currently commented out in original)
--- CREATE TABLE Categories (
---     CategoryID INTEGER PRIMARY KEY AUTOINCREMENT,
---     CategoryName VARCHAR(50) NOT NULL UNIQUE
--- );
+CREATE TABLE categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+INSERT INTO categories(id, name) VALUES (0, 'main');
+
 -- Table for storing blog posts
 CREATE TABLE posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,10 +60,12 @@ CREATE TABLE posts (
     labels VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    category INTEGER NOT NULL DEFAULT 0,
     -- SQLite doesn't have ON UPDATE CURRENT_TIMESTAMP directly
     source VARCHAR(255),
     status BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (user_id) REFERENCES users (id) -- FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (category) REFERENCES categories(id)
 );
 
 CREATE TABLE media (
@@ -70,7 +73,7 @@ CREATE TABLE media (
     user_id INTEGER NOT NULL,
     images TEXT,
     FOREIGN KEY (user_id) REFERENCES users (id)
-)
+);
 
  -- Note on `updated_at`:
 -- SQLite does not have a direct equivalent to `ON UPDATE CURRENT_TIMESTAMP`.
@@ -108,7 +111,7 @@ CREATE TABLE media (
 CREATE TABLE inbox (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
-    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
     -- TIMESTAMP is aliased to DATETIME
     -- FOREIGN KEY (id) - This foreign key definition is incomplete and likely incorrect.
     -- If it's meant to reference another table, it needs a REFERENCES clause.

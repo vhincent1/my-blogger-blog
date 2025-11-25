@@ -3,11 +3,9 @@ import { Post } from '../model/Post.model.ts';
 import SQLiteDatabase from './sqlite.database.ts';
 import JSONDatabase from './json.database.ts';
 
-
-
 class Database implements DatabaseI {
   config; //type
-  blogPosts;
+  blogPosts: Post[];
   db: DatabaseI;
 
   constructor(config) {
@@ -15,27 +13,29 @@ class Database implements DatabaseI {
   }
 
   async load() {
+    console.log('loading');
     if (this.config.type == 'json') {
-      // this.blogPosts = await readJsonFile(this.config.file);
-      // await JSONDatabase.load();
-      this.db = JSONDatabase
-      // JSONDatabase.load()
-      // await this.db.load()
-      // this.blogPosts =  JSONDatabase.getAllBlogPosts();
+      this.db = JSONDatabase;
+      await JSONDatabase.load();
     } else if (this.config.type == 'sqlite') {
       this.db = SQLiteDatabase;
-      // this.blogPosts = this.db.getAllBlogPosts().reverse();
-      // this.blogPosts = SQLiteDatabase.getAllBlogPosts()
     }
 
-    await this.db.load()
-    this.blogPosts = this.db.getAllBlogPosts()
+    this.db.load();
+    // this.blogPosts = this.db.getAllBlogPosts()
   }
 
   //select
-   getAllBlogPosts() {
+  getAllBlogPosts() {
     // return this.blogPosts;
-    return this.db.getAllBlogPosts()
+    return this.db.getAllBlogPosts();
+  }
+
+  importPosts(posts: Post[]): void {
+    this.db.importPosts(posts);
+  }
+  setup(): void {
+    // throw new Error('Method not implemented.');
   }
 
   //insert
@@ -49,17 +49,15 @@ class Database implements DatabaseI {
 
   //shutdown
   close() {
-    console.log('Closing database')
+    console.log('Closing database');
     this.db.close();
   }
-
- 
 }
 
-enum Type { 
+enum Type {
   CREATE,
   SAVE,
-  EDIT
+  EDIT,
 }
 
 export interface DatabaseI {
@@ -69,6 +67,8 @@ export interface DatabaseI {
   // createPost(post): void
   // savePost(post): void
 
+  setup(): void;
+  importPosts(posts: Post[]): void;
   close(): void;
 }
 

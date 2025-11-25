@@ -2,12 +2,11 @@ import 'dotenv/config';
 import path from 'path';
 // color text
 import chalk from 'chalk';
-//express
+// express
 import express from 'express';
 import session from 'express-session';
 import compress from 'compression';
 import { xss } from 'express-xss-sanitizer';
-import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 //routes
@@ -30,7 +29,6 @@ app.use(express.static(path.join(__dirname, 'public/content')));
 app.use(compress());
 app.use(express.json()); // for parsing application/json
 app.use(xss()); // Apply XSS sanitizer to all incoming requests
-// app.use(mongoSanitize()); // Apply MongoDB sanitizer
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // Enable CORS for all routes (for development purposes, or if you want to allow all origins)

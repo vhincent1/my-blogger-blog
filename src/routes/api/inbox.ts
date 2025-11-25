@@ -4,16 +4,15 @@ import { Worker } from 'node:worker_threads';
 import { inboxLimiter } from '../../middleware/limiter.middleware.ts';
 
 const router = express.Router();
+
+const inbox = [];
 //display inbox
-router.get('/', async(req, res) => {
+router.get('/', async (req, res) => {});
 
+//recieve
+router.post('/', inboxLimiter, async (req, res) => {
+  const data = req.body;
 
-});
-
-//recieve 
-router.post('/', inboxLimiter, async(req, res)=>{
-const data = req.body
-    
   const worker = new Worker('../../workers/inbox.worker.js', { workerData: data });
 
   worker.on('message', (result) => {
@@ -24,6 +23,6 @@ const data = req.body
     console.error('Worker error:', error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   });
-})
+});
 
 export default router;

@@ -1,13 +1,18 @@
 import express from 'express';
-import emojis from './emojis.ts';
-import inboxRouter from './inbox.ts';
 import { performance } from 'node:perf_hooks';
+/* routes */
+import emojis from './emojis.ts';
+import healthRouter from './health.routes.ts';
+import inboxRouter from '../inbox.ts';
+import pingRouter from './ping.routes.ts';
+import uploadRouter from './upload.routes.ts';
+/* services */
+import { ServiceResponse } from '../../../model/ServiceResponse.model.ts';
+import PostService from '../../../services/post.service.ts';
+import { Post, type PostParameters } from '../../../model/Post.model.ts';
+import { getPaginationParameters, getPaginatedData } from '../../../controller/pagination.controller.ts';
 
-import { Post, type PostParameters } from '../../model/Post.model.ts';
-import PostService from '../../services/post.service.ts';
-import { getPaginationParameters, getPaginatedData } from '../../controller/pagination.controller.ts';
-// import type { Pagination } from '../../controller/page.controller.ts';
-
+// api/v1
 const router = express.Router();
 
 //curl -H "x-api-key: your_super_secret_api_key_here" http://localhost:3000/protected-data
@@ -30,53 +35,14 @@ const router = express.Router();
 //   res.json({ message: 'This is public data.' });
 // });
 
-const startTime = new Date();
-router.get('/health', async (req, res) => {
-  const healthCheck = {
-    status: 'OK',
-    message: 'Hi - 👋🌎🌍🌏',
-    date: startTime,
-  };
-  try {
-    res.status(200).json(healthCheck);
-  } catch (error) {
-    res.status(503).json(healthCheck);
-  }
-});
-
-const inbox = [];
-let pingCount = 0;
-
-router.get('/ping', async (req, res) => {});
-
-import path from 'path';
-import fs from 'fs';
-
-router.post('/ping', async (req, res) => {
-  const data = req.body;
-  const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  let remoteIp = req.ip || req.connection.remoteAddress;
-  console.log('Recieved :', { timestamp: Date.now(), data, clientIp });
-  res.status(201).json({ message: 'pong', receivedData: true, pingCount: (pingCount = ++pingCount) });
-});
-
-// router.get('/memory-status', (req, res) => {
-//   const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
-
-//   const memoryData = process.memoryUsage();
-
-//   const memoryUsage = {
-//     rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
-//     heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
-//     heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
-//     external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
-//   };
-//   res.json(memoryUsage);
-// });
-
+router.use('/health', healthRouter);
+router.use('/ping', pingRouter);
+/* upload form */
+router.use('/upload', uploadRouter);
 router.use('/emojis', emojis);
 router.use('/inbox', inboxRouter);
 
+/* post  */
 router.use('/posts/format', async (req, res) => {
   const placeholder = new Post(0);
   placeholder.title = 'Title';
@@ -90,12 +56,11 @@ router.use('/posts/format', async (req, res) => {
   res.status(200).json(placeholder);
 });
 
-import { ServiceResponse } from '../../model/ServiceResponse.model.ts';
 router.use('/posts', async (req, res) => {
   const t0 = performance.now(); //timer
   const { page, limit, search, type, filter, exclude }: any = req.query;
   try {
-    const serviceResponse = await PostService.getPosts({ search, type, filter, exclude, meta: {source: 'api/v1/posts'} });
+    const serviceResponse = await PostService.getPosts({ search, type, filter, exclude, meta: { source: 'api/v1/posts' } });
     if (serviceResponse.success) {
       const posts: any = await serviceResponse.responseObject;
       // ----------------------------------
@@ -104,8 +69,7 @@ router.use('/posts', async (req, res) => {
         limit: limit || 5,
       });
       const paginatedItems = await getPaginatedData(paginationParams, posts);
-      if (paginatedItems.currentPage > paginatedItems.totalPages /*exceeds limit*/ || paginatedItems.currentPage < 0 /*is negative*/)
-         return res.send(ServiceResponse.failure('Page limit exceeded', req.query, null, 404));
+      if (paginatedItems.currentPage > paginatedItems.totalPages /*exceeds limit*/ || paginatedItems.currentPage < 0 /*is negative*/) return res.send(ServiceResponse.failure('Page limit exceeded', req.query, null, 404));
       res.send(ServiceResponse.success<any>('Posts found', req.query, paginatedItems));
     } else {
       res.send(serviceResponse);

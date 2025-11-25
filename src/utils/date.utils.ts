@@ -10,8 +10,6 @@ export function getMinutesDifference(date1: Date, date2: Date) {
   return Math.round(diffMinutes);
 }
 
-export const hoursToMs = (hours: number) => hours * 3600000
-
 export function msToTime(ms) {
   let seconds = (ms / 1000).toFixed(1);
   let minutes = (ms / (1000 * 60)).toFixed(1);
@@ -20,5 +18,12 @@ export function msToTime(ms) {
   if (parseInt(seconds) < 60) return seconds + ' Seconds';
   else if (parseInt(minutes) < 60) return minutes + ' Minutes';
   else if (parseInt(hours) < 24) return hours + ' Hours';
-  else return days + ' Days'
+  else return days + ' Days';
 }
+
+export enum MsType {
+  SECONDS = 1000,
+  MINUTES = 60 * 1000,
+  HOURS = 3600000,
+}
+export const numberToMs = (value: number, type: MsType) => value * type.valueOf();

@@ -7,8 +7,6 @@ import { Gallery } from '../model/Gallery.model.ts';
 
 let posts: Post[] = await database.getAllBlogPosts();
 
-// repo -> database
-
 export class PostRepository {
   // private posts: Post[]
   private gallery: any;
@@ -18,6 +16,33 @@ export class PostRepository {
     this.gallery = this.buildGallery();
   }
 
+  // generates post ids, sizes, etc
+  private async generateMetaData() {
+    let posts = await this.findAllPostsAsync();
+    posts = posts.reverse();
+
+    let startIndex = 1;
+    for (let index = 0; index < posts.length; index++) {
+      const post: any = posts[index];
+      post.id = startIndex++;
+      post.size = await buildSizeTable(post);
+    }
+    posts = posts.reverse();
+  }
+
+  //image sources
+  private async buildGallery() {
+    const entries: any = [];
+    const posts = await this.findAllPostsAsync();
+    for (let index = 0; index < posts.length; index++) {
+      const post = posts[index];
+      const galleryEntry = buildGallery(post);
+      if (galleryEntry) entries.push(galleryEntry);
+    }
+    return new Gallery(entries.reverse());
+  }
+
+  //unused
   async updatePosts() {
     posts = database.getAllBlogPosts();
   }
@@ -65,42 +90,10 @@ export class PostRepository {
     // data = data.filter(post => Object.keys(post).length > 0);
     return data;
   }
+
   async getGallery() {
     // console.log('g:',await this.gallery)
     return this.gallery;
-  }
-
-  // generates post ids, sizes, etc
-  private async generateMetaData() {
-    let posts = await this.findAllPostsAsync();
-    posts = posts.reverse();
-
-    let startIndex = 1;
-    for (let index = 0; index < posts.length; index++) {
-      const post: any = posts[index];
-      post.id = startIndex++;
-      post.size = buildSizeTable(post);
-    }
-    posts = posts.reverse();
-  }
-
-  //   private async formatPosts() {
-  //     const posts = await this.findAllAsync()
-  //     //modify img tags
-  //     for (let index = 0; index < posts.length; index++) {
-  //       const post = posts[index];
-  //     }
-  //   }
-  //image sources
-  private async buildGallery() {
-    const entries: any = [];
-    const posts = await this.findAllPostsAsync();
-    for (let index = 0; index < posts.length; index++) {
-      const post = posts[index];
-      const galleryEntry = buildGallery(post);
-      if (galleryEntry) entries.push(galleryEntry);
-    }
-    return new Gallery(entries);
   }
 
   // prettier-ignore
@@ -150,6 +143,10 @@ export class PostRepository {
       groups[monthYear].push({ postId: post.id, title: post.title });
       return groups;
     }, {});
+  };
+
+  heartPost = async (parameters) => {
+    // database.getHearts()
   };
 
   // // Filter posts by the target tag

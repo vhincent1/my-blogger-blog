@@ -1,5 +1,6 @@
 interface Table {}
 
+// Posts
 export interface Posts extends Table {
   id: any;
   user_id: any;
@@ -26,6 +27,36 @@ export const PostsTable: Posts = {
   status: undefined,
 };
 
+// Users
+export interface Users extends Table {
+  id: number | undefined;
+  username: string | undefined;
+  password: string | undefined;
+  email: string | undefined;
+  registration_date: Date | undefined;
+  role: number | undefined;
+}
+
+export const UsersTable: Users = {
+  id: undefined,
+  username: undefined,
+  password: undefined,
+  email: undefined,
+  registration_date: undefined,
+  role: undefined,
+};
+
+export interface Hearts extends Table {
+  post_id: number;
+  user_id: number;
+  value: number;
+}
+
+export const HeartsTable: Hearts = {
+  post_id: 0,
+  user_id: 0,
+  value: 0,
+};
 /**
  * Generates the dynamic ON DUPLICATE KEY UPDATE clause.
  * @param {object} data The object containing column names.

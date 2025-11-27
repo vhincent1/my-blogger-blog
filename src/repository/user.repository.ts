@@ -6,7 +6,7 @@ class UserRepository {
   ];
   constructor(config) {
     if (config.type == 'sqlite') {
-      SQLiteDatabase;
+      // SQLiteDatabase;
     }
   }
 

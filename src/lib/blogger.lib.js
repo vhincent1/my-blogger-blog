@@ -141,10 +141,8 @@ async function downloadImage2(imageUrl, destPath) {
 export async function convertBloggerPosts(exportedData, config) {
   const bloggerData = exportedData.reverse();
   const convertedPosts = [];
-  const imageDatabase = [];
 
   const imagesToDownload = [];
-  const errors = [];
   let startingIndex = 0;
   for (let index = 0; index < bloggerData.length; index++) {
     startingIndex++; // 1
@@ -193,7 +191,6 @@ export async function convertBloggerPosts(exportedData, config) {
         imagesToDownload.push(data);
 
         if (config) {
-          if (!config.enabled) return;
           // update image sources
           const hostURL = config.storageDir(config.hostPath, bloggerPost, startingIndex);
           img.setAttribute('src', encodeURI(hostURL + '/' + filename));
@@ -201,60 +198,11 @@ export async function convertBloggerPosts(exportedData, config) {
           bloggerPost.content = document.toString();
 
           // configure paths
-          const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
-          await fs.mkdir(storagePath, { recursive: true });
-          // if (bloggerPost.index == 522) {
-          //   const ifExists = await checkFileExistence(savePath)
-          //   if (!ifExists) {
-          //     const error = await downloadImage(originalSource, savePath);
-          //     if (error) {
-          //       console.log('error ' + error)
-          //     }
-          //   }
-          // }
-          const savePath = path.resolve(storagePath, filename);
-
-          // const response = await downloadImage2(originalSource, folderPath)
-          // if (response.status == 'OK') {
-          //   const imageFile = response.result.hash
-
-          //   const hostURL = extractConfig.hostPath + bloggerPost.author.displayName;
-          //   img.setAttribute('src', encodeURI(hostURL + '/' + imageFile));
-
-          //   console.log(img.getAttribute('src'))
-          //   // update new image urls
-          //   bloggerPost.content = document.toString();
-          //   // console.log(imageFile)
-
-          //   // imageDatabase.push(result)
-          // }
-
-          const data = { author: bloggerPost.author.displayName, index: startingIndex, source: originalSource, path: savePath };
-          // console.log()
-          // imagesToDownload.push(1);
-          // console.log('i',imagesToDownload.length)
-          // // download images
-          // if (!(await checkFileExistence(savePath))) {
-          //   const error = await downloadImage(originalSource, savePath);
-          //   if (config.errorLog) {
-          //     const errorInfo = {
-          //       postId: index,
-          //       author: bloggerPost.author.displayName,
-          //       imageSource: originalSource,
-          //       error: error.toString(),
-          //     };
-          //     // prettier-ignore
-          //     if (error) {
-          //       await fs.appendFile(config.errorLog, JSON.stringify(errorInfo, null, 2));
-          //       console.log('Error downloading image:', error);
-          //       // errors.push(1)
-          //     }
-          //   }
-          // }
+          // const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
+          // await fs.mkdir(storagePath, { recursive: true });
         }
       });
     }
-
     // --------------------------
 
     // new Post() template
@@ -275,29 +223,7 @@ export async function convertBloggerPosts(exportedData, config) {
     convertedPosts.push(post);
   }
 
-  // download images
-  // console.log('Downloading', imagesToDownload.length, 'Images');
-  // imagesToDownload.forEach(async (o) => {
-  //   if (!(await checkFileExistence(o.path))) {
-  //     const error = await downloadImage(o.source, o.path);
-  //     if (config.errorLog) {
-  //       const errorInfo = {
-  //         postId: o.index,
-  //         author: o.author,
-  //         imageSource: o.source,
-  //         error: error.toString(),
-  //       };
-  //       if (error) {
-  //         await fs.appendFile(config.errorLog, JSON.stringify(errorInfo, null, 2));
-  //         console.log('Error downloading image:', error);
-  //         // errors.push(1)
-  //       }
-  //     }
-  //   }
-  // });
-  // console.log('Done downloading');
-
-  return { convertedPosts, imagesToDownload, errors };
+  return { convertedPosts, imagesToDownload };
 }
 
 export async function checkFileExistence(folderPath) {

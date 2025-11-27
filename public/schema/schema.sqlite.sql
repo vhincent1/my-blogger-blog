@@ -40,13 +40,15 @@ INSERT INTO
         role
     )
 VALUES
-    (2, 'VHINCENT', '', '', CURRENT_TIMESTAMP, 1); -- BOOLEAN TRUE is 1 in SQLite
+    (2, 'VHINCENT', '', '', CURRENT_TIMESTAMP, 1);
 
+-- BOOLEAN TRUE is 1 in SQLite
 -- Table for storing blog post categories (currently commented out in original)
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE
 );
+
 INSERT INTO categories(id, name) VALUES (0, 'main');
 
 -- Table for storing blog posts
@@ -68,14 +70,15 @@ CREATE TABLE posts (
     FOREIGN KEY (category) REFERENCES categories(id)
 );
 
-CREATE TABLE media (
-    id INTEGER PRIMARY KEY,
+-- Table for heart'd posts (likes)
+CREATE TABLE hearts (
+    post_id INTEGER PRIMARY KEY, -- post id
     user_id INTEGER NOT NULL,
-    images TEXT,
+    value INTEGER,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
- -- Note on `updated_at`:
+-- Note on `updated_at`:
 -- SQLite does not have a direct equivalent to `ON UPDATE CURRENT_TIMESTAMP`.
 -- You typically handle this with triggers in SQLite. Here's how you'd add a trigger for `posts`:
 -- CREATE TRIGGER update_posts_updated_at
@@ -111,8 +114,7 @@ CREATE TABLE media (
 CREATE TABLE inbox (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
-    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    -- TIMESTAMP is aliased to DATETIME
+    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP -- TIMESTAMP is aliased to DATETIME
     -- FOREIGN KEY (id) - This foreign key definition is incomplete and likely incorrect.
     -- If it's meant to reference another table, it needs a REFERENCES clause.
     -- For now, I'm commenting it out as it's malformed.
@@ -123,3 +125,5 @@ CREATE TABLE inbox (
     -- user_id INTEGER,
     -- FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+

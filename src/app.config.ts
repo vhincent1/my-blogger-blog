@@ -1,6 +1,6 @@
 import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config({path: '.env'});
+dotenv.config({ path: '.env' });
 
 const CONFIG = {
   // blogger.lib.js config
@@ -10,18 +10,19 @@ const CONFIG = {
     blogId: '7847840505089960893',
 
     // where to save export data
-    exported: './public/dist/blogger-export.json',
+    exported: './public/dist/blogger-export.json', // ->
+    // converted posts
     new: './public/dist/new.json',
 
     // where to save/display exported media (updates <img src> tags)
     exportConfig: {
-      enabled: true,
       uploadPath: './public/content/', // folder path
       hostPath: '/content/', // img src tags
       // hostPath: 'http://127.0.0.1:3000/content/',
       // hostPath: 'http://192.168.40.220:3000/content/',
+      /** Image downloader **/
       storageDir: (hostPath, bloggerPost, index) => hostPath + bloggerPost.author.displayName + '/' + index, // SAME THING
-      errorLog: path.resolve('./public/dist', 'missing_images.txt'),
+      errorLog: path.resolve('./public/logs', 'missing_images.json'),
       inspectLog: path.resolve('./public/dist', 'manual_download.json'),
       //   uploadPath: (path, post, index)=> path + post.author.displayName + '/' + index,
     },
@@ -31,11 +32,13 @@ const CONFIG = {
     type: 'sqlite', // storage type : json, sqlite
     file: './public/dist/new.json', // blog posts data
     sqlite3: './database/database.db',
+    /**
+     * where content is stored (./public/content/AUTHOR/POST_ID)
+     */
     // uploaded media path
     uploadPath: process.cwd() + '/public/content/',
     // host: 'http://127.0.0.1:3000', // host
-    // where content is stored (./public/content/AUTHOR/POST_ID)
-    contentPath: (uploadPath, post) => uploadPath + post.author + '/' + post.id + '/', // SAME THING
+    contentPath: (post) => CONFIG.database.uploadPath + post.author + '/' + post.id + '/', // SAME THING
   },
 
   // express config
@@ -49,15 +52,15 @@ const CONFIG = {
       editPost: (post) => `/post/${post.id}/edit`,
       createPost: '/post',
       footerLinks: {
-        "/": "Home",
-        "/index": "Index",
-        "/login": "Login",
-        "/dashboard": "Dashboard",
-        "/post": "Post",
-        "/gallery": "Gallery"
-      }
-    }
-  }
+        '/': 'Home',
+        '/index': 'Index',
+        '/login': 'Login',
+        '/dashboard': 'Dashboard',
+        '/post': 'Post',
+        '/gallery': 'Gallery',
+      },
+    },
+  },
 };
 
 export default CONFIG;

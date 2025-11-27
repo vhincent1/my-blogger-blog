@@ -5,9 +5,12 @@
 // const post = null
 // const editting = false
 // }
-const title = editting? post.title : ''; 
-const labels = editting? post.labels : '';
-const content = editting? post.content : '';
+const title = editting? post?.title : ''; 
+const labels = editting? post?.labels : '';
+const content = editting? post?.content : '';
+const source = editting? post?.source : '';
+
+
 
 //error
 let err = undefined
@@ -20,6 +23,11 @@ if(typeof error === 'undefined'){
 %>
 <head>
   <style>
+    .error {
+      font-family: monospace;
+      background: FIREBRICK;
+      color: WHITE;
+    }
     textarea {
       width: 100vw;
       /* Sets width to 100% of viewport width */
@@ -30,21 +38,21 @@ if(typeof error === 'undefined'){
 
     /* Style the tab */
     .tab {
-      /* overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;*/
+      /*  overflow: hidden;
+          border: 1px solid #ccc;
+          background-color: #f1f1f1; */
     }
 
     /* Style the buttons inside the tab */
     .tab button {
-      /* background-color: inherit;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  font-size: 17px;*/
+      /*  background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;                */
     }
 
     /* Change background color of buttons on hover */
@@ -61,8 +69,8 @@ if(typeof error === 'undefined'){
     .tabcontent {
       display: none;
       /* padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-top: none;*/
+        border: 1px solid #ccc;
+        border-top: none; */
     }
   </style>
 
@@ -105,15 +113,20 @@ if(typeof error === 'undefined'){
   </script>
 </head>
 
-<%if(editting){%>
+<% if(editting) { %>
 <h1>Edit</h1>
-<%}else{%>
+<% } else { %>
 <h1>Create</h1>
-<%}%>
+<% } %>
+<!-- Inputs -->
 <textarea id="title" name="edit-title" placeholder="Blog Title" rows="1"><%=title%></textarea>
 <div class="autocomplete" style="width: 300px">
   <textarea id="labels" name="edit-labels" placeholder="Blog Labels" rows="1"><%=labels%></textarea>
 </div>
+<textarea id="source" name="edit-source" placeholder="Source (reference link)" rows="1"><%=source%></textarea>
+<!-- Error div -->
+<div class="error"><% if(typeof error !== 'undefined'){%>Error: <%=error.message%><% } %></div>
+<!-- Tabs -->
 <div class="tab">
   <button class="tablinks" onclick="openTab(event, 'Info')" id="defaultOpen">Info</button>
   <button class="tablinks" onclick="openTab(event, 'Raw')">Raw</button>
@@ -127,8 +140,7 @@ if(typeof error === 'undefined'){
 <div id="Pell" class="tabcontent"><%- include('../editors/PellEditor', {content}) %></div>
 <div id="SunEditor" class="tabcontent"><%- include('../editors/SunEditor', {content}) %></div>
 <div id="WYSIHTML" class="tabcontent"><%- include('../editors/WYSIHtml', {content}) %></div>
-<div id="Upload" class="tabcontent"><%- include('../editors/Upload', {error: err})
- %></div>
+<div id="Upload" class="tabcontent"><%- include('../editors/Upload', {error: err}) %></div>
 <script>
   // Get the element with id="defaultOpen" and click on it
   document.getElementById('defaultOpen').click();

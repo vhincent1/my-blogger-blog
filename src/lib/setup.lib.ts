@@ -1,8 +1,3 @@
-// import PostService from '../services/post.service.ts';
-// import { Post } from '../model/Post.model.ts';
-
-//TODO databases
-// import SQLiteDatabase from '../database/sqlite.database.ts';
 import database from '../database/index.database.ts';
 // sqliteDb.setup()
 
@@ -45,10 +40,14 @@ import database from '../database/index.database.ts';
 // console.log('done');
 // process.exit(0);
 
+/**
+ *
+ */
+
 import appConfig from '../app.config.ts';
 import { downloadImage, checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from './blogger.lib.js';
 import fs from 'fs/promises';
-
+import HTML_parser from 'node-html-parser';
 // exportBlog();
 
 const exportBlogger = new Promise(async (resolve, reject) => {
@@ -77,6 +76,8 @@ const exportBlogger = new Promise(async (resolve, reject) => {
   // }, 2000);
 });
 
+import path from 'path';
+import type { Post } from '../model/Post.model.ts';
 exportBlogger
   .then(
     (bloggerPosts: any) => {
@@ -89,43 +90,100 @@ exportBlogger
       throw new Error('Further error processing');
     }
   )
-  // download pictures
+  /**
+   * Download pictures
+   */
   .then(async (processedResult: any) => {
+    const errorLogFile = appConfig.blogger.exportConfig.errorLog;
     console.log('Downloading', processedResult.imagesToDownload.length, 'images');
-    const promises = processedResult.imagesToDownload.map(async (o) => {
-      if (!(await checkFileExistence(o.path))) {
-        const error = await downloadImage(o.source, o.path);
-        if (appConfig.blogger.exportConfig.errorLog)
-          if (error) {
+
+    const downloadImages = async () => {
+      const missingData: any = [];
+      const result = processedResult.imagesToDownload.map(async (o) => {
+        await fs.mkdir(path.dirname(o.path), { recursive: true });
+        const ifImageExists = await checkFileExistence(o.path);
+        if (!ifImageExists) {
+          const error = await downloadImage(o.source, o.path);
+          if (errorLogFile && error) {
             const errorInfo = {
               postId: o.index,
               author: o.author,
               imageSource: o.source,
-              error: error.toString(),
+              downloadPath: o.path, //path.dirname(o.path),
+              error: await error.toString(),
             };
-            await fs.appendFile(appConfig.blogger.exportConfig.errorLog, JSON.stringify(errorInfo, null, 2));
-            console.log('Error downloading image:', error.message);
+            missingData.push(await errorInfo);
+            console.log('Error downloading image:', await error.message);
           }
-      } else {
-        // console.log('already downloaded')
-      }
-      return 0;
-    });
-    await Promise.all(promises); // Wait for all promises to resolve
+        } else {
+          // console.log('already downloaded')
+        }
+      });
+      await Promise.all(result); // wait for all downloads to resolve
+      // write to log
+      await fs.writeFile(errorLogFile, JSON.stringify(missingData, null, 2));
+    };
+    await Promise.resolve(downloadImages());
+
+    //configure new image sources
+    // const editImageSources = () => {
+    //   const posts: Post[] = processedResult.convertedPosts;
+    //   const imagesToDownload: ImagesToDownload[] = processedResult.imagesToDownload;
+    //   console.log(imagesToDownload.length);
+
+    //   interface ImagesToDownload {
+    //     author: string;
+    //     index: number; // post id
+    //     source: string; //http url
+    //     path: string; //save path
+    //   }
+
+    //   for (const post of posts) {
+    //     const document = HTML_parser.parse(post.content);
+    //     const imgElements = document.querySelectorAll('img');
+    //     imgElements.forEach((img) => {
+    //       const originalSource: any = img.getAttribute('src');
+
+    //       let imagePath;
+    //       try {
+    //         const imgURL = new URL(originalSource);
+    //         imagePath = imgURL.pathname;
+    //       } catch (err) {
+    //         imagePath = originalSource;
+    //       }
+    //       const baseFileName = path.basename(imagePath);
+    //       const filename = decodeURIComponent(baseFileName);
+
+    //       const cfg = appConfig.blogger.exportConfig;
+    //       const newImgPath = `${cfg.hostPath}${post.author}/${post.id}/${filename}`;
+
+    //       if (post.id == 683) {
+    //         console.log('postID:', post.id, newImgPath);
+    //         console.log(originalSource)
+    //       }
+    //       // img.setAttribute('src', encodeURI(newImgPath));
+    //     });
+
+    //     // const newImgSrc = cfg.storageDir(cfg.hostPath, post);
+    //     // const data = imagesToDownload.filter((o) => {
+    //     //   o.index == post.id;
+    //     // });
+    //   }
+    // };
+    // await Promise.resolve(editImageSources());
+
     console.log('--- Done ---');
     return processedResult;
   })
-  // import to database
+  /**
+   * Import to database
+   */
   .then(async (processedResult: any) => {
     const result = await processedResult;
     if (result.convertedPosts) {
-      switch (appConfig.database.type) {
-        case 'sqlite':
-          database.setup();
-          database.importPosts(result.convertedPosts);
-          console.log('Import to sqlite3 db');
-          break;
-      }
+      console.log('Importing to ', appConfig.database.type);
+      database.setup();
+      database.importPosts(result.convertedPosts);
     } else if (result.errors) {
       console.log('Errors:', result.errors);
     }

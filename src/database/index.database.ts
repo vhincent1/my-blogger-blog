@@ -1,7 +1,8 @@
 import appConfig from '../app.config.ts';
-import { Post } from '../model/Post.model.ts';
+import type { Post } from '../model/Post.model.ts';
 import SQLiteDatabase from './sqlite.database.ts';
 import JSONDatabase from './json.database.ts';
+import type Heart from '../model/Heart.model.ts';
 
 class Database implements DatabaseI {
   config; //type
@@ -11,9 +12,11 @@ class Database implements DatabaseI {
   constructor(config) {
     this.config = config;
   }
+  heartPost() {
+    throw new Error('Method not implemented.');
+  }
 
   async load() {
-    console.log('loading');
     if (this.config.type == 'json') {
       this.db = JSONDatabase;
       await JSONDatabase.load();
@@ -26,14 +29,19 @@ class Database implements DatabaseI {
   }
 
   //select
-  getAllBlogPosts() {
+  getAllBlogPosts(): Post[] {
     // return this.blogPosts;
     return this.db.getAllBlogPosts();
+  }
+
+  getHearts(): Heart[] {
+    return this.db.getHearts();
   }
 
   importPosts(posts: Post[]): void {
     this.db.importPosts(posts);
   }
+
   setup(): void {
     // throw new Error('Method not implemented.');
   }
@@ -66,6 +74,9 @@ export interface DatabaseI {
 
   // createPost(post): void
   // savePost(post): void
+
+  getHearts(): Heart[];
+  heartPost(id, user, value)
 
   setup(): void;
   importPosts(posts: Post[]): void;

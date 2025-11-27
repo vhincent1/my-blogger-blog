@@ -2,10 +2,11 @@ import express from 'express';
 import { performance } from 'node:perf_hooks';
 /* routes */
 import emojis from './emojis.ts';
-import healthRouter from './health.routes.ts';
+import healthRouter from './health.ts';
 import inboxRouter from '../inbox.ts';
-import pingRouter from './ping.routes.ts';
-import uploadRouter from './upload.routes.ts';
+import pingRouter from './ping.ts';
+import uploadRouter from './upload.ts';
+import heart from './heart.ts';
 /* services */
 import { ServiceResponse } from '../../../model/ServiceResponse.model.ts';
 import PostService from '../../../services/post.service.ts';
@@ -41,6 +42,8 @@ router.use('/ping', pingRouter);
 router.use('/upload', uploadRouter);
 router.use('/emojis', emojis);
 router.use('/inbox', inboxRouter);
+// heart widget
+router.use('/heart', /*authController.isAuthenticated,*/ heart);
 
 /* post  */
 router.use('/posts/format', async (req, res) => {

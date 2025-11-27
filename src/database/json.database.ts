@@ -5,6 +5,7 @@ import type { Post } from '../model/Post.model.ts';
 import type { DatabaseI } from './index.database.ts';
 
 import { filter, truncate } from '../utils/array.utils.ts';
+import type { Heart } from '../model/Heart.model.ts';
 
 const dbMutex = new Mutex();
 
@@ -44,6 +45,9 @@ class JSONDatabase implements DatabaseI {
   // comments;
   constructor(config) {
     this.config = config;
+  }
+  getHearts(): Heart[] {
+    throw new Error('Method not implemented.');
   }
 
   setup(): void {
@@ -108,6 +112,9 @@ class JSONDatabase implements DatabaseI {
 
   //delete
   async delete() {}
+    heartPost(id, user, value) {
+    throw new Error('Method not implemented.');
+  }
 }
 const database = new JSONDatabase(appConfig.database)
 export default database;

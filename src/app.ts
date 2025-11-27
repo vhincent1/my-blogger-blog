@@ -135,6 +135,10 @@ app.use(middlewares.notFound);
 // from app.get() etc
 app.use(middlewares.errorHandler);
 const server = app.listen(port, () => {
+  // const addressInfo = server.address();
+  // const host = addressInfo.address === '::' ? 'localhost' : addressInfo.address; // Handle IPv6 '::' for localhost
+  // const port = addressInfo.port;
+
   /* eslint-disable no-console */
   // console.log(`${chalk.bgYellow.black('Listening:')} ` + chalk.bgBlue.white(`http://localhost:${port}`));
   console.log(`${chalk.bgBlue.white(`Listening: http://localhost:${port}`)}`);

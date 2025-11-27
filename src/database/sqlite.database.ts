@@ -1,8 +1,10 @@
 import SQLite3 from 'better-sqlite3';
 import fs from 'fs';
 import { PostStatus, Post } from '../model/Post.model.ts';
-import { PostsTable, type Posts } from '../model/Tables.model.ts';
+import { PostsTable, type Posts, HeartsTable, type Hearts } from '../model/Tables.model.ts';
 import { type DatabaseI } from './index.database.ts';
+
+import Heart from '../model/Heart.model.ts';
 import User from '../model/User.model.ts';
 
 //TODO: post sizes
@@ -13,8 +15,9 @@ class SQLiteDatabase implements DatabaseI {
     this.db = new SQLite3(config.sqlite3);
     this.db.pragma('journal_mode = WAL');
   }
+
   load(): void {
-    throw new Error('Method not implemented.');
+    // throw new Error('Method not implemented.');
   }
 
   close(): void {
@@ -71,7 +74,7 @@ class SQLiteDatabase implements DatabaseI {
       for (const post of postsData) {
         const values: Posts = {
           id: post.id,
-          user_id: 1,
+          user_id: 2,
           title: post.title,
           content: post.content,
           labels: post.labels.toString(),
@@ -87,28 +90,28 @@ class SQLiteDatabase implements DatabaseI {
       console.log('Successfully inserted', result.get().count, 'posts rows');
     });
 
-    checkTable = this.db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get('media');
-    if (!checkTable) {
-      console.error("media table doesn't exist, use setup()");
-      return;
-    }
+    // checkTable = this.db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get('media');
+    // if (!checkTable) {
+    //   console.error("media table doesn't exist, use setup()");
+    //   return;
+    // }
 
     // media
-    const insertMediaStmt = this.db.prepare('INSERT OR REPLACE INTO media (id, user_id, images) VALUES (:id, :user_id, :images)');
-    const insertMedia = this.db.transaction((postsData) => {
-      for (const post of postsData)
-        if (post.media?.images) {
-          const values = { id: post.id, user_id: 1, images: JSON.stringify(post.media?.images) };
-          insertMediaStmt.run(values);
-        }
+    // const insertMediaStmt = this.db.prepare('INSERT OR REPLACE INTO media (id, user_id, images) VALUES (:id, :user_id, :images)');
+    // const insertMedia = this.db.transaction((postsData) => {
+    //   for (const post of postsData)
+    //     if (post.media?.images) {
+    //       const values = { id: post.id, user_id: 1, images: JSON.stringify(post.media?.images) };
+    //       insertMediaStmt.run(values);
+    //     }
 
-      const result = this.db.prepare('SELECT count(*) AS count FROM media');
-      console.log('Successfully inserted', result.get().count, 'media rows');
-    });
+    //   const result = this.db.prepare('SELECT count(*) AS count FROM media');
+    //   console.log('Successfully inserted', result.get().count, 'media rows');
+    // });
 
     try {
       insertPosts(posts);
-      insertMedia(posts);
+      // insertMedia(posts);
     } catch (err) {
       console.error('Error inserting posts:', err);
     }
@@ -146,11 +149,11 @@ class SQLiteDatabase implements DatabaseI {
     return update.run(status, post.id);
   }
 
-  #mapMedia(post_id: number) {
-    const statement = this.db.prepare('SELECT images FROM media WHERE id = ?');
-    const result = statement.get(post_id);
-    if (result) return JSON.parse(result.images);
-  }
+  // #mapMedia(post_id: number) {
+  //   const statement = this.db.prepare('SELECT images FROM media WHERE id = ?');
+  //   const result = statement.get(post_id);
+  //   if (result) return JSON.parse(result.images);
+  // }
 
   #mapRowToPost(row) {
     if (!row) return null;
@@ -171,8 +174,8 @@ class SQLiteDatabase implements DatabaseI {
     post.status = row.status;
     post.source = row.source;
 
-    const images = this.#mapMedia(row.id);
-    if (images) post.media = { images: images };
+    // const images = this.#mapMedia(row.id);
+    // if (images) post.media = { images: images };
 
     return post;
   }
@@ -213,6 +216,70 @@ class SQLiteDatabase implements DatabaseI {
     const statement = this.db.prepare('SELECT * FROM users');
     const rows = statement.all();
     return rows.map((row) => this.#mapRowToUser(row));
+  }
+
+  getHearts(): Heart[] {
+    const statement = this.db.prepare('SELECT * FROM hearts');
+    const rows = statement.all();
+    return rows.map((row) => {
+      if (!row) return null;
+      return new Heart(row.post_id, row.user_id, row.value);
+    });
+  }
+
+  heartPost(id, user_id, value) {
+    //     const existingLike = await db.query('SELECT * FROM likes WHERE item_id = ? AND user_id = ?', [itemId, userId]);
+    //     let newLikeCount;
+    //     if (existingLike.length > 0) {
+    //       // User already liked, so unlike it (or toggle dislike)
+    //       await db.query('DELETE FROM likes WHERE item_id = ? AND user_id = ?', [itemId, userId]);
+    //       newLikeCount = await db.query('SELECT COUNT(*) AS count FROM likes WHERE item_id = ? AND value = 1', [itemId]);
+    //     } else {
+    //       // User has not liked, so add a like
+    //       await db.query('INSERT INTO likes (item_id, user_id, value) VALUES (?, ?, 1)', [itemId, userId]);
+    //       newLikeCount = await db.query('SELECT COUNT(*) AS count FROM likes WHERE item_id = ? AND value = 1', [itemId]);
+    //     }
+    //     res.json({ message: 'Like status updated', newLikeCount: newLikeCount[0].count });
+    //   } catch (error) {
+    //     console.error('Database error:', error);
+    //     res.status(500).json({ error: 'Internal server error' });
+    //   }
+
+    const existingLike = this.db.prepare('SELECT * FROM hearts WHERE post_id = ? AND user_id = ?');
+    let result = existingLike.all(id, user_id);
+
+    console.log('exisiting:', result.length);
+
+    if (result.length > 0) {
+      // User already liked, so unlike it (or toggle dislike)
+      const toggle = this.db.prepare('DELETE FROM hearts WHERE post_id = ? AND user_id = ?');
+      result = toggle.run(id, user_id);
+      console.log('unheart:', result);
+    } else {
+      // User has not liked, so add a like
+      const toggle = this.db.prepare('INSERT OR REPLACE INTO hearts (post_id, user_id, value) VALUES (?, ?, ?)');
+      result = toggle.run(id, user_id, value);
+      console.log('heart:', result);
+    }
+
+    const newLikeCount = this.db.prepare('SELECT COUNT(*) AS count FROM hearts WHERE post_id = ? AND value = 1');
+    console.log('new like count for post_id:', id, newLikeCount.get(id).count);
+
+    console.log('Number of rows changed:', result.changes, '@ Row:', result.lastInsertRowid);
+
+    //prettier-ignore
+    // const placeholders = Object.keys(HeartsTable).map((col) => `:${col}`).join(', ');
+    // const columns = Object.keys(HeartsTable).join(', ');
+
+    // const insertStatement = this.db.prepare(`INSERT OR REPLACE INTO hearts (${columns}) VALUES (${placeholders});`);
+    // const values: Hearts = {
+    //   post_id: id,
+    //   user_id: user_id,
+    //   value: value,
+    // };
+
+    // const info = insertStatement.run(values);
+    // console.log(info)
   }
 }
 

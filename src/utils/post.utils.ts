@@ -1,30 +1,27 @@
 import appConfig from '../app.config.ts';
 // image db
-import fs from 'fs';
-import { fileFormat } from './io.utils.ts';
+import { fileFormat, getFileSize, checkFileExistence } from './io.utils.ts';
 // content formatting
 import parser from 'node-html-parser';
 import path from 'path';
 import type { GalleryEntry } from '../model/Gallery.model.ts';
 
 // generates size of post
-export function buildSizeTable(post) {
-  // size of images
-  let totalImageSize = 0;
-  if (post.media)
-    for (const filename of post.media.images) {
-      // console.log(decodeURIComponent(filename))
-      const imagePath = appConfig.database.contentPath(appConfig.database.uploadPath, post) + decodeURIComponent(filename);
-      // console.log(imagePath)
-      if (fs.existsSync(imagePath)) {
-        const size = fs.statSync(imagePath).size;
-        totalImageSize += size;
-      } else {
-        // console.log(`[buildSizeTable(${post.id})] doesnt exist: ${imagePath}`);
-      }
-    }
+export async function buildSizeTable(post) {
+  const document = parser.parse(post.content);
 
-  // if(totalImageSize>0) console.log(post.id)
+  let totalImageSize = 0;
+  const imgElements: any = document.querySelectorAll('img');
+  for (const img of imgElements) {
+    const filename = path.basename(img.getAttribute('src'));
+    const imagePath = appConfig.database.contentPath(post) + decodeURIComponent(filename);
+    if (await checkFileExistence(imagePath)) {
+      const size = await getFileSize(imagePath);
+      totalImageSize += size;
+    } else {
+      // console.log(`[buildSizeTable(${post.id})] doesnt exist: ${imagePath}`);
+    }
+  }
 
   // size of post
   const jsonString = JSON.stringify(post, (key, value) => {
@@ -40,7 +37,6 @@ export function buildSizeTable(post) {
     content: fileFormat.formatBytes(byteSize),
     images: fileFormat.formatBytes(totalImageSize),
     total: fileFormat.formatBytes(byteSize + totalImageSize),
-    // format: 'Kb',
   };
 }
 
@@ -288,8 +284,9 @@ export async function importFolder(directoryPath) {
         console.log('element:', element.getAttribute('src'));
       });
 
-      const uploadPath = `${process.cwd()}/public/content/`;
-      const hostURL = appConfig.database.contentPath(uploadPath, post);
+      // const uploadPath = `${process.cwd()}/public/content/`;
+      // const hostURL = appConfig.database.contentPath(uploadPath, post);
+      const hostURL = appConfig.database.contentPath(post);
       console.log('image path:', hostURL);
 
       return { success: true, post };

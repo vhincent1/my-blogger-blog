@@ -1,5 +1,14 @@
-// import PostService from './src/services/post.service.ts';
-// import { Post } from './src/model/Post.model.ts';
+import PostService from './src/services/post.service.ts';
+import sqlitedb from './src/database/sqlite.database.ts';
+
+// PostService.heartPost({post_id: 1, user_id: 1, value:1})
+
+for (let i = 0; i < 10; i++) {
+  console.log(i); // Outputs 0, 1, 2, 3, 4
+  sqlitedb.heartPost(i, 1, 1);
+}
+
+// sqlitedb.heartPost(1, 1, 1);
 
 // const serviceResponse = await PostService.getPosts();
 // const posts: Post[] | null = await serviceResponse.responseObject;
@@ -38,3 +47,5 @@
 
 // import sqliteDb from './src/database/sqlite.database.ts';
 // sqliteDb.setup()
+
+//   getResourceSize("http://127.0.0.1:3000/content/VHINCENT/700/s-l1200.webp");

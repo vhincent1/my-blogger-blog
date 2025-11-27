@@ -1,12 +1,34 @@
 import fs from 'fs/promises';
 
+// export async function getResourceSize(url) {
+//   try {
+//     const response = await fetch(url, { method: 'HEAD' }); // Use HEAD request for metadata only
+//     if (response.ok) {
+//       const contentLength = response.headers.get('Content-Length');
+//       if (contentLength) {
+//         console.log(`Size of resource at ${url}: ${parseInt(contentLength, 10)} bytes`);
+//         return parseInt(contentLength, 10);
+//       } else {
+//         console.warn(`Content-Length header not found for ${url}`);
+//         return 0;
+//       }
+//     } else {
+//       console.error(`Failed to fetch resource headers from ${url}: ${response.status} ${response.statusText}`);
+//       return 0;
+//     }
+//   } catch (error) {
+//     console.error(`Error getting resource size for ${url}:`, error);
+//     return 0;
+//   }
+// }
+
 async function checkFileExistence(filePath) {
   try {
-    await fs.access(filePath); //, fs.constants.F_OK); // F_OK checks if the file/folder exists
-    // return true;
+    await fs.access(filePath, fs.constants.F_OK); // F_OK checks if the file/folder exists
+    return true;
   } catch (error) {
     // throw error;
-    // return false
+    return false
   }
 }
 

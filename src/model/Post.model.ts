@@ -1,8 +1,10 @@
 export class Post {
   public id: number | null;
+
   constructor(id: number | null) {
     this.id = id;
   }
+
   public title: string;
   public content: string;
   public labels: string[];
@@ -10,6 +12,7 @@ export class Post {
     published: new Date(),
     updated: new Date(),
   };
+
   public author: string;
   public status: PostStatus = PostStatus.PUBLISHED;
   public category: number = 0;

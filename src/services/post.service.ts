@@ -5,7 +5,7 @@ import { PostRepository } from '../repository/post.repository.ts';
 import { StatusCodes } from 'http-status-codes';
 
 import { filter, truncate } from '../utils/array.utils.ts';
-
+import Heart from '../model/Heart.model.ts';
 
 class PostService {
   repository: PostRepository;
@@ -106,6 +106,14 @@ class PostService {
     return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NOT_FOUND);
   }
 
+  async heartPost(parameters): Promise<ServiceResponse<any>> {
+    if (parameters) parameters.meta = { source: 'heartPost' };
+    this.repository.heartPost(parameters);
+
+    const heart = new Heart(0, 0, 0);
+    return ServiceResponse.success<Heart>('Send heart', parameters, heart);
+  }
+
   // async getPostsByDate(month, year, parameters?) {
   //   const serviceResponse = await this.getPostsByMonthYear(parameters)
   //   const result: any = serviceResponse.responseObject
@@ -121,7 +129,7 @@ class PostService {
 
     interface ArchiveMenu {
       parameters: any;
-      archive;
+      archive: any; //ytd
     }
 
     interface YearToDateMenu {
@@ -160,7 +168,8 @@ class PostService {
 
           //prettier-ignore
           Object.keys(postsByMonthYear).filter((key) => key.includes(year))
-            .reverse()/*descending order*/.forEach(async (key) => {
+            .reverse()/*descending order*/
+            .forEach(async (key) => {
               const posts = postsByMonthYear[key];
               const month = key.replace(' ' + year, '');
               const monthCount = posts.length;

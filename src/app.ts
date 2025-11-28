@@ -14,6 +14,7 @@ import routes from './routes/app.routes.ts';
 //middleware
 import * as middlewares from './middleware/errorhandler.middleware.ts';
 import { handleShutdown } from './middleware/shutdown.middleware.ts';
+import expressStatusMonitorMiddleware from './middleware/express-status-monitor.middleware.ts';
 
 const app = express();
 const port = process.env.PORT;
@@ -33,9 +34,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // Enable CORS for all routes (for development purposes, or if you want to allow all origins)
 app.use(cors());
-
-import expressStatusMonitorMiddleware from './middleware/express-status-monitor.middleware.ts';
-import type { Server, IncomingMessage, ServerResponse } from 'http';
 app.use(expressStatusMonitorMiddleware);
 
 // Or, configure CORS to allow specific origins:
@@ -72,8 +70,9 @@ app.use((req, res, next) => {
   // Get the remote IP address
   let remoteIp = req.ip || req.connection.remoteAddress; // Use req.ip if trust proxy is enabled
   // Store the IP address in the session if it's not already there
-  if (!req.session.remoteAddress) {
-    req.session.remoteAddress = remoteIp;
+  const session: any = req.session
+  if (!session.remoteAddress) {
+    session.remoteAddress = remoteIp;
   }
   // You can also update it on subsequent requests if needed,
   // for example, to track changes in IP address (e.g., mobile network changes)
@@ -134,6 +133,7 @@ app.use(middlewares.notFound);
 // if it were above it would not receive errors
 // from app.get() etc
 app.use(middlewares.errorHandler);
+
 const server = app.listen(port, () => {
   // const addressInfo = server.address();
   // const host = addressInfo.address === '::' ? 'localhost' : addressInfo.address; // Handle IPv6 '::' for localhost

@@ -46,8 +46,9 @@ const galleryController = {
     const serviceResponse = await PostService.getGallery({
       search: req.query.search,
       type: req.query.type,
-      filter: 'id'
+      filter: 'id',
     });
+    
     const posts = serviceResponse.responseObject;
 
     const paginatedResult = await getPaginatedData(parameters, posts);
@@ -57,7 +58,7 @@ const galleryController = {
 
     // const pagination = await pageController.pagination(req, parameters);
     if (paginatedResult.currentPage > paginatedResult.totalPages) return res.status(404).json({ error: 'Page limit exceeded' });
-    res.render('v1/gallery', { images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
+    res.render('v1/gallery', { showFeed: true, images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
   },
 };
 

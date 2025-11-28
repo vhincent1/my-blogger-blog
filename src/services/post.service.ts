@@ -17,7 +17,8 @@ class PostService {
   async getPosts(parameters?): Promise<ServiceResponse<Promise<Post[] | null>>> {
     try {
       // TODO: parameters.meta
-      console.log('getPosts: ', parameters.meta);
+      // if (parameters.meta) console.log('getPosts: ', parameters.meta);
+      if (parameters) parameters.meta = { source: 'getPosts' };
       const posts = this.repository.findAllPostsAsync(parameters);
       // const posts = await this.repository.findAllPostsAsync(parameters);
       if (!posts) return ServiceResponse.failure('No Posts found', parameters, Promise.resolve(null), StatusCodes.NO_CONTENT);

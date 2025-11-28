@@ -1,5 +1,11 @@
 <%- include('../partials/header', {title: 'Gallery'}) -%>
 <style>
+  /* position checkbox top right of pic */
+  .checkbox {
+    position: absolute;
+    margin-left: -16px;
+  }
+
   #photos {
     line-height: 0;
     -webkit-column-count: 5;
@@ -48,30 +54,127 @@
   }
 </style>
 <!-- Body -->
-<h1>Gallery</h1>
-<div id="rss-feed-container">
+<h1>GALLERY 2</h1>
+<div id="toolbar">
+  <input type="checkbox" id="myCheckbox" />
+  <label for="myCheckbox">Toggle me</label>
+  <button onclick="getValues()">get selected</button>
+  <button onclick="clearSelection()">clear selection</button>
+  <div id="status" style="font-family: monospace;"></div>
+</div>
+<script>
+  const toolbar = document.getElementById('toolbar')
+  const statusDiv = document.getElementById('status')
+  const myCheckbox = document.getElementById('myCheckbox');
+
+  function getValues() {
+    console.log('values')
+    const selected = document.getElementsByName('select')
+    const total = []
+    selected.forEach(element => {
+      if (element.checked) {
+        console.log('value:', element.postId)
+        total.push(element.postId)
+      }
+    })
+    console.log('selected values: ', total.length)
+    statusDiv.innerHTML = 'Selected: ' + total
+  }
+
+  function clearSelection() {
+    console.log('clear')
+    const selected = document.getElementsByName('select')
+    selected.forEach(element => {
+      if (element.checked) element.checked = false
+    });
+  }
+
+  //   preserve
+  let prevClick
+  window.addEventListener('load', () => {
+    const elements = document.querySelectorAll('.widget-image-open-modal')
+    for (const element of elements) prevClick = element.onclick
+  })
+
+  // You can also add an event listener directly to the checkbox
+  myCheckbox.addEventListener('change', () => {
+    console.log('Checkbox state changed:', myCheckbox.checked);
+
+    const elements = document.querySelectorAll('.widget-image-open-modal')
+
+    // for (const element of elements) {
+    elements.forEach((element, index) => {
+      if (myCheckbox.checked) {
+        console.log('toggle')
+        element.onclick = () => {
+          console.log('clicked postId:', element.dataset.postId)
+        }
+
+        const label = document.createElement('label')
+        label.id = 'label' + index
+        label.setAttribute('for', 'checkbox' + index)
+
+        const checkbox = document.createElement('input')
+        checkbox.id = 'checkbox' + index
+        checkbox.type = 'checkbox'
+        checkbox.className = 'checkbox'
+        checkbox.name = 'select'
+
+        // checkbox.style = 'position: absolute; left: 180px;'
+
+        // const imgData = element.getElementsByTagName('img')[0]
+        // console.log('data:', element.dataset.postId)
+
+        checkbox.postId = element.dataset.postId
+
+        //wrap
+        element.parentNode.insertBefore(label, element);
+        label.appendChild(element);
+        //--
+
+        element.after(checkbox)
+      } else {
+        console.log('revert')
+        element.onclick = prevClick
+
+        document.getElementById('checkbox' + index).remove()
+        const label = document.getElementById('label' + index)
+        const img = label.getElementsByTagName('img')[0]
+        label.after(img)
+        label.remove()
+      }
+
+      //   console.log(elements.length)
+    });
+  });
+</script>
+<div id=" rss-feed-container">
   <!-- RSS feed items will be dynamically inserted here -->
 </div>
 <!-- Folder -->
 <div class="feed-item">
   <h2>images/avatars/NFTs</h2>
-  <% images.forEach(image => {%>
-  <img class="widget-image-open-modal" id="myImg" src="<%=image.path%>" alt="<%=image.fileName%>" style="width:200px">
+  <% images.forEach((image, index) => {%>
+  <a href="#<%=index%>"><img class="widget-image-open-modal" id="myImg<%=index%>" data-post-id="<%=index%>" src="<%=image.path%>" alt="<%=image.fileName%>" style="width: 200px" /></a>
   <%});%>
 </div>
+
 <!-- Index -->
+<%if (showFeed) { %>
 <div class="feed-item">
   <h2><%-include('sorted-labels', {path: 'gallery'})-%></h2>
   <section id="photos">
-    <%paginationResult.data.forEach(result => { for(const image of result.images){%>
+    <%paginationResult.data.forEach(result => { for(const image of result.images) {%>
     <%const caption = '<a href='+common.links.viewPost({id: result.postId})+'>'+result.title+'</a>'%>
     <a href="#<%=result.postId%>">
-      <img class="widget-image-open-modal" id="myImg<%=result.postId%>" src="<%=image%>" alt="<%=caption%>" style="width:300px; <%if(result.isNSFW){%>filter: blur(1.5rem);<%}%>" onerror="Widgets_ImageModal.onImgError(this)">
+      <img class="widget-image-open-modal" id="myImg<%=result.postId%>" src="<%=image%>" alt="<%=caption%>" style="width:300px; <%if(result.isNSFW) {%>filter: blur(1.5rem);<% } %>" onerror="Widgets_ImageModal.onImgError(this)" data-post-id="<%=result.postId%>" />
     </a>
-    <%}%>
+    <%}%> 
     <%});%>
   </section>
 </div>
+<%}%> 
+
 <%-include('pagination')-%>
 <%-include('image-modal')-%>
 <%-include('../partials/footer')-%>

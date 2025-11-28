@@ -7,26 +7,35 @@ import { homepageController } from '../../controller/home.controller.ts';
 
 const route = express.Router();
 
+/**
+ * v1
+ */
 route.get('/', homepageController.getFrontPage);
 route.get('/index', homepageController.getIndex);
 route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
-route.get('/gallery', galleryController.index)
-route.get('/chart', async (req, res) => { res.render('chart') })
+route.get('/gallery', galleryController.index);
+route.get('/chart', async (req, res) => {
+  res.render('chart');
+});
 route.get('/search', async (req, res) => {
-  const { limit, page } = req.query
-
+  const { limit, page } = req.query;
   //if(!search)res.status(400).send('Missing search')
-  res.render('search')
-})
+  res.render('search');
+});
+
+/**
+ * v2
+ */
 route.get('/v2', async (req, res) => {
-  res.render('v2/index', {theme: 1, limit:5})
-})
+  res.render('v2/index', { theme: 1, limit: 5 });
+});
 
 route.get('/v2/index', async (req, res) => {
-  const { limit, page } = req.query
+  const { limit, page } = req.query;
   // console.log(req.query)
-  res.render('v2/index', {theme: 0, limit: 25})
-})
+  res.render('v2/index', { theme: 0, limit: 25 });
+});
+
 
 import jwt from 'jsonwebtoken';
 

@@ -143,6 +143,7 @@
     },
 
     openModal(targetElement) {
+      console.log('open modal')
       Widgets_ImageModal.modal.style.display = "block";
       Widgets_ImageModal.modalImg.src = targetElement.src;
       Widgets_ImageModal.captionText.innerHTML = targetElement.alt;

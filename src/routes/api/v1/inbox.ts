@@ -1,7 +1,7 @@
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Worker } from 'node:worker_threads';
-import { inboxLimiter } from '../../middleware/limiter.middleware.ts';
+import { inboxLimiter } from '../../../middleware/limiter.middleware.ts';
 
 const router = express.Router();
 

@@ -14,6 +14,8 @@ route.get('/', homepageController.getFrontPage);
 route.get('/index', homepageController.getIndex);
 route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
 route.get('/gallery', galleryController.index);
+
+//wip
 route.get('/chart', async (req, res) => {
   res.render('chart');
 });
@@ -29,7 +31,6 @@ route.get('/search', async (req, res) => {
 route.get('/v2', async (req, res) => {
   res.render('v2/index', { theme: 1, limit: 5 });
 });
-
 route.get('/v2/index', async (req, res) => {
   const { limit, page } = req.query;
   // console.log(req.query)

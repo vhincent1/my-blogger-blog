@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import PostService from '../services/post.service.ts';
 import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
-import { filter } from 'compression';
+import { StatusCodes } from 'http-status-codes';
 
 // Example usage:
 const targetDirectory = './public/images';
@@ -48,7 +48,7 @@ const galleryController = {
       type: req.query.type,
       filter: 'id',
     });
-    
+
     const posts = serviceResponse.responseObject;
 
     const paginatedResult = await getPaginatedData(parameters, posts);
@@ -57,7 +57,9 @@ const galleryController = {
     // parameters.data = posts
 
     // const pagination = await pageController.pagination(req, parameters);
-    if (paginatedResult.currentPage > paginatedResult.totalPages) return res.status(404).json({ error: 'Page limit exceeded' });
+    if (paginatedResult.currentPage > paginatedResult.totalPages) {
+      return res.status(StatusCodes.NOT_FOUND).json({ error: 'Page limit exceeded' });
+    }
     res.render('v1/gallery', { showFeed: true, images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });
   },
 };

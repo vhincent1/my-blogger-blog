@@ -10,6 +10,7 @@ import User from '../model/User.model.ts';
 //TODO: post sizes
 
 class SQLiteDatabase implements DatabaseI {
+  version = 2; //2 json
   db;
   constructor(config) {
     this.db = new SQLite3(config.sqlite3);
@@ -62,12 +63,6 @@ class SQLiteDatabase implements DatabaseI {
       return;
     }
 
-    const columns = Object.keys(PostsTable).join(', ');
-    // prettier-ignore
-    const placeholders = Object.keys(PostsTable).map((col) => `:${col}`).join(', ');
-    const query = `INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders});`;
-    const insertStmt = this.db.prepare(query);
-
     // Execute the statement with values
     // Create a function to run the insertion within a transaction
     const insertPosts = this.db.transaction((postsData) => {
@@ -78,13 +73,39 @@ class SQLiteDatabase implements DatabaseI {
           title: post.title,
           content: post.content,
           labels: post.labels.toString(),
-          created_at: new Date(post.date.published).toISOString(),
-          updated_at: new Date(post.date.updated).toISOString(),
+          created_at: post.date.published.toISOString(),
+          updated_at: post.date.updated.toISOString(),
           category: post.category,
           source: post.source?.url,
           status: PostStatus.PUBLISHED,
         };
+        const columns = Object.keys(PostsTable).join(', ');
+        // prettier-ignore
+        const placeholders = Object.keys(PostsTable).map((col) => `:${col}`).join(', ');
+        const query = `INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders});`;
+        const insertStmt = this.db.prepare(query);
         insertStmt.run(values);
+      }
+      const result = this.db.prepare('SELECT count(*) AS count FROM posts');
+      console.log('Successfully inserted', result.get().count, 'posts rows');
+    });
+
+    const insertPostsJson = this.db.transaction((postsData) => {
+      for (const post of postsData) {
+        const values: Posts = {
+          id: post.id,
+          user_id: 2,
+          title: post.title,
+          content: post.content,
+          labels: post.labels.toString(),
+          created_at: post.date.published,
+          updated_at: post.date.updated,
+          category: post.category,
+          source: post.source?.url,
+          status: PostStatus.PUBLISHED,
+        };
+        const insertStmt = this.db.prepare(`INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?);`);
+        insertStmt.run(values.id, JSON.stringify(values));
       }
       const result = this.db.prepare('SELECT count(*) AS count FROM posts');
       console.log('Successfully inserted', result.get().count, 'posts rows');
@@ -110,8 +131,11 @@ class SQLiteDatabase implements DatabaseI {
     // });
 
     try {
-      insertPosts(posts);
-      // insertMedia(posts);
+      if (this.version === 2) {
+        insertPostsJson(posts);
+      } else {
+        insertPosts(posts);
+      }
     } catch (err) {
       console.error('Error inserting posts:', err);
     }
@@ -125,26 +149,36 @@ class SQLiteDatabase implements DatabaseI {
       title: post.title,
       content: post.content,
       labels: post.labels.toString(),
-      created_at: new Date(post.date.published).toISOString(),
-      updated_at: new Date(post.date.updated).toISOString(),
+      created_at: post.date.published,
+      updated_at: post.date.updated,
       category: post.category,
       source: post.source?.url,
       status: PostStatus.PUBLISHED,
     };
-    const columns = Object.keys(values).join(', ');
-    // prettier-ignore
-    const placeholders = Object.keys(values).map((key) => `:${key}`).join(', ');
-    const insertStatement = this.db.prepare(`INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders})`);
-    const info = insertStatement.run(values);
-    // console.log('Number of rows changed:', info.changes, '@ Row:', info.lastInsertRowid);
 
-    //TODO: media
-    return info;
+    //json
+    if (this.version === 2) {
+      const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?)`;
+      const statement = this.db.prepare(query).run(values.id, JSON.stringify(values));
+      return statement;
+    } else {
+      const columns = Object.keys(values).join(', ');
+      // prettier-ignore
+      const placeholders = Object.keys(values).map((key) => `:${key}`).join(', ');
+      const insertStatement = this.db.prepare(`INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders})`);
+      const info = insertStatement.run(values);
+      // console.log('Number of rows changed:', info.changes, '@ Row:', info.lastInsertRowid);
+      return info;
+    }
   }
 
   async deletePost() {}
 
   postStatus(post: Post, status: PostStatus) {
+    if (this.version === 2) {
+      const update = this.db.prepare('UPDATE posts SET data = json_replace(data, "$.status", ?) WHERE id = ?');
+      return update.run(status, post.id);
+    }
     const update = this.db.prepare('UPDATE posts SET status = ? WHERE id = ?');
     return update.run(status, post.id);
   }
@@ -201,9 +235,9 @@ class SQLiteDatabase implements DatabaseI {
   //   findAllPosts() {
   getAllBlogPosts(): Post[] {
     console.log('getAllBlogPosts()');
-    const statement = this.db.prepare('SELECT * FROM posts');
-    const rows = statement.all().reverse();
-    return rows.map((row) => this.#mapRowToPost(row));
+    const statement = this.db.prepare('SELECT * FROM posts ORDER BY id DESC'); //ASC - recent, DESC - oldest
+    const rows = statement.all();
+    return rows.map((row) => this.#mapRowToPost(this.version === 2 ? JSON.parse(row.data) : row));
   }
 
   findUserById(id: number) {

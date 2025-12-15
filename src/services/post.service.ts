@@ -18,7 +18,7 @@ class PostService {
     try {
       // TODO: parameters.meta
       // if (parameters.meta) console.log('getPosts: ', parameters.meta);
-      if (parameters) parameters.meta = { source: 'getPosts' };
+      // if (parameters) parameters.meta = { source: 'getPosts' };
       const posts = this.repository.findAllPostsAsync(parameters);
       // const posts = await this.repository.findAllPostsAsync(parameters);
       if (!posts) return ServiceResponse.failure('No Posts found', parameters, Promise.resolve(null), StatusCodes.NO_CONTENT);
@@ -121,7 +121,7 @@ class PostService {
   //   return result[month.concat(' ', year)];
   // }
 
-  async getArchiveCount(parameters?) {
+  async getArchive(parameters?) {
     let serviceResponse = await this.getPostCountByYear(parameters);
     const postCountByYear = serviceResponse.responseObject;
 

@@ -267,9 +267,9 @@
 </div><!-- toolbar -->
 
 <%if(content){ %>
-<textarea id="myUniqueTextarea" class="editor" placeholder="Enter text ..."><%- content %></textarea>
+<textarea id="WYSIEditor-myUniqueTextarea" class="editor" placeholder="Enter text ..."><%- content %></textarea>
 <%}else{%>
-<textarea id="myUniqueTextarea" class="editor" placeholder="Enter text ..."></textarea>
+<textarea id="WYSIEditor-myUniqueTextarea" class="editor" placeholder="Enter text ..."></textarea>
 <div style="font-family: 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;">
   <h1><b>THIS </b>is <span style="color: rgb(0, 162, 255); font-weight: 400;">the </span> type<span style="color: rgb(255, 249, 197); font-weight: 400;"><b>writer </b></span><span style="color: rgb(0, 162, 255);"><b><i>for </i></b></span>the <span style="color: rgb(255, 249, 197);"><b>modern</b> </span>web<span style="color: rgb(0, 162, 255);"><b>.</b></span></h1>
   <p>Go on, start typing here ...</p>
@@ -278,7 +278,7 @@
 <small>powered by <a href="https://github.com/Voog/wysihtml" target="_blank">wysihtml</a>.</small>
 
 <h2>Events:</h2>
-<div id="log"></div>
+<div id="WYSIEditor-log"></div>
 
 <script src="/js/wysihtml/wysihtml.min.js"></script>
 <script src="/js/wysihtml/wysihtml.all-commands.min.js"></script>
@@ -287,36 +287,36 @@
 <script>
   const WYSIEditor = {};
 
-  WYSIEditor.textArea = document.getElementById("myUniqueTextarea")
+  WYSIEditor.textArea = document.getElementById("WYSIEditor-myUniqueTextarea")
   WYSIEditor.editor = new wysihtml.Editor(WYSIEditor.textArea, {
     toolbar: document.querySelector('.toolbar'),
     parserRules: wysihtmlParserRules, // Assuming wysihtmlParserRules is defined elsewhere
     // pasteParserRulesets: wysihtmlParserPasteRulesets // Assuming wysihtmlParserPasteRulesets is defined elsewhere
   });
-  var log = document.getElementById("log");
+  WYSIEditor.log = document.getElementById("WYSIEditor-log");
 
   WYSIEditor.editor.on("load", function() {
-      log.innerHTML += "<div>load</div>";
+      WYSIEditor.log.innerHTML += "<div>load</div>";
     })
     .on("focus", function() {
-      log.innerHTML += "<div>focus</div>";
+      WYSIEditor.log.innerHTML += "<div>focus</div>";
     })
     .on("blur", function() {
-      log.innerHTML += "<div>blur</div>";
+      WYSIEditor.log.innerHTML += "<div>blur</div>";
     })
     .on("change", function() {
-      log.innerHTML += "<div>change</div>";
+      WYSIEditor.log.innerHTML += "<div>change</div>";
     })
     .on("paste", function() {
-      log.innerHTML += "<div>paste</div>";
+      WYSIEditor.log.innerHTML += "<div>paste</div>";
     })
     .on("newword:composer", function() {
-      log.innerHTML += "<div>newword:composer</div>";
+      WYSIEditor.log.innerHTML += "<div>newword:composer</div>";
     })
     .on("undo:composer", function() {
-      log.innerHTML += "<div>undo:composer</div>";
+      WYSIEditor.log.innerHTML += "<div>undo:composer</div>";
     })
     .on("redo:composer", function() {
-      log.innerHTML += "<div>redo:composer</div>";
+      WYSIEditor.log.innerHTML += "<div>redo:composer</div>";
     });
 </script>

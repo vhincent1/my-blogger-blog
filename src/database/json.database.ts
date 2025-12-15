@@ -5,16 +5,16 @@ import type { Post } from '../model/Post.model.ts';
 import type { DatabaseI } from './index.database.ts';
 
 import { filter, truncate } from '../utils/array.utils.ts';
-import type { Heart } from '../model/Heart.model.ts';
+import type Heart from '../model/Heart.model.ts';
 
 const dbMutex = new Mutex();
 
-async function readJsonFile(filePath) {
-  console.log('reading')
+export async function readJsonFile(filePath) {
+  console.log('reading');
   try {
     const data = await fs.readFile(filePath, 'utf8');
     const jsonData = JSON.parse(data);
-    console.log(jsonData.length)
+    console.log(jsonData.length);
     return jsonData;
   } catch (error: any) {
     switch (error.code) {
@@ -27,7 +27,7 @@ async function readJsonFile(filePath) {
   }
 }
 
-async function writeJsonFile(filePath, data) {
+export async function writeJsonFile(filePath, data) {
   try {
     const jsonString = JSON.stringify(data, null, 2); // Pretty print JSON
     await fs.writeFile(filePath, jsonString, 'utf8');
@@ -63,7 +63,7 @@ class JSONDatabase implements DatabaseI {
     writeJsonFile(file, data);
   }
 
-  importPosts(posts){
+  importPosts(posts) {
     throw new Error('Method not implemented.');
   }
 
@@ -112,11 +112,11 @@ class JSONDatabase implements DatabaseI {
 
   //delete
   async delete() {}
-    heartPost(id, user, value) {
+  heartPost(id, user, value) {
     throw new Error('Method not implemented.');
   }
 }
-const database = new JSONDatabase(appConfig.database)
+const database = new JSONDatabase(appConfig.database);
 export default database;
 
 // --- API Endpoints with Mutex Protection ---

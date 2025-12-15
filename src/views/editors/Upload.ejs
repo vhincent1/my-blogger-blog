@@ -60,18 +60,18 @@
   }
 </style>
 <b>Upload a folder</b>
-<div id="info" style="font-family: monospace;">
+<div id="upload-info" style="font-family: monospace;">
 test
 </div>
 
-<form id="folderInput" action="api/v1/upload/upload-folder" method="post" enctype="multipart/form-data">
-  <input id="folderName" type="hidden" name="folderName" value="" />
+<form id="upload-folderInput" action="api/v1/upload/upload-folder" method="post" enctype="multipart/form-data">
+  <input id="upload-folderName" type="hidden" name="folderName" value="" />
   <input type="file" name="folder" multiple webkitdirectory directory />
-  <button type="submit">submit</button>
+  <button type="upload-submit">submit</button>
 </form>
 
-<div id="status">
-  <div id="folder-list-container">
+<div id="upload-status">
+  <div id="upload-folder-list-container">
     <!-- The folder list will be generated here by JavaScript -->
   </div>
 </div>
@@ -101,7 +101,7 @@ test
   //     }
   //   });
 
-  document.getElementById('folderInput').addEventListener('change', function (event) {
+  document.getElementById('upload-folderInput').addEventListener('change', function (event) {
     const files = event.target.files;
 
     for (let i = 0; i < files.length; i++) {
@@ -118,9 +118,9 @@ test
   function updateStatus(files) {
     console.log('update');
     console.log('files:', files);
-    const element = document.getElementById('status');
+    const element = document.getElementById('upload-status');
     // Get the container element where the list will be added
-    const container = document.getElementById('folder-list-container');
+    const container = document.getElementById('upload-folder-list-container');
 
     function createFolderTree(paths) {
       const tree = [];
@@ -226,10 +226,10 @@ test
     folderData.push(tree[0]);
     // Create the folder list and append it to the container
     const folderListElement = createFolderList(folderData);
-    folderListElement.id = 'folderList';
+    folderListElement.id = 'upload-folderList';
     folderListElement.className = 'tree';
 
-    const check = document.getElementById('folderList');
+    const check = document.getElementById('upload-folderList');
     if (check) check.remove();
     container.appendChild(folderListElement);
   }
@@ -239,7 +239,7 @@ test
     // You can use Fetch API or XMLHttpRequest to send the file and its relative path
     // to your server-side endpoint.
 
-    const folderName = document.getElementById('folderName');
+    const folderName = document.getElementById('upload-folderName');
     // folderName.value = getFolderName(path);
 
     console.log(`Uploading file: ${file.name} to path: ${path}`);

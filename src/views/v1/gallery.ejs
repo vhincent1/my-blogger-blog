@@ -54,7 +54,7 @@
   }
 </style>
 <!-- Body -->
-<h1>GALLERY 2</h1>
+<h1>Gallery</h1>
 <div id="toolbar">
   <input type="checkbox" id="myCheckbox" />
   <label for="myCheckbox">Toggle me</label>
@@ -68,13 +68,12 @@
   const myCheckbox = document.getElementById('myCheckbox');
 
   function getValues() {
-    console.log('values')
     const selected = document.getElementsByName('select')
     const total = []
     selected.forEach(element => {
       if (element.checked) {
-        console.log('value:', element.postId)
-        total.push(element.postId)
+        console.log('postId:', element.value)
+        total.push(element.value)
       }
     })
     console.log('selected values: ', total.length)
@@ -125,7 +124,7 @@
         // const imgData = element.getElementsByTagName('img')[0]
         // console.log('data:', element.dataset.postId)
 
-        checkbox.postId = element.dataset.postId
+        checkbox.value = element.dataset.postId
 
         //wrap
         element.parentNode.insertBefore(label, element);

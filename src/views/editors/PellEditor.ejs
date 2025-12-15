@@ -36,6 +36,7 @@
 
     const str = '<%=content%>';
     document.getElementsByClassName('pell-content')[0].innerHTML = unescapeHTMLWithDOM(str);
+    document.getElementById('content').value = unescapeHTMLWithDOM(str);//code preview
   };
 
   PellEditor.previewButton = function () {

@@ -1,7 +1,7 @@
 export class Post {
-  public id: number | null;
+  public id: number | undefined;
 
-  constructor(id: number | null) {
+  constructor(id: number | undefined) {
     this.id = id;
   }
 
@@ -26,14 +26,15 @@ export class Post {
 export enum PostStatus {
   DRAFT = 0,
   PUBLISHED = 1,
-  DELETED = 2
+  DELETED = 2,
 }
 
 export function getPostStatusByName(value) {
   const name = value.toUpperCase();
   //prettier-ignore
   if (Object.prototype.hasOwnProperty.call(PostStatus, name) 
-    && typeof PostStatus[name] === 'number') return PostStatus[name];
+    && typeof PostStatus[name] === 'number') 
+        return PostStatus[name];
   return PostStatus.DRAFT;
 }
 
@@ -42,6 +43,7 @@ export interface PostDate {
   updated: Date;
 }
 
+// search parameters
 export interface PostParameters {
   search: string;
   type: string;

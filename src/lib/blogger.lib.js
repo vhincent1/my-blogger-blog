@@ -52,7 +52,7 @@ export async function fetchAllBloggerPosts() {
 // -----------------------------------------------------------
 
 export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
-  console.log('Downloading image');
+  // console.log('Downloading image');
   //prettier-ignore
   for (let i = 0; i < retries; i++) try { 
       const response = await fetch(imageUrl);
@@ -184,8 +184,8 @@ export async function convertBloggerPosts(exportedData, config) {
         const storagePath = config.storageDir(config.uploadPath, bloggerPost, startingIndex);
         const data = {
           author: bloggerPost.author.displayName,
-          index: startingIndex,
-          source: originalSource,
+          index: startingIndex,  //post id
+          source: originalSource, // img src
           path: path.resolve(storagePath, filename),
         };
         imagesToDownload.push(data);

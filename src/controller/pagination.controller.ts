@@ -17,8 +17,8 @@ export function getPaginationParameters(req, defaults): PaginationParams {
   return { page, limit, offset, search, type };
 }
 
-export async function getPaginatedData<T extends Array<any>>(params: PaginationParams, data: T): Promise<PaginatedResult<T>> {
-  const { limit, offset, page } = params;
+export async function getPaginatedData<T extends Array<any>>(parameters: PaginationParams, data: T): Promise<PaginatedResult<T>> {
+  const { page, limit, offset, search, type } = parameters;
   const safePage = Math.max(0, page);
   const startIndex = safePage * limit;
   const endIndex = startIndex + limit;
@@ -36,6 +36,7 @@ export async function getPaginatedData<T extends Array<any>>(params: PaginationP
   }
 
   return {
+    parameters: parameters,
     data: paginatedResults,
     totalCount: items.length,
     totalPages,

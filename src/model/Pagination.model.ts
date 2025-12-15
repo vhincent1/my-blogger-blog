@@ -7,6 +7,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResult<T> {
+  parameters: PaginationParams
   data: T[];
   totalCount: number;
   totalPages: number;

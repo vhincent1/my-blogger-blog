@@ -19,7 +19,7 @@ router.use('/format', async (req, res) => {
   res.status(200).json(placeholder);
 });
 
-// 
+//
 router.use('/', async (req, res) => {
   const t0 = performance.now(); //timer
   const { page, limit, search, type, filter, exclude }: any = req.query;
@@ -33,7 +33,9 @@ router.use('/', async (req, res) => {
         limit: limit || 5,
       });
       const paginatedItems = await getPaginatedData(paginationParams, posts);
-      if (paginatedItems.currentPage > paginatedItems.totalPages /*exceeds limit*/ || paginatedItems.currentPage < 0 /*is negative*/) return res.send(ServiceResponse.failure('Page limit exceeded', req.query, null, 404));
+      if (paginatedItems.currentPage > paginatedItems.totalPages /*exceeds limit*/ || paginatedItems.currentPage < 0 /*is negative*/) {
+        return res.send(ServiceResponse.failure('Page limit exceeded', req.query, null, 404));
+      }
       res.send(ServiceResponse.success<any>('Posts found', req.query, paginatedItems));
     } else {
       res.send(serviceResponse);
@@ -44,6 +46,5 @@ router.use('/', async (req, res) => {
   const t1 = performance.now();
   console.log(`Fetch request took ${t1 - t0} milliseconds.`);
 });
-
 
 export default router;

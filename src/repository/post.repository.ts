@@ -4,6 +4,7 @@ import { Post, type PostParameters } from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
 import { Gallery } from '../model/Gallery.model.ts';
+//TODO: optimize
 
 let posts: Post[] = await database.getAllBlogPosts();
 
@@ -18,16 +19,16 @@ export class PostRepository {
 
   // generates post ids, sizes, etc
   private async generateMetaData() {
-    let posts = await this.findAllPostsAsync();
-    posts = posts.reverse();
+    // posts = await this.findAllPostsAsync();
+    // posts = posts.reverse();
 
     let startIndex = 1;
     for (let index = 0; index < posts.length; index++) {
       const post: any = posts[index];
-      post.id = startIndex++;
+      // post.id = startIndex++;
       post.size = await buildSizeTable(post);
     }
-    posts = posts.reverse();
+    // posts = posts.reverse();
   }
 
   //image sources

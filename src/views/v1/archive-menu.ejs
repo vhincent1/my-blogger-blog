@@ -1,28 +1,59 @@
+<style>
+  .drop-button {
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  .drop-button:focus {
+    /* background-color: #0e07d2; */
+    /* background-color: #ff0000; */
+    text-decoration: underline;
+  }
+
+  .drop-down {}
+
+  .drop-down-content {
+    display: none;
+  }
+
+  .drop-down-content a {
+    display: block;
+  }
+
+  .show {
+    display: block;
+  }
+</style>
 <!-- Monthly archive menu -->
 <div class="archive-menu">
   <% let index = 0; common.navbar.getArchiveMenu().forEach((YTD) => {%>
   <!-- YEAR -->
-  <b><%= YTD.year -%></b><sup><%= YTD.total %></sup>
+  <b><%= YTD.year %></b><sup><%= YTD.total %></sup>
   <!-- MONTHS -->
-  <% YTD.MTD.forEach((MTD) => { index++; const posts = common.navbar.getPostsByDate(MTD.month, YTD.year)%>
-  <button onclick="Widgets_ArchiveMenu.dropDownMonth(<%= index %>)" class="drop-button"><%= MTD.month.toUpperCase() %></button><sup><%= posts.length %></sup>
-  <div id="dropDown<%= index %>" class="dropdown-content">
+  <% YTD.MTD.forEach((MTD) => { 
+    index++; 
+    const posts = common.navbar.getPostsByDate(MTD.month, YTD.year)
+   %>
+  <button onclick="Widgets_ArchiveMenu.dropDownMonth('<%= index %>')" class="drop-button"><%= MTD.month.toUpperCase() %></button><sup><%= posts.length %></sup>
+  <div id="drop-down<%= index %>" class="drop-down-content">
     <% posts.forEach((post) => { %>
     <a href="<%=common.links.viewPost({id: post.postId})%>"><%=post.title%></a>
     <% }); %>
   </div>
-  <% });%> <% });%>
+  <% });%> 
+  <% });%>
 </div>
 <!-- Scripts -->
 <script>
   const Widgets_ArchiveMenu = {
     dropDownMonth: (index) => {
-      document.getElementById('dropDown' + index).classList.toggle('show');
-      // console.log(index);
+      document.getElementById('drop-down' + index).classList.toggle('show');
+      // console.log(index); 
     },
     closeDropDown: (event) => {
       if (!event.target.matches('.drop-button')) {
-        var dropdowns = document.getElementsByClassName('dropdown-content');
+        var dropdowns = document.getElementsByClassName('drop-down-content');
         var i;
         for (i = 0; i < dropdowns.length; i++) {
           var openDropdown = dropdowns[i];

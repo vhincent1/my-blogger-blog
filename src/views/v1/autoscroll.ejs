@@ -6,6 +6,8 @@
     currentPage: parseInt('<%=currentPage%>'), // ejs
     limit: parseInt('<%=limit%>'), // ejs
     style: parseInt('<%=style%>'), // ejs
+    searchQuery: '<%=parameters.search%>', // ejs
+    typeQuery: '<%=parameters.type%>', // ejs
     isLoading: false,
     hasMoreData: true, // Set based on server response
     async init() {
@@ -16,7 +18,11 @@
       window.addEventListener('scroll', () => {
         // Check if the checkbox is checked
         if (!myCheckbox.checked) return;
-        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        const {
+          scrollTop,
+          scrollHeight,
+          clientHeight
+        } = document.documentElement;
 
         if (scrollTop + clientHeight >= scrollHeight - 0 && !Widgets_AutoScroll.isLoading && Widgets_AutoScroll.hasMoreData) {
           Widgets_AutoScroll.isLoading = true;
@@ -29,12 +35,19 @@
     async loadMoreItems() {
       const currentPage = Widgets_AutoScroll.currentPage;
       const maxResults = Widgets_AutoScroll.limit;
+      const searchQuery = Widgets_AutoScroll.searchQuery;
+      const typeQuery = Widgets_AutoScroll.typeQuery;
 
       console.log('current page: ', currentPage);
       console.log('max results : ', maxResults);
 
       try {
-        const response = await new SimpBlog().getPosts({ page: currentPage, limit: maxResults });
+        const response = await new SimpBlog().getPosts({
+          page: currentPage,
+          limit: maxResults,
+          search: searchQuery,
+          type: typeQuery
+        });
         if (!response.success) {
           Widgets_AutoScroll.hasMoreData = false;
           return;
@@ -109,33 +122,7 @@
         Widgets_AutoScroll.isLoading = false;
         Widgets_AutoScroll.hasMoreData = false;
       }
-    },
-    // async loadMoreItems() {
-    //   try {
-    //     const response = await fetch(`/api/v1/posts?page=${Widgets_AutoScroll.currentPage}&limit=${Widgets_AutoScroll.limit}`);
-    //     // const response = await fetch(`/api/v1/posts?page=1&limit=1`);
-    //     const apiResponse = await response.json();
-    //     if (response.status != 200) {
-    //       console.log('error:', apiResponse);
-    //       Widgets_AutoScroll.hasMoreData = false;
-    //       return;
-    //     }
-    //     // Append new items to the container
-    //     const itemContainer = document.getElementById('rss-feed-container');
-    //     apiResponse.responseObject.data.forEach((item) => {
-    //       console.log(item);
-    //       const itemDiv = document.createElement('div');
-    //       itemDiv.classList.add('feed-item');
-    //       itemDiv.textContent = item.title;
-    //       itemContainer.appendChild(itemDiv);
-    //     });
-    //     Widgets_AutoScroll.isLoading = false;
-    //   } catch (error) {
-    //     console.error('Error loading more items:', error);
-    //     Widgets_AutoScroll.isLoading = false;
-    //     Widgets_AutoScroll.hasMoreData = false;
-    //   }
-    // },
+    }
   };
 
   Widgets_AutoScroll.init();

@@ -4,18 +4,23 @@
     field-sizing: content;
     height: 50vh;
   }
-
 </style>
-<textarea id="simp-editor" placeholder="Enter text..."><%-content%></textarea>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.4/beautify-html.min.js"></script>
+
+<textarea id="simp-editor" placeholder="Enter text..."></textarea>
 <button id="simp-preview-button">Preview</button>
+
 <h3>Preview</h1>
 <div id="simp-preview"></div>
 <script>
-const SimpEditor = {}
+  const SimpEditor = {
+    editor: document.getElementById('simp-editor'),
+    preview: document.getElementById('simp-preview'),
+    previewButton: document.getElementById('simp-preview-button')
+  }
 
-let simpeditor = document.getElementById('simp-editor')
-let preview = document.getElementById('simp-preview')
-let previewButton = document.getElementById('simp-preview-button')
+  SimpEditor.editor.innerHTML = html_beautify(unescapeHTMLWithDOM('<%=content%>'))
 
-previewButton.onclick = () => preview.innerHTML = simpeditor.value
+  SimpEditor.previewButton.onclick = () => SimpEditor.preview.innerHTML = SimpEditor.editor.value
 </script>

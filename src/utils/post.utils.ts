@@ -21,6 +21,10 @@ export async function buildSizeTable(post) {
     } else {
       // console.log(`[buildSizeTable(${post.id})] doesnt exist: ${imagePath}`);
     }
+
+    // if(post.id ==262){
+    //   console.log(filename)
+    // }
   }
 
   // size of post

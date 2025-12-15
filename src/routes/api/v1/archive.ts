@@ -7,7 +7,7 @@ const router = express.Router()
 const archive = express.Router({ mergeParams: true });
 router.use('/', archive, async (req, res) => {
   const { search, type, exclude, filter }: any = req.query;
-  const serviceResponse = await PostService.getArchiveCount({ search, type, exclude, filter, meta: { source: 'api/v1/archive' } });
+  const serviceResponse = await PostService.getArchive({ search, type, exclude, filter, meta: { source: 'api/v1/archive' } });
   res.send(serviceResponse);
 });
 

@@ -9,7 +9,7 @@ import apiV2Router from './api/v2/index.ts';
 import authRouter from './auth.routes.ts';
 import indexRouter from './homepage/index.ts';
 import postsRouter from './posts.routes.ts';
-import rssRouter from './rss.routes.ts';
+import rssRouter from './api/v1/rss.ts';
 
 import { apiLimiter } from '../middleware/limiter.middleware.ts';
 

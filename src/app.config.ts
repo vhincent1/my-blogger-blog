@@ -31,7 +31,7 @@ const CONFIG = {
   database: {
     type: 'sqlite', // storage type : json, sqlite
     file: './public/dist/new.json', // blog posts data
-    sqlite3: './database/database.db',
+    sqlite3: './database/test.db',
     /**
      * where content is stored (./public/content/AUTHOR/POST_ID)
      */

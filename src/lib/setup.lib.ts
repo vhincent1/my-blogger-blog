@@ -46,7 +46,7 @@ import {writeJsonFile} from '../database/json.database.ts';
  */
 
 import appConfig from '../app.config.ts';
-import { downloadImage, checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from './blogger.lib.js';
+import { checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from './blogger.lib.js';
 import fs from 'fs/promises';
 import path from 'path';
 import HTML_parser from 'node-html-parser';
@@ -54,6 +54,7 @@ import HTML_parser from 'node-html-parser';
 
 // interfaces
 import type { Post } from '../model/Post.model.ts';
+import { downloadImage } from '../utils/io.utils.ts';
 
 interface DownloadImage {
   author: string; //post author
@@ -61,6 +62,7 @@ interface DownloadImage {
   source: string; // img src
   path: string; //save path
 }
+
 interface BloggerLibResults {
   convertedPosts: Post[];
   imagesToDownload: DownloadImage[];
@@ -129,7 +131,7 @@ exportBlogger
         const ifImageExists = await checkFileExistence(savePath);
         if (!ifImageExists) {
           console.log('Downloading image, post:', o.index)
-          const error = await downloadImage(o.source, savePath);
+          const error: any = await downloadImage(o.source, savePath);
           if (errorLogFile && error) {
             const errorInfo = {
               postId: o.index,

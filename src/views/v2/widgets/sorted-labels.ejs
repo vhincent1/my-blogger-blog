@@ -13,7 +13,7 @@
      await serviceResponse.responseObject.forEach((entry) => {
         const { label, total } = entry;
         const a = document.createElement('a');
-        a.href = `/?search=${encodeURIComponent(label)}&type=labels`;
+        a.href = `/<%=path%>?search=${encodeURIComponent(label)}&type=labels`;
         a.textContent = label;
         const sup = document.createElement('sup');
         sup.textContent = total;

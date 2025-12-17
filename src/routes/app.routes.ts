@@ -33,7 +33,25 @@ app.use('/api/v2', apiV2Router);
 app.use('/', indexRouter);
 app.use('/login', authRouter);
 app.use('/post', postsRouter);
-
 app.use('/rss', rssRouter);
+
+// import path from 'path';
+
+// // Define the absolute path to your images directory
+// const imagesDir = path.join(path.resolve(), 'public/images');
+
+// // Route to serve an image dynamically using a route parameter
+// app.get('/images/:imageName', (req, res) => {
+//   const imageName = req.params.imageName;
+//   const imagePath = path.join(imagesDir, imageName);
+
+//   // Use res.sendFile to send the image file
+//   res.sendFile(imagePath, (err) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(404).send('Image not found'); // Handle errors, e.g., file not found
+//     }
+//   });
+// });
 
 export default app;

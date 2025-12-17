@@ -1,63 +1,131 @@
 interface Table {}
 
-// Posts
-export interface Posts extends Table {
-  id: number | undefined;
-  user_id: number | undefined;
-  title: string | undefined;
-  content: string | undefined;
-  labels: string | undefined;
-  created_at: Date | undefined;
-  updated_at: Date | undefined;
-  category: number | undefined;
-  source: any;
-  status: number | undefined;
+export abstract class SQLiteTable<T> implements Table {
+  abstract version: number;
+  abstract tableName: string;
+
+  #db;
+  constructor(db) {
+    this.#db = db;
+  }
+  
+  abstract tableScheme(model?: T);
+  abstract mapRowToData(row): T | null;
+
+  fetchAll(): T[] {
+    const statement = this.#db.prepare(`SELECT * FROM ${this.tableName} ORDER BY id DESC`); //ASC - recent, DESC - oldest
+    const rows = statement.all();
+    return rows.map((row) => this.mapRowToData(this.version === 2 ? JSON.parse(row.data) : row));
+  }
+
+  findById(id: number): T | null {
+    const statement = this.#db.prepare(`SELECT * FROM ${this.tableName} WHERE id = ?`);
+    const row = statement.get(id);
+    const data = this.version === 2 ? JSON.parse(row.data) : row;
+    return this.mapRowToData(data);
+  }
+
+  generateSchema(): any {
+    //prettier-ignore
+    function getType(value) {
+      if (value === null) return 'NULL';
+      if (value instanceof Date) return 'DATE';
+      switch (typeof value) {
+        case 'number': return 'INTEGER';
+        case 'boolean': return 'BOOLEAN';
+        case 'string': default: return 'TEXT';
+      }
+    }
+    let _schema = ``;
+    _schema += `--- auto-generated JSON schema for ${this.tableName} table ---\n`;
+    // tables
+    _schema += `DROP TABLE IF EXISTS ${this.tableName};
+CREATE TABLE ${this.tableName} (
+  id INTEGER PRIMARY KEY,
+  data JSON
+);\n`;
+
+    const entries = Object.entries(this.tableScheme()).filter(([key]) => key !== 'id' && key !== 'tableName' && key !== 'version');
+
+    // create alter table statements
+    _schema += `-- Alter table statements\n`;
+    entries.forEach(([key, value]) => {
+      _schema += `ALTER TABLE ${this.tableName} ADD COLUMN ${key} ${getType(key)} GENERATED ALWAYS AS (json_extract(data, '$.${key}')) VIRTUAL;\n`;
+    });
+
+    // create indexes
+    _schema += `-- Create indexes\n`;
+    entries.forEach(([key, value]) => {
+      _schema += `CREATE INDEX idx_${this.tableName}_${key} ON ${this.tableName} (${key});\n`;
+    });
+    _schema += `--- end of schema ---`;
+    return _schema;
+  }
+
+  importData(data: any[]) {
+    // Insert sample data if the table is empty
+    // const count = db.prepare('SELECT COUNT(*) AS count FROM users').get().count;
+    // if (count === 0) {
+    //   const insert = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
+    //   for (let i = 1; i <= 50; i++) {
+    //     insert.run(`User ${i}`, `user${i}@example.com`);
+    //   }
+    // }
+    console.log('importing data into', this.tableName, 'table');
+    let checkTable = this.#db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get(this.tableName);
+    if (!checkTable) {
+      console.error("posts table doesn't exist, use setup()");
+      return;
+    }
+
+    const query = `INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?);`;
+    const insertStmt = this.#db.prepare(query);
+
+    const insertData = this.#db.transaction((dataArray) => {
+      for (const data of dataArray) {
+        const schema = this.tableScheme(data);
+
+        if (this.version === 1) {
+          const columns = Object.keys(schema).join(', ');
+          // prettier-ignore
+          const placeholders = Object.keys(schema).map((col) => `:${col}`).join(', ');
+          const query = `INSERT OR REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders});`;
+          const insertStmt = this.#db.prepare(query);
+          insertStmt.run(schema);
+        } else if (this.version === 2) {
+          //json
+          const insertStmt = this.#db.prepare(`INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?);`);
+          insertStmt.run(schema.id, JSON.stringify(schema));
+        }
+      }
+      const result = this.#db.prepare(`SELECT count(*) AS count FROM ${this.tableName}`);
+      console.log('Successfully inserted', result.get().count, this.tableName, 'rows');
+    });
+    try {
+      insertData(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  insertData(values: any) {
+    console.log('Inserting data into', this.tableName, 'table');
+    //json
+    if (this.version === 1) {
+      const columns = Object.keys(values).join(', ');
+      // prettier-ignore
+      const placeholders = Object.keys(values).map((key) => `:${key}`).join(', ');
+      const insertStatement = this.#db.prepare(`INSERT OR REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders})`);
+      const info = insertStatement.run(values);
+      // console.log('Number of rows changed:', info.changes, '@ Row:', info.lastInsertRowid);
+      return info;
+    } else if (this.version === 2) {
+      const query = `INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?)`;
+      const statement = this.#db.prepare(query).run(values.id, JSON.stringify(values));
+      return statement;
+    }
+  }
 }
-
-export const PostsTable: Posts = {
-  id: 0,
-  user_id: 0,
-  title: '',
-  content: '',
-  labels: '',
-  created_at: new Date(),
-  updated_at: new Date(),
-  category: 0,
-  source: undefined,
-  status: 0,
-};
-
-// Users
-export interface Users extends Table {
-  id: number | undefined;
-  username: string | undefined;
-  password: string | undefined;
-  email: string | undefined;
-  registration_date: Date | undefined;
-  role: number | undefined;
-}
-
-export const UsersTable: Users = {
-  id: 0,
-  username: '',
-  password: '',
-  email: '',
-  registration_date: new Date(),
-  role: 0,
-};
-
-// Hearts
-export interface Hearts extends Table {
-  post_id: number | undefined;
-  user_id: number;
-  value: number;
-}
-
-export const HeartsTable: Hearts = {
-  post_id: 0,
-  user_id: 0,
-  value: 0,
-};
 
 // Utils
 /**
@@ -71,46 +139,9 @@ export function buildDuplicateKeyUpdateClause(data) {
   return updateClauses.join(', ');
 }
 
-function buildJsonSchema(table: Table) {
-  const TableName = () => {
-    if (table === PostsTable) return 'posts';
-    else if (table === UsersTable) return 'users';
-    else if (table === HeartsTable) return 'hearts';
-    else return 'unknown';
-  };
-  const getType = (value) => {
-    if (typeof value === 'number') return 'INTEGER';
-    else if (typeof value === 'string') return 'TEXT';
-    else if (typeof value === 'boolean') return 'BOOLEAN';
-    else if (typeof value === 'object') {
-      if (value instanceof Date) return 'DATE';
-      return 'NULL';
-    } else return 'TEXT';
-  };
-  let schema = ``;
-  schema += `--- auto-generated JSON Schema for ${TableName()} table ---\n\n`;
-  // tables
-  schema += `DROP TABLE IF EXISTS ${TableName()};
-CREATE TABLE ${TableName()} (
-  id INTEGER PRIMARY KEY,
-  data JSON
-);`;
-
-  // create alter table statements
-  schema += `\n\n-- Alter table statements`;
-  for (const [key, value] of Object.entries(table)) {
-    if (key === 'id') continue; // Skip the primary key column
-    schema += `\nALTER TABLE ${TableName()} ADD COLUMN ${key} ${getType(value)} GENERATED ALWAYS AS (json_extract(data, '$.${key}')) VIRTUAL;`;
-  }
-  // create indexes
-  schema += `\n\n-- Create indexes`;
-  for (const [key, value] of Object.entries(table)) {
-    if (key === 'id') continue; // Skip the primary key column
-    schema += `\nCREATE INDEX idx_${TableName()}_${key} ON ${TableName()} (${key});`;
-  }
-  schema += `\n--- end of ${TableName()} schema ---`;
-  return schema;
-}
-
 // console.log(buildJsonSchema(PostsTable));
 // console.log(buildJsonSchema(UsersTable));
+
+// console.log(buildJsonSchema());
+// console.log(buildJsonSchema({...new Hearts2()}))
+// console.log(new Hearts().generateSchema());

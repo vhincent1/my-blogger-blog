@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import PostService from '../services/post.service.ts';
+import { postService } from '../services/index.service.ts';
 import { getPaginatedData, getPaginationParameters, getPaginatedQueryDetails } from './pagination.controller.ts';
 import { StatusCodes } from 'http-status-codes';
 
@@ -43,7 +43,7 @@ const galleryController = {
       limit: parseInt(req.query.limit) || 50,
     });
 
-    const serviceResponse = await PostService.getGallery({
+    const serviceResponse = await postService.getGallery({
       search: req.query.search,
       type: req.query.type,
       filter: 'id',
@@ -57,7 +57,9 @@ const galleryController = {
     // parameters.data = posts
 
     // const pagination = await pageController.pagination(req, parameters);
-    if (paginatedResult.currentPage > paginatedResult.totalPages) {
+    if (paginatedResult.totalCount === 0) {
+      return res.status(StatusCodes.NOT_FOUND).render('404', { errorMessage: 'No posts found' });
+    } else if (paginatedResult.currentPage > paginatedResult.totalPages) {
       return res.status(StatusCodes.NOT_FOUND).json({ error: 'Page limit exceeded' });
     }
     res.render('v1/gallery', { showFeed: true, images: allItems, pagination: paginationQueryDetails, paginationResult: paginatedResult });

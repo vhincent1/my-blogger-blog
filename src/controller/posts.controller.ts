@@ -1,12 +1,11 @@
-import appConfig from '../app.config.ts';
-import PostService from '../services/post.service.ts';
+import {postService} from '../services/index.service.ts';
 
 // import { navbarController } from './navbar.controller.ts';
 // import { homepageController } from './home.controller.ts';
 
 async function publishPost(req, res) {
   const postId = parseInt(req.params.postId);
-  const serviceResponse = await PostService.getPostById(postId);
+  const serviceResponse = await postService.getPostById(postId);
   // console.log(serviceResponse)
 
   const postFound = serviceResponse.success;
@@ -31,7 +30,7 @@ const postsController = {
   getEditPost: async (req, res) => publishPost(req, res),
   getViewPost: async (req, res) => {
     const postId = parseInt(req.params.postId);
-    const serviceResponse = await PostService.getPostById(postId);
+    const serviceResponse = await postService.getPostById(postId);
     if (!serviceResponse.success) return res.status(serviceResponse.statusCode).render('404', { errorMessage: 'Post not found' });
 
     res.status(serviceResponse.statusCode).render('view-post', {

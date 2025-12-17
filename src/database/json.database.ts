@@ -2,9 +2,7 @@ import * as fs from 'node:fs/promises';
 import { Mutex } from 'async-mutex';
 import appConfig from '../app.config.ts';
 import type { Post } from '../model/Post.model.ts';
-import type { DatabaseI } from './index.database.ts';
 
-import { filter, truncate } from '../utils/array.utils.ts';
 import type Heart from '../model/Heart.model.ts';
 
 const dbMutex = new Mutex();
@@ -45,6 +43,9 @@ class JSONDatabase implements DatabaseI {
   // comments;
   constructor(config) {
     this.config = config;
+  }
+  findPostById(id: number): Post | null {
+    throw new Error('Method not implemented.');
   }
   getHearts(): Heart[] {
     throw new Error('Method not implemented.');

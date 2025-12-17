@@ -1,18 +1,23 @@
-import database from '../database/index.database.ts';
-
 import { Post, type PostParameters } from '../model/Post.model.ts';
 import { buildGallery, buildSizeTable } from '../utils/post.utils.ts';
 import { filter, truncate } from '../utils/array.utils.ts';
 import { Gallery } from '../model/Gallery.model.ts';
-//TODO: optimize
+import type { Database } from '../database/Database.model.ts';
+//TODO: optimize, load db
 
-let posts: Post[] = await database.getAllBlogPosts();
+// import database from '../database/index.database.ts';
+// let posts: Post[] = await database.getAllBlogPosts();
 
-export class PostRepository {
-  // private posts: Post[]
+class PostRepository {
+  private database: Database;
+
+  private posts: Post[];
   private gallery: any;
 
-  constructor() {
+  constructor(database) {
+    this.database = database;
+    this.posts = database.getAllBlogPosts();
+
     this.generateMetaData();
     this.gallery = this.buildGallery();
   }
@@ -23,8 +28,8 @@ export class PostRepository {
     // posts = posts.reverse();
 
     let startIndex = 1;
-    for (let index = 0; index < posts.length; index++) {
-      const post: any = posts[index];
+    for (let index = 0; index < this.posts.length; index++) {
+      const post: any = this.posts[index];
       // post.id = startIndex++;
       post.size = await buildSizeTable(post);
     }
@@ -40,16 +45,16 @@ export class PostRepository {
       const galleryEntry = buildGallery(post);
       if (galleryEntry) entries.push(galleryEntry);
     }
-    return new Gallery(entries.reverse());
+    return new Gallery(entries);
   }
 
   //unused
   async updatePosts() {
-    posts = database.getAllBlogPosts();
+    this.posts = this.database.getAllBlogPosts();
   }
 
   async findByIdAsync(id: number): Promise<Post | null> {
-    return posts.find((post) => post.id === id) || null;
+    return this.posts.find((post) => post.id === id) || null;
   }
 
   //searchPosts
@@ -65,21 +70,21 @@ export class PostRepository {
     let data: any;
     switch (p.type) {
       case 'content':
-        data = posts.filter((post) => post.content.includes(p.search));
+        data = this.posts.filter((post) => post.content.includes(p.search));
         break;
       case 'labels':
         //TODO: this breaks when post.labels == undefined
-        data = posts.filter((post) => post.labels.includes(p.search));
+        data = this.posts.filter((post) => post.labels.includes(p.search));
         break;
       case 'title':
-        data = posts.filter((post) => post.title.includes(p.search));
+        data = this.posts.filter((post) => post.title.includes(p.search));
         break;
       case 'author':
-        data = posts.filter((post) => post.author.includes(p.search));
+        data = this.posts.filter((post) => post.author.includes(p.search));
         break;
       default:
         //type not found
-        data = posts;
+        data = this.posts;
         break;
     }
     // properties to only show
@@ -97,58 +102,58 @@ export class PostRepository {
     return this.gallery;
   }
 
-  // prettier-ignore
-  filterByYear = async (priorityYear?) => posts?.filter((post) => {
-    const year = new Date(post.date.published).getFullYear();
-    return year == priorityYear;
-  });
+  // // prettier-ignore
+  // filterByYear = async (priorityYear?) => posts?.filter((post) => {
+  //   const year = new Date(post.date.published).getFullYear();
+  //   return year == priorityYear;
+  // });
 
-  sortedLabels = async (parameters?: PostParameters) => {
-    let data = await this.findAllPostsAsync(parameters);
-    function countTagOccurrences(tagsArray) {
-      const tagCounts = {};
-      for (const tag of tagsArray) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-      return tagCounts;
-    }
-    let allLabels: any = [];
-    data?.forEach((post: Post) => (allLabels = allLabels.concat(post.labels)));
+  // sortedLabels = async (parameters?: PostParameters) => {
+  //   let data = await this.findAllPostsAsync(parameters);
+  //   function countTagOccurrences(tagsArray) {
+  //     const tagCounts = {};
+  //     for (const tag of tagsArray) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+  //     return tagCounts;
+  //   }
+  //   let allLabels: any = [];
+  //   data?.forEach((post: Post) => (allLabels = allLabels.concat(post.labels)));
 
-    const uniqueTags = [...new Set(allLabels)];
-    // console.log(uniqueTags)
-    const labelCount = countTagOccurrences(allLabels.sort().reverse());
-    // Convert the object into an array of objects for easier consumption
+  //   const uniqueTags = [...new Set(allLabels)];
+  //   // console.log(uniqueTags)
+  //   const labelCount = countTagOccurrences(allLabels.sort().reverse());
+  //   // Convert the object into an array of objects for easier consumption
 
-    const result: any = Object.keys(labelCount).map((label) => ({
-      label,
-      total: labelCount[label],
-    }));
-    return result;
-  };
+  //   const result: any = Object.keys(labelCount).map((label) => ({
+  //     label,
+  //     total: labelCount[label],
+  //   }));
+  //   return result;
+  // };
 
-  //
-  postCountByYear = async (parameters) => {
-    let data = await this.findAllPostsAsync(parameters);
-    return data?.reduce((acc, post) => {
-      const year = new Date(post.date.published).getFullYear();
-      acc[year] = (acc[year] || 0) + 1;
-      return acc;
-    }, {});
-  };
+  // //
+  // postCountByYear = async (parameters) => {
+  //   let data = await this.findAllPostsAsync(parameters);
+  //   return data?.reduce((acc, post) => {
+  //     const year = new Date(post.date.published).getFullYear();
+  //     acc[year] = (acc[year] || 0) + 1;
+  //     return acc;
+  //   }, {});
+  // };
 
-  postsByMonthYear = async (parameters) => {
-    let data = await this.findAllPostsAsync(parameters);
-    return data?.reduce((groups, post) => {
-      const date = new Date(post.date.published);
-      const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-      if (!groups[monthYear]) groups[monthYear] = [];
-      groups[monthYear].push({ postId: post.id, title: post.title });
-      return groups;
-    }, {});
-  };
+  // postsByMonthYear = async (parameters) => {
+  //   let data = await this.findAllPostsAsync(parameters);
+  //   return data?.reduce((groups, post) => {
+  //     const date = new Date(post.date.published);
+  //     const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  //     if (!groups[monthYear]) groups[monthYear] = [];
+  //     groups[monthYear].push({ postId: post.id, title: post.title });
+  //     return groups;
+  //   }, {});
+  // };
 
-  heartPost = async (parameters) => {
-    // database.getHearts()
-  };
+  // heartPost = async (parameters) => {
+  //   // database.getHearts()
+  // };
 
   // // Filter posts by the target tag
   // const targetTag = "art";
@@ -169,3 +174,5 @@ export class PostRepository {
 //test
 // const repo = new PostRepository()
 // console.log(await repo.getGallery())
+
+export default PostRepository;

@@ -8,12 +8,15 @@ export class Post {
   public title: string;
   public content: string;
   public labels: string[];
+
   public date: PostDate = {
     published: new Date(),
     updated: new Date(),
   };
 
+  public user_id: number;
   public author: string;
+
   public status: PostStatus = PostStatus.PUBLISHED;
   public category: number = 0;
 
@@ -32,8 +35,8 @@ export enum PostStatus {
 export function getPostStatusByName(value) {
   const name = value.toUpperCase();
   //prettier-ignore
-  if (Object.prototype.hasOwnProperty.call(PostStatus, name) 
-    && typeof PostStatus[name] === 'number') 
+  if (Object.prototype.hasOwnProperty.call(PostStatus, name)
+     && typeof PostStatus[name] === 'number') 
         return PostStatus[name];
   return PostStatus.DRAFT;
 }

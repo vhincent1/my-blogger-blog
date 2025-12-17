@@ -1,5 +1,24 @@
-// import PostService from './src/services/post.service.ts';
-// import sqlitedb from './src/database/sqlite.database.ts';
+import { postService } from './src/services/index.service.ts';
+
+const serviceResponse = await postService.getPosts()
+const posts = await serviceResponse.responseObject
+console.log(posts?.find(p=>p.id === 713));
+
+import appConfig from './src/app.config.ts'
+
+// const testdb = new SQLite3(appConfig.database.sqlite3);
+// const usersTable = new UsersTable(testdb)
+
+// const scheme = usersTable.tableScheme(new User(2, 'VHINCENT'));
+// console.log(usersTable.insertData(scheme))
+
+
+
+// import {SQLiteDatabase} from './src/database/sqlite.database.ts';
+// import appConfig from './src/app.config.ts';
+
+// const sqldb = new SQLiteDatabase(appConfig.database)
+// console.log(sqldb.getAllBlogPosts().length)
 
 // const serviceResponse = await PostService.getPosts();
 // const posts: any = serviceResponse.responseObject;
@@ -56,41 +75,73 @@
 
 import { readJsonFile } from './src/database/json.database.ts';
 import SQLite3 from 'better-sqlite3';
-import type { Posts } from './src/model/Tables.model.ts';
 import { Post, PostStatus } from './src/model/Post.model.ts';
 const db = new SQLite3('./database/test.db');
 
-async function importPosts() {
-  const data = await readJsonFile('./public/dist/posts.json');
-
-  const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?);`;
-  const insertStmt = db.prepare(query);
-
-  const insertPosts = db.transaction((postsData) => {
-    for (const post of postsData) {
-      const values: Posts = {
-        id: post.id,
-        user_id: 2,
-        title: post.title,
-        content: post.content,
-        labels: post.labels.toString(),
-        created_at: post.date.published,
-        updated_at: post.date.updated,
-        category: post.category,
-        source: post.source?.url,
-        status: PostStatus.PUBLISHED,
-      };
-      insertStmt.run(values.id, JSON.stringify(values));
-    }
-    const result = db.prepare('SELECT count(*) AS count FROM posts');
-    console.log('Successfully inserted', result.get().count, 'posts rows');
-  });
-  try {
-    insertPosts(data);
-  } catch (error) {
-    console.error(error);
+import { SQLiteTable } from './src/model/Tables.model.ts';
+import { UsersTable } from './src/database/tables/users.table.ts';
+import User from './src/model/User.model.ts';
+class PostsTable extends SQLiteTable<Post> {
+  mapRowToData(row: any): Post | null {
+    throw new Error('Method not implemented.');
+  }
+  version: number = 2;
+  tableName: string = 'posts';
+  tableScheme(post?: Post) {
+    const scheme: {
+      id: number | undefined;
+      user_id: number;
+      title: string;
+      content: string;
+      labels: string;
+      created_at: Date;
+      updated_at: Date;
+      category: number;
+      source: string;
+      status: PostStatus;
+    } = {
+      id: post?.id,
+      user_id: 2,
+      title: post?.title || '',
+      content: post?.content || '',
+      labels: post?.labels.toString() || '',
+      created_at: post?.date.published || new Date(),
+      updated_at: post?.date.updated || new Date(),
+      category: post?.category || 0,
+      source: post?.source?.url,
+      status: PostStatus.PUBLISHED,
+    };
+    return { ...scheme };
   }
 }
+
+// const t = new PostsTable(null);
+// console.log(t.tableScheme());
+// console.log(t.generateSchema())
+// console.log(t.generateSchema());
+
+// async function importPosts() {
+//   const data = await readJsonFile('./public/dist/posts.json');
+
+//   const postTable = new PostsTable2();
+
+//   const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?);`;
+//   const insertStmt = db.prepare(query);
+
+//   const insertPosts = db.transaction((postsData) => {
+//     for (const post of postsData) {
+//       const schema = postTable.schemaTable(post);
+//       insertStmt.run(schema.id, JSON.stringify(schema));
+//     }
+//     const result = db.prepare('SELECT count(*) AS count FROM posts');
+//     console.log('Successfully inserted', result.get().count, 'posts rows');
+//   });
+//   try {
+//     insertPosts(data);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
 
 // importPosts();
 
@@ -107,22 +158,32 @@ function getPost(id: number) {
 // console.log(getPost(714));
 
 function savePost() {
-  const values: Posts = {
-    id: 1000,
-    user_id: 1,
-    title: 'title2',
-    content: 'content',
-    labels: 'label,label2',
-    created_at: new Date(),
-    updated_at: new Date(),
-    category: 1,
-    source: { url: 'https://example.com' },
-    status: 1,
+  const post = new Post(1000);
+  post.id = 1000;
+  post.title = 'title2';
+  post.content = 'content';
+  post.labels = ['label,label2'];
+  post.date = {
+    published: new Date(),
+    updated: new Date(),
   };
-  const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?)`;
+  post.category = 1;
+  post.author = 'VHINCENT';
+  post.status = PostStatus.PUBLISHED;
+  post.source = { url: 'https://example.com' };
 
-  const statement = db.prepare(query).run(values.id, JSON.stringify(values));
-  return statement;
+  const postTable = new PostsTable(null);
+  // const schema = postTable.schemaTable(post);
+
+  // const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?)`;
+
+  // // const statement = db.prepare(query).run(values.id, JSON.stringify(values));
+  // // return statement;
+  // const columns = Object.keys(schema).join(', ');
+  // // prettier-ignore
+  // const placeholders = Object.keys(schema).map((col) => `:${col}`).join(', ');
+  // const query2 = `INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders});`;
+  // console.log(query2);
 }
 
 // console.log(savePost());
@@ -160,6 +221,6 @@ function mapRowToPost(row) {
 // const row = statement.get(1000);
 // console.log(mapRowToPost(JSON.parse(row.data)))
 
-const statement = db.prepare('SELECT * FROM posts ORDER BY id DESC'); //ASC - recent, DESC - oldest
-const rows = statement.all();
-const all = rows.map((row) => mapRowToPost(JSON.parse(row.data)));
+// const statement = db.prepare('SELECT * FROM posts ORDER BY id DESC'); //ASC - recent, DESC - oldest
+// const rows = statement.all();
+// const all = rows.map((row) => mapRowToPost(JSON.parse(row.data)));

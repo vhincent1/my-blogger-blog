@@ -22,13 +22,39 @@ import fs from 'fs/promises';
 //   }
 // }
 
+export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
+  // console.log('Downloading image');
+  //prettier-ignore
+  for (let i = 0; i < retries; i++) try { 
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      await fs.writeFile(savePath, buffer);
+      return { success: true };
+    } catch (error: any) {
+      if (i < retries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
+        console.log('retrying')
+      } else {
+        console.error(`Failed to download image after ${retries} attempts.`);
+        // throw error; // Re-throw if all retries fail
+        return {sucess: false, error: error.message, other: `Failed to download image after ${retries} attempts.`};
+      }
+      // console.error('Error downloading the image with fetch:', error);
+      // throw error;
+      return {success: false, error: error.message}
+    }
+}
+
 async function checkFileExistence(filePath) {
   try {
     await fs.access(filePath, fs.constants.F_OK); // F_OK checks if the file/folder exists
     return true;
   } catch (error) {
     // throw error;
-    return false
+    return false;
   }
 }
 
@@ -61,4 +87,5 @@ const fileFormat = {
   fileSizeInKb,
   formatBytes,
 };
+
 export { checkFileExistence, getFileSize, fileFormat };

@@ -1,7 +1,6 @@
-import {Post} from '../model/Post.model.ts';
-import PostService from '../services/post.service.ts';
+import { postService } from '../services/index.service.ts';
 
-const sr = await PostService.getPosts({meta: {source: 'navbar/controller'}})
+const sr = await postService.getPosts({ meta: { source: 'navbar/controller' } });
 const blogPosts: any = await sr.responseObject;
 
 // ----------- Label Menu -----------
@@ -15,7 +14,9 @@ function countTagOccurrences(tagsArray) {
 }
 
 let allLabels = [];
-blogPosts.forEach((post) => { allLabels = allLabels.concat(post.labels); });
+blogPosts.forEach((post) => {
+  allLabels = allLabels.concat(post.labels);
+});
 
 const uniqueTags = [...new Set(allLabels)];
 const labelCount = countTagOccurrences(allLabels.sort().reverse());
@@ -39,7 +40,6 @@ const postCountByYear = blogPosts.reduce((acc, post) => {
 function getYearlyCount(year) {
   return postCountByYear[year];
 }
-
 
 /*
  *
@@ -68,26 +68,29 @@ const archiveMenu = [];
 
 // load
 function buildMenu() {
-  Object.keys(postCountByYear).reverse().forEach((year) => {
-    // yearly
-    const yearlyPostCount = postCountByYear[year];
-    // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
-    let YTD = { year: year, total: yearlyPostCount };
-    let MTD: any = [];
-    //monthly
-    // key = "Month Year"
-    Object.keys(postsByMonthYear).filter((key) => key.includes(year))
-      .reverse() // descending order
-      .forEach((key) => {
-        const posts = postsByMonthYear[key];
-        const month = key.replace(' ' + year, '');
-        const monthCount = posts.length;
-        MTD.push({ month, total: monthCount });
-        YTD.MTD = MTD;
-      });
-    //update
-    archiveMenu.push(YTD);
-  });
+  Object.keys(postCountByYear)
+    .reverse()
+    .forEach((year) => {
+      // yearly
+      const yearlyPostCount = postCountByYear[year];
+      // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
+      let YTD = { year: year, total: yearlyPostCount };
+      let MTD: any = [];
+      //monthly
+      // key = "Month Year"
+      Object.keys(postsByMonthYear)
+        .filter((key) => key.includes(year))
+        .reverse() // descending order
+        .forEach((key) => {
+          const posts = postsByMonthYear[key];
+          const month = key.replace(' ' + year, '');
+          const monthCount = posts.length;
+          MTD.push({ month, total: monthCount });
+          YTD.MTD = MTD;
+        });
+      //update
+      archiveMenu.push(YTD);
+    });
   return archiveMenu;
 }
 

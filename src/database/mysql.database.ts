@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import type { Post } from '../model/Post.model.ts';
 
-import { type Posts, PostsTable, buildDuplicateKeyUpdateClause } from '../model/Tables.model.ts';
+import { buildDuplicateKeyUpdateClause } from '../model/Tables.model.ts';
 
 class MySQLDatabase {
   pool: any;

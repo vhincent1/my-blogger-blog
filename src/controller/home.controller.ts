@@ -1,4 +1,5 @@
-import PostService from '../services/post.service.ts';
+import { StatusCodes } from 'http-status-codes';
+import { postService } from '../services/index.service.ts';
 import { getPaginationParameters, getPaginatedQueryDetails, getPaginatedData } from './pagination.controller.ts';
 
 // async function findPage(postId, pageLimit, data) {
@@ -38,7 +39,7 @@ class HomeController {
     const parameters: any = getPaginationParameters(req, { page: 1, limit });
     // console.log(parameters)
     parameters.meta = { source: 'home/controller/list' };
-    const serviceResponse = await PostService.getPosts(parameters);
+    const serviceResponse = await postService.getPosts(parameters);
     // console.log('Service: ', serviceResponse)
     if (serviceResponse.success) {
       const posts: any = await serviceResponse.responseObject;
@@ -49,8 +50,10 @@ class HomeController {
       // console.log('RESPONSE: ', serviceResponse);
       // const pagination = await handlePagination(req, parameters);
       // console.log(pagination.totalPages)
-      if (paginatedResult.currentPage > paginatedResult.totalPages) {
-        res.status(404).render('404', { errorMessage: 'Not found' });
+      if (paginatedResult.totalCount === 0) {
+        res.status(StatusCodes.NOT_FOUND).render('404', { errorMessage: 'No posts found' });
+      } else if (paginatedResult.currentPage > paginatedResult.totalPages) {
+        res.status(StatusCodes.NOT_FOUND).render('404', { errorMessage: 'Not found' });
       } else {
         res.status(serviceResponse.statusCode).render('v1/index', {
           pagination: paginationQueryDetails,
@@ -77,11 +80,11 @@ class HomeController {
   }
 }
 
-const c = new HomeController();
+const controller = new HomeController();
 
 const homepageController = {
-  getFrontPage: async (req, res) => c.list(req, res, false, 5),
-  getIndex: async (req, res) => c.list(req, res, true, 100),
+  getFrontPage: async (req, res) => controller.list(req, res, false, 5),
+  getIndex: async (req, res) => controller.list(req, res, true, 100),
 };
 
 export { homepageController };

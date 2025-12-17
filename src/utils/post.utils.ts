@@ -236,7 +236,7 @@ export async function importFolder(directoryPath) {
       //   console.log(isAnImageFile(f))
       // })
 
-      const post = new Post(null);
+      const post = new Post(undefined);
 
       //readme file
       const readmeFileExists = files.find((f) => f.toUpperCase().includes('README'));

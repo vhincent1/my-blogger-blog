@@ -4,6 +4,7 @@ import appConfig from '../app.config.ts';
 import type { Post } from '../model/Post.model.ts';
 
 import type Heart from '../model/Heart.model.ts';
+import type { DatabaseI } from '../model/DatabaseI.model.ts';
 
 const dbMutex = new Mutex();
 
@@ -51,7 +52,7 @@ class JSONDatabase implements DatabaseI {
     throw new Error('Method not implemented.');
   }
 
-  setup(): void {
+  setup(dropExistingTables): void {
     throw new Error('Method not implemented.');
   }
 

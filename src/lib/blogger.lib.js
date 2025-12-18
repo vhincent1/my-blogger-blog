@@ -228,7 +228,7 @@ export function convertBloggerPosts(data) {
     post.category = 0;
     convertedPosts.push(post);
   }
-  return convertedPosts
+  return {convertedPosts}
 }
 
 export async function checkFileExistence(folderPath) {

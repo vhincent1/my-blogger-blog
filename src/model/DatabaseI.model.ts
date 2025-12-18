@@ -2,7 +2,7 @@ import type Heart from "./Heart.model.ts";
 import type { Post } from "./Post.model.ts";
 
 export interface DatabaseI {
-  setup(): void;
+  setup(dropExistingTables?): void;
   load(): void;
   close(): void;
 

@@ -37,4 +37,4 @@ export class UsersTable extends SQLiteTable<User> {
   }
 }
 
-console.log(new UsersTable(null).generateSchema())
+// console.log(new UsersTable(null).generateSchema())

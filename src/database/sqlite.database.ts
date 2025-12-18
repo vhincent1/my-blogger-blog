@@ -18,7 +18,7 @@ export class SQLiteDatabase implements DatabaseI {
   #usersTable: UsersTable;
 
   constructor(config) {
-    this.#db = new SQLite3(config.sqlite3);
+    this.#db = new SQLite3(config.sqlite3,/*{readonly: true}*/);
     this.#db.pragma('journal_mode = WAL');
 
     // tables
@@ -45,10 +45,15 @@ export class SQLiteDatabase implements DatabaseI {
       }
   }
 
-  setup() {
+  setup(dropExistingTables?) {
     try {
-      const sqlScript = fs.readFileSync('./public/schema/schema.sqlite.sql', 'utf8');
-      this.#db.exec(sqlScript);
+      if (this.version == 1) {
+        const sqlScript = fs.readFileSync('./public/schema/schema.sqlite.sql', 'utf8');
+        this.#db.exec(sqlScript);
+      } else if (this.version == 2) {
+        //setup tables
+        this.#usersTable.generateSchema()
+      }
       console.log('Schema created');
       // this.db.close();
     } catch (error) {
@@ -58,6 +63,7 @@ export class SQLiteDatabase implements DatabaseI {
   }
 
   importPosts(posts: Post[]) {
+    console.log('importPosts()');
     this.#postsTable.importData(posts);
   }
 
@@ -98,7 +104,7 @@ export class SQLiteDatabase implements DatabaseI {
 
     const user: User | null = this.findUserById(row.user_id);
     if (user) post.author = user.username;
-    post.user_id = row.user_id
+    post.user_id = row.user_id;
     // post.author = 'VHINCENT'
 
     post.status = row.status;

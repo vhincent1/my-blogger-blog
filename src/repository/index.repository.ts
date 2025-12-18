@@ -3,6 +3,6 @@ import PostRepository from './post.repository.ts';
 import UserRepository from './user.repository.ts';
 
 const postRepository = new PostRepository(database);
-const userRepository = new UserRepository(null);
+const userRepository = new UserRepository(database);
 
-export { postRepository };
+export { postRepository, userRepository};

@@ -1,28 +1,27 @@
 import fs from 'fs/promises';
+interface IOResponse {
+  success: boolean;
+  error?: string;
+}
 
-// export async function getResourceSize(url) {
-//   try {
-//     const response = await fetch(url, { method: 'HEAD' }); // Use HEAD request for metadata only
-//     if (response.ok) {
-//       const contentLength = response.headers.get('Content-Length');
-//       if (contentLength) {
-//         console.log(`Size of resource at ${url}: ${parseInt(contentLength, 10)} bytes`);
-//         return parseInt(contentLength, 10);
-//       } else {
-//         console.warn(`Content-Length header not found for ${url}`);
-//         return 0;
-//       }
-//     } else {
-//       console.error(`Failed to fetch resource headers from ${url}: ${response.status} ${response.statusText}`);
-//       return 0;
-//     }
-//   } catch (error) {
-//     console.error(`Error getting resource size for ${url}:`, error);
-//     return 0;
-//   }
-// }
+export async function moveFile(source, destinationPath): Promise<IOResponse> {
+  try {
+    // The fs.rename function renames a file or moves it to a new path.
+    // If the destination file already exists, it will be overwritten.
+    await fs.rename(source, destinationPath);
+    console.log(`File moved successfully from ${source} to ${destinationPath}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error moving file:', error);
 
-export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
+    // Common errors:
+    // - ENOENT: Source file/folder doesn't exist, or destination folder doesn't exist.
+    // - EXDEV: Moving across different disk drives or partitions (see alternative below).
+    return { success: false, error: error.message };
+  }
+}
+
+export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000){
   // console.log('Downloading image');
   //prettier-ignore
   for (let i = 0; i < retries; i++) try { 
@@ -40,11 +39,12 @@ export async function downloadImage(imageUrl, savePath, retries = 5, delay = 100
       } else {
         console.error(`Failed to download image after ${retries} attempts.`);
         // throw error; // Re-throw if all retries fail
-        return {sucess: false, error: error.message, other: `Failed to download image after ${retries} attempts.`};
+        // throw new Error( `Failed to download image after ${retries} attempts.`)
+        return {success: false, error: `Failed to download image after ${retries} attempts.`};
       }
       // console.error('Error downloading the image with fetch:', error);
       // throw error;
-      return {success: false, error: error.message}
+      // return {success: false, error: error.message}
     }
 }
 

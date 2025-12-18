@@ -8,8 +8,8 @@ export abstract class SQLiteTable<T> implements Table {
   constructor(db) {
     this.#db = db;
   }
-  
-  abstract tableScheme(model?: T);
+
+  abstract tableScheme(model?: T): T | any;
   abstract mapRowToData(row): T | null;
 
   fetchAll(): T[] {
@@ -25,7 +25,7 @@ export abstract class SQLiteTable<T> implements Table {
     return this.mapRowToData(data);
   }
 
-  generateSchema(): any {
+  generateSchema(dropExistingTables?, print?): any {
     //prettier-ignore
     function getType(value) {
       if (value === null) return 'NULL';
@@ -39,13 +39,14 @@ export abstract class SQLiteTable<T> implements Table {
     let _schema = ``;
     _schema += `--- auto-generated JSON schema for ${this.tableName} table ---\n`;
     // tables
-    _schema += `DROP TABLE IF EXISTS ${this.tableName};
+    if (dropExistingTables)
+      _schema += `DROP TABLE IF EXISTS ${this.tableName};
 CREATE TABLE ${this.tableName} (
   id INTEGER PRIMARY KEY,
   data JSON
 );\n`;
 
-    const entries = Object.entries(this.tableScheme()).filter(([key]) => key !== 'id' && key !== 'tableName' && key !== 'version');
+    const entries = Object.entries(this.tableScheme() as any).filter(([key]) => key !== 'id' && key !== 'tableName' && key !== 'version');
 
     // create alter table statements
     _schema += `-- Alter table statements\n`;
@@ -59,6 +60,7 @@ CREATE TABLE ${this.tableName} (
       _schema += `CREATE INDEX idx_${this.tableName}_${key} ON ${this.tableName} (${key});\n`;
     });
     _schema += `--- end of schema ---`;
+    if (print) console.dir(_schema);
     return _schema;
   }
 
@@ -86,9 +88,9 @@ CREATE TABLE ${this.tableName} (
         const schema = this.tableScheme(data);
 
         if (this.version === 1) {
-          const columns = Object.keys(schema).join(', ');
+          const columns = Object.keys(schema as any).join(', ');
           // prettier-ignore
-          const placeholders = Object.keys(schema).map((col) => `:${col}`).join(', ');
+          const placeholders = Object.keys(schema as any).map((col) => `:${col}`).join(', ');
           const query = `INSERT OR REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders});`;
           const insertStmt = this.#db.prepare(query);
           insertStmt.run(schema);
@@ -108,20 +110,21 @@ CREATE TABLE ${this.tableName} (
     }
   }
 
-  insertData(values: any) {
-    console.log('Inserting data into', this.tableName, 'table');
+  insertData(value: any, printCallback?) {
+    if (printCallback) printCallback(value);
+    // console.log('Inserting data into', this.tableName, 'table');
     //json
     if (this.version === 1) {
-      const columns = Object.keys(values).join(', ');
+      const columns = Object.keys(value).join(', ');
       // prettier-ignore
-      const placeholders = Object.keys(values).map((key) => `:${key}`).join(', ');
+      const placeholders = Object.keys(value).map((key) => `:${key}`).join(', ');
       const insertStatement = this.#db.prepare(`INSERT OR REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders})`);
-      const info = insertStatement.run(values);
+      const info = insertStatement.run(value);
       // console.log('Number of rows changed:', info.changes, '@ Row:', info.lastInsertRowid);
       return info;
     } else if (this.version === 2) {
       const query = `INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?)`;
-      const statement = this.#db.prepare(query).run(values.id, JSON.stringify(values));
+      const statement = this.#db.prepare(query).run(value.id, JSON.stringify(value));
       return statement;
     }
   }

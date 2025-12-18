@@ -1,20 +1,23 @@
-import appConfig from '../src/app.config.ts';
 import fs from 'fs/promises';
+import parser from 'node-html-parser';
 import path from 'path';
+
+import appConfig from '../src/app.config.ts';
+import type { Post } from '../src/model/Post.model.ts';
+import { postService } from '../src/services/index.service.ts';
 import { checkFileExistence, downloadImage } from '../src/utils/io.utils.ts';
 
 // blogspot/blogger utils
 import { convertBloggerPosts } from '../src/lib/blogger.lib.js';
-const errorLogFile = appConfig.blogger.exportConfig.errorLog;
 
-interface DownloadEntry {
+interface PostEntry {
   post: Omit<Post, 'content' | 'labels'>;
   source: string; // img src
 }
 // callback function
-type SaveFolderCallback = (entry: DownloadEntry) => string;
+type SavePathCallback = (entry: PostEntry) => string;
 
-const downloadImages = async (entries: DownloadEntry[], saveFolder: SaveFolderCallback) => {
+const downloadEntries = async (entries: PostEntry[], saveFolder: SavePathCallback) => {
   // statistic counter
   let counts = {};
   const downloadStats: any[] = [];
@@ -28,7 +31,7 @@ const downloadImages = async (entries: DownloadEntry[], saveFolder: SaveFolderCa
   });
 
   const downloadStat = (entryId) => downloadStats.find((stat) => stat.entryId == entryId);
-  const removeImage = (entryId, source) => {
+  const updateStat = (entryId, source) => {
     const stat = downloadStat(entryId);
     const index = stat.images.indexOf(source);
     if (index > -1) stat.images.splice(index, 1);
@@ -60,9 +63,13 @@ const downloadImages = async (entries: DownloadEntry[], saveFolder: SaveFolderCa
           return false;
         }
       }
-      if(!isValidUrl(entry.source)){
-        console.log('Malformed URL')
-        return
+      if (!isValidUrl(entry.source)) {
+        console.log('Malformed URL');
+        return;
+      }
+
+      const urlType: string = '';
+      if (urlType == 'download') {
       }
 
       const result: any = await Promise.resolve(downloadImage(entry.source, savePath));
@@ -72,7 +79,7 @@ const downloadImages = async (entries: DownloadEntry[], saveFolder: SaveFolderCa
         console.log('Downloading post id:', entry.post.id, '(', totalLeftover(identifier), '/', totalCount(identifier), ') result:', result);
         if (result.success) {
           // update statistic
-          removeImage(identifier, entry.source);
+          updateStat(identifier, entry.source);
         } else {
           //log error
           const errorInfo = {
@@ -91,6 +98,8 @@ const downloadImages = async (entries: DownloadEntry[], saveFolder: SaveFolderCa
     }
   });
   await Promise.all(result); // wait for all downloads to resolve
+
+  const errorLogFile = appConfig.blogger.exportConfig.errorLog;
   await fs.writeFile(errorLogFile, JSON.stringify(missingData, null, 2)); // write to log
 };
 
@@ -98,18 +107,14 @@ const downloadImages = async (entries: DownloadEntry[], saveFolder: SaveFolderCa
 
 // console.log('Downloading', imagesToDownload.length, 'Images');
 
-import { postService } from '../src/services/index.service.ts';
-import parser from 'node-html-parser';
-import type { Post } from '../src/model/Post.model.ts';
-
-const buildEntries = async (posts: Post[]): Promise<DownloadEntry[]> => {
+const buildEntries = async (posts: Post[]): Promise<PostEntry[]> => {
   //   const serviceResponse = await postService.getPosts();
   //   const posts = await serviceResponse.responseObject;
   //   if (posts == null) return [];
 
   console.log('Downloading', posts.length);
 
-  const entries: DownloadEntry[] = [];
+  const entries: PostEntry[] = [];
   posts.forEach((post) => {
     const document = parser.parse(post.content);
 
@@ -127,7 +132,7 @@ const buildEntries = async (posts: Post[]): Promise<DownloadEntry[]> => {
         // You can specify the type for the new object
         const typedPublicObject: Omit<typeof originalObject, 'content' | 'labels'> = publicObject;
 
-        const data: DownloadEntry = {
+        const data: PostEntry = {
           post: typedPublicObject,
           source: originalSource, // img src
           //   filename: filename
@@ -142,18 +147,20 @@ const buildEntries = async (posts: Post[]): Promise<DownloadEntry[]> => {
   return entries;
 };
 
+export { buildEntries, downloadEntries, type SavePathCallback, type PostEntry };
+
 const run = async () => {
   /**
    *  Customize
    */
-  const saveFolder: SaveFolderCallback = (entry: DownloadEntry) => {
+  const saveFolder: SavePathCallback = (entry: PostEntry) => {
     const post = entry.post;
-    console.log('saveFolder', post)
+    console.log('saveFolder', post);
     // const imagePath = new URL(entry.source).pathname;
     const imagePath = entry.source;
     const fileName = decodeURIComponent(path.basename(imagePath));
     // the callback path to save the pics
-    return `${appConfig.blogger.exportConfig.uploadPath}/${post.user_id}/${entry.post.id}/${fileName}`;
+    return `${appConfig.blogger.exportConfig.uploadPath}/${post.user_id}/${post.id}/${fileName}`;
   };
 
   // Blogger posts
@@ -164,13 +171,13 @@ const run = async () => {
   const serviceResponse = await postService.getPosts();
   const posts = await serviceResponse.responseObject;
 
-  const entries = await buildEntries(posts!!);
+  const entries = await buildEntries(bloggerPosts);
 
   //download
-  await Promise.resolve(downloadImages(entries, saveFolder));
+  await Promise.resolve(downloadEntries(entries, saveFolder));
 };
 
-run();
+// run();
 
 // download stat counter thingy test
 //   download.forEach((entry) => {
@@ -209,3 +216,5 @@ run();
 //     console.log(`post: ${testId} (${counts[testId]}/${counts[testId]})`);
 //     counts[testId] = counts[testId] - 1;
 //   }, 1000); // 1000ms = 1 second
+
+// downloadImage('https://google.com/png', './test.png', 5)

@@ -45,7 +45,8 @@ export class Database implements DatabaseI {
     this.db.importPosts(posts);
   }
 
-  setup(): void {
+  setup(dropExistingTables?): void {
+    this.db.setup(dropExistingTables)
     // throw new Error('Method not implemented.');
   }
 

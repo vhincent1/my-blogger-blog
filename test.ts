@@ -1,18 +1,38 @@
 import { postService } from './src/services/index.service.ts';
 
-const serviceResponse = await postService.getPosts()
-const posts = await serviceResponse.responseObject
-console.log(posts?.find(p=>p.id === 713));
+// const serviceResponse = await postService.getPosts();
+// const posts = await serviceResponse.responseObject;
+// console.log(posts?.find((p) => p.id === 713));
 
-import appConfig from './src/app.config.ts'
+import appConfig from './src/app.config.ts';
 
-// const testdb = new SQLite3(appConfig.database.sqlite3);
+import { UsersTable } from './src/database/tables/users.table.ts';
+import { PostsTable } from './src/database/tables/posts.table.ts';
+
+const testdb = new SQLite3(appConfig.database.sqlite3);
+
+const usersTable = new UsersTable(testdb);
+const postsTable = new PostsTable(testdb, usersTable);
+
+// console.log(usersTable.generateSchema())
+try {
+  const print = false;
+  // users
+  testdb.exec(usersTable.generateSchema(true, print));
+  const defaultUsers = [new User(1, 'host'), new User(2, 'Vhincent')];
+  defaultUsers.forEach((user) => {
+    const scheme = usersTable.tableScheme(user);
+    console.log(usersTable.insertData(scheme, (user) => console.log(`Inserting id=${user.id} username=${user.username}`)));
+  });
+  testdb.exec(postsTable.generateSchema(false, print));
+} catch (error) {
+  console.log(error);
+}
+
 // const usersTable = new UsersTable(testdb)
 
 // const scheme = usersTable.tableScheme(new User(2, 'VHINCENT'));
 // console.log(usersTable.insertData(scheme))
-
-
 
 // import {SQLiteDatabase} from './src/database/sqlite.database.ts';
 // import appConfig from './src/app.config.ts';
@@ -78,10 +98,9 @@ import SQLite3 from 'better-sqlite3';
 import { Post, PostStatus } from './src/model/Post.model.ts';
 const db = new SQLite3('./database/test.db');
 
-import { SQLiteTable } from './src/model/Tables.model.ts';
-import { UsersTable } from './src/database/tables/users.table.ts';
 import User from './src/model/User.model.ts';
-class PostsTable extends SQLiteTable<Post> {
+import { SQLiteTable } from './src/model/Tables.model.ts';
+class PostsTable2 extends SQLiteTable<Post> {
   mapRowToData(row: any): Post | null {
     throw new Error('Method not implemented.');
   }
@@ -172,7 +191,7 @@ function savePost() {
   post.status = PostStatus.PUBLISHED;
   post.source = { url: 'https://example.com' };
 
-  const postTable = new PostsTable(null);
+  const postTable = new PostsTable2(null);
   // const schema = postTable.schemaTable(post);
 
   // const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?)`;

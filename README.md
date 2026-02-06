@@ -16,13 +16,13 @@ blogger: {
 ```
 Download your Blogspot with the command:
 ```
-yarn run setup
+deno run setup
 ```
 api lib
 ```
-yarn run build
+deno run build
 ```
 then run
 ```
-yarn run start
+deno run start
 ```

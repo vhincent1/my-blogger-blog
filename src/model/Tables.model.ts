@@ -81,9 +81,9 @@ export abstract class SQLiteTable<T> implements Table {
     // tables
     if (config?.dropExistingTables) _schema += `DROP TABLE IF EXISTS ${this.tableName};\n`;
     _schema += `CREATE TABLE ${this.tableName} (
-  id INTEGER PRIMARY KEY,
-  data JSON
-);\n`;
+      id INTEGER PRIMARY KEY,
+      data JSON
+    );\n`;
 
     const entries = Object.entries(this.tableScheme() as any).filter(([key]) => key !== 'id' && key !== 'tableName' && key !== 'version');
 

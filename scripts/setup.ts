@@ -1,77 +1,19 @@
+// deno-lint-ignore-file no-async-promise-executor
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import appConfig from '../src/app.config.ts';
 import database from '../src/database/index.database.ts';
 import { writeJsonFile } from '../src/database/json.database.ts';
-// sqliteDb.setup()
-
-// async function getPosts() {
-//   const serviceResponse = await PostService.getPosts();
-//   if (serviceResponse.success == false) {
-//     console.error('Error: ', serviceResponse);
-//     process.exit(0);
-//   }
-//   const posts: any = await serviceResponse.responseObject;
-//   return posts;
-// }
-
-// const sqliteDb = new SQLiteDatabase();
-// await sqliteDb.getAllBlogPosts()
-// sqliteDb.setup()
-
-// const posts = await getPosts();
-// sqliteDb.importPosts(posts);
-
-// const post = sqliteDb.findPostById(262)
-// const user = sqliteDb.findUserById(1)
-// console.log(user?.username)
-// console.log(post)
-
-// import { buildSizeTable } from '../utils/post.utils.ts';
-// console.log(buildSizeTable(post))
-
-// import fs from 'fs'
-
-// const size = fs.statSync('/Users/vhincent/Programming/web/simpblog/public/content/262/6bd8b0b4-cdb9-429c-9150-02f5def338d5.jpg').size
-// console.log(size)
-
-// const post: Post = posts.filter((p) => p.id == 681)
-// sqliteDb.savePost(post[0]);
-
-// const db = new MySQLDatabase();
-// await db.getAllBlogPosts();
-
-// console.log('done');
-// process.exit(0);
-
-/**
- *
- */
-
-import appConfig from '../src/app.config.ts';
-import { checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from '../src/lib/blogger.lib.js';
-import fs from 'fs/promises';
-import path from 'path';
-// exportBlog();
-
-// interfaces
 import type { Post } from '../src/model/Post.model.ts';
+import { checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from '../src/lib/blogger.lib.js';
 import { buildEntries, downloadEntries, type PostEntry, type SavePathCallback } from './download-images.ts';
-
-// interface DownloadImage {
-//   author: string; //post author
-//   index: number; //post id
-//   source: string; // img src
-//   path: string; //save path
-// }
 
 interface BloggerLibResults {
   convertedPosts: Post[];
-  // imagesToDownload: DownloadImage[];
-  errors: any;
+  errors?: any;
 }
 
 const exportBlogger = new Promise(async (resolve, reject) => {
-  // Simulate an asynchronous operation
-  // setTimeout(async () => {
-
   const file = appConfig.blogger.exported;
   if (await checkFileExistence(file)) {
     console.log('Using exported data:', file);
@@ -91,7 +33,6 @@ const exportBlogger = new Promise(async (resolve, reject) => {
   //   reject('Error: Failed to fetch data.');
   // }
   return resolve(bloggerPosts);
-  // }, 2000);
 });
 
 exportBlogger
@@ -110,7 +51,6 @@ exportBlogger
    * Download pictures
    */
   .then(async (processedResult: BloggerLibResults) => {
-    // console.log('Downloading', processedResult.imagesToDownload.length, 'Images');
     console.log('Downloading images...');
 
     /**
@@ -131,45 +71,6 @@ exportBlogger
     const entries = await buildEntries(processedResult.convertedPosts);
     await Promise.resolve(downloadEntries(entries, saveFolder));
 
-    // const saveFolder = (o) => `${appConfig.blogger.exportConfig.uploadPath}/${o.author}/${o.index}`;
-    // console.log('To: ', saveFolder({ author: 'AUTHOR', index: 'POST_ID' }));
-
-    // const downloadImages = async () => {
-    //   const missingData: any = [];
-    //   const result = processedResult.imagesToDownload.map(async (o) => {
-    //     const imagePath = new URL(o.source).pathname;
-    //     const fileName = decodeURIComponent(path.basename(imagePath));
-
-    //     // const saveFolder = `${appConfig.blogger.exportConfig.uploadPath}/${o.author}/${o.index}`;
-    //     const savePath = path.resolve(saveFolder({ author: o.author, index: o.index }), fileName);
-
-    //     // ---------------------
-    //     await fs.mkdir(path.dirname(savePath), { recursive: true });
-    //     const ifImageExists = await checkFileExistence(savePath);
-    //     if (!ifImageExists) {
-    //       console.log('Downloading image, post:', o.index)
-    //       const error: any = await downloadImage(o.source, savePath);
-    //       if (errorLogFile && error) {
-    //         const errorInfo = {
-    //           postId: o.index,
-    //           author: o.author,
-    //           imageSource: o.source,
-    //           downloadPath: savePath, //path.dirname(o.path),
-    //           error: await error.toString(),
-    //         };
-    //         missingData.push(await errorInfo);
-    //         console.log('Error downloading image:', await error.message);
-    //       }
-    //     } else {
-    //       // console.log('already downloaded')
-    //     }
-    //   });
-    //   await Promise.all(result); // wait for all downloads to resolve
-    //   const errorLogFile = appConfig.blogger.exportConfig.errorLog;
-    //   await fs.writeFile(errorLogFile, JSON.stringify(missingData, null, 2)); // write to log
-    // };
-    // await Promise.resolve(downloadImages());
-
     console.log('--- Done ---');
     return processedResult;
   })
@@ -178,14 +79,16 @@ exportBlogger
    */
   .then(async (processedResult: BloggerLibResults) => {
     const result = await processedResult;
+
     if (result.convertedPosts) {
       console.log('Importing to', appConfig.database.type);
 
-      database.setup(true);
-      database.importPosts(result.convertedPosts);
+      database.setup({ dropExistingTables: true });
 
+      // import
+      database.importPosts(result.convertedPosts);
       // JSONDatabase.writ
-      await writeJsonFile('../public/dist/posts.json', result.convertedPosts);
+      await writeJsonFile(appConfig.database.file, result.convertedPosts);
     } else if (result.errors) {
       console.log('Errors:', result.errors);
     }

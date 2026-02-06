@@ -1,16 +1,53 @@
 interface Table {}
 
+interface SchemaConfig {
+  dropExistingTables: boolean;
+  print: boolean;
+}
+
+interface JsonTable {
+  id: number;
+  data: any;
+}
+
 export abstract class SQLiteTable<T> implements Table {
   abstract version: number;
   abstract tableName: string;
-
   #db;
   constructor(db) {
     this.#db = db;
   }
-
   abstract tableScheme(model?: T): T | any;
   abstract mapRowToData(row): T | null;
+
+  getDatabase = () => this.#db;
+
+  delete = (data: T | any, key, value) => {
+    let keytemplate;
+    if (this.version == 2) {
+      keytemplate = `JSON_EXTRACT(data, '$.${key}')`;
+    }
+    const statement = this.#db.prepare(`DELETE FROM ${this.tableName} WHERE id = ? AND ${keytemplate} = ?`);
+    // console.log(`DELETE FROM ${this.tableName} WHERE id = ? AND ${keytemplate} = ?`);
+    // console.log(data.id, key, value);
+    return statement.run(data.id, value);
+  };
+
+  insert = (data: T | any, replace?) => {
+    const statement = this.getDatabase().prepare(`INSERT ${replace ? 'OR REPLACE' : ''} INTO ${this.tableName} (id, data) VALUES (?, ?)`);
+    return statement.run(data.id, JSON.stringify(data));
+  };
+
+  update = (data: T | any, key, value) => {
+    let query;
+    if (this.version === 1) {
+      query = `UPDATE ${this.tableName} SET ${key} = ? WHERE id = ?`;
+    } else if (this.version === 2) {
+      query = `UPDATE ${this.tableName} SET data = json_replace(data, "$.${key}", ?) WHERE id = ?`;
+    }
+    const update = this.#db.prepare(query);
+    return update.run(value, data.id);
+  };
 
   fetchAll(): T[] {
     const statement = this.#db.prepare(`SELECT * FROM ${this.tableName} ORDER BY id DESC`); //ASC - recent, DESC - oldest
@@ -21,11 +58,14 @@ export abstract class SQLiteTable<T> implements Table {
   findById(id: number): T | null {
     const statement = this.#db.prepare(`SELECT * FROM ${this.tableName} WHERE id = ?`);
     const row = statement.get(id);
+    if (!row) return null;
+
+    // console.log('findById:',row)
     const data = this.version === 2 ? JSON.parse(row.data) : row;
     return this.mapRowToData(data);
   }
 
-  generateSchema(dropExistingTables?, print?): any {
+  generateSchema(config?): any {
     //prettier-ignore
     function getType(value) {
       if (value === null) return 'NULL';
@@ -39,9 +79,8 @@ export abstract class SQLiteTable<T> implements Table {
     let _schema = ``;
     _schema += `--- auto-generated JSON schema for ${this.tableName} table ---\n`;
     // tables
-    if (dropExistingTables)
-      _schema += `DROP TABLE IF EXISTS ${this.tableName};
-CREATE TABLE ${this.tableName} (
+    if (config?.dropExistingTables) _schema += `DROP TABLE IF EXISTS ${this.tableName};\n`;
+    _schema += `CREATE TABLE ${this.tableName} (
   id INTEGER PRIMARY KEY,
   data JSON
 );\n`;
@@ -60,11 +99,11 @@ CREATE TABLE ${this.tableName} (
       _schema += `CREATE INDEX idx_${this.tableName}_${key} ON ${this.tableName} (${key});\n`;
     });
     _schema += `--- end of schema ---`;
-    if (print) console.dir(_schema);
+    if (config?.print) console.dir(_schema);
     return _schema;
   }
 
-  importData(data: any[]) {
+  importData(data: T[]) {
     // Insert sample data if the table is empty
     // const count = db.prepare('SELECT COUNT(*) AS count FROM users').get().count;
     // if (count === 0) {
@@ -76,33 +115,47 @@ CREATE TABLE ${this.tableName} (
     console.log('importing data into', this.tableName, 'table');
     let checkTable = this.#db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get(this.tableName);
     if (!checkTable) {
-      console.error("posts table doesn't exist, use setup()");
+      console.error(`${this.tableName} table doesn't exist, use setup()`);
       return;
     }
 
-    const query = `INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?);`;
-    const insertStmt = this.#db.prepare(query);
+    // const query = `INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?);`;
+    // const insertStmt = this.#db.prepare(query);
 
-    const insertData = this.#db.transaction((dataArray) => {
-      for (const data of dataArray) {
-        const schema = this.tableScheme(data);
+    const insertData = (dataArray) => {
+      // node:sqlite doesn't have a built-in .transaction() wrapper yet,
+      // so we use standard SQL commands for atomicity and speed.
+      this.#db.exec('BEGIN');
 
-        if (this.version === 1) {
-          const columns = Object.keys(schema as any).join(', ');
-          // prettier-ignore
-          const placeholders = Object.keys(schema as any).map((col) => `:${col}`).join(', ');
-          const query = `INSERT OR REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders});`;
-          const insertStmt = this.#db.prepare(query);
-          insertStmt.run(schema);
-        } else if (this.version === 2) {
-          //json
-          const insertStmt = this.#db.prepare(`INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?);`);
-          insertStmt.run(schema.id, JSON.stringify(schema));
+      try {
+        for (const data of dataArray) {
+          const schema = this.tableScheme(data);
+
+          if (this.version === 1) {
+            const keys = Object.keys(schema);
+            const columns = keys.join(', ');
+            const placeholders = keys.map((k) => `:${k}`).join(', ');
+
+            const query = `INSERT OR REPLACE INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
+            // In node:sqlite, we can pass the object directly for named parameters
+            this.#db.prepare(query).run(schema);
+          } else if (this.version === 2) {
+            const query = `INSERT OR REPLACE INTO ${this.tableName} (id, data) VALUES (?, ?)`;
+            this.#db.prepare(query).run(schema.id, JSON.stringify(schema));
+          }
         }
+
+        this.#db.exec('COMMIT');
+
+        // Get final count
+        const result = this.#db.prepare(`SELECT count(*) AS count FROM ${this.tableName}`).get();
+        console.log(`Successfully inserted. Total rows in ${this.tableName}:`, result.count);
+      } catch (err) {
+        this.#db.exec('ROLLBACK');
+        console.error('Transaction failed, rolled back:', err);
+        throw err;
       }
-      const result = this.#db.prepare(`SELECT count(*) AS count FROM ${this.tableName}`);
-      console.log('Successfully inserted', result.get().count, this.tableName, 'rows');
-    });
+    };
     try {
       insertData(data);
     } catch (error) {

@@ -1,11 +1,12 @@
-import { postService } from './src/services/index.service.ts';
-
 // const serviceResponse = await postService.getPosts();
 // const posts = await serviceResponse.responseObject;
 // console.log(posts?.find((p) => p.id === 713));
+import SQLite3 from 'better-sqlite3';
 
 import appConfig from './src/app.config.ts';
 
+// import { SQLiteTable } from './src/model/Tables.model.ts';
+import { HeartsTable } from './src/database/tables/hearts.table.ts';
 import { UsersTable } from './src/database/tables/users.table.ts';
 import { PostsTable } from './src/database/tables/posts.table.ts';
 
@@ -13,18 +14,31 @@ const testdb = new SQLite3(appConfig.database.sqlite3);
 
 const usersTable = new UsersTable(testdb);
 const postsTable = new PostsTable(testdb, usersTable);
+const heartsTable = new HeartsTable(testdb);
 
 // console.log(usersTable.generateSchema())
+// try {
+//   const config = {
+//     dropExistingTables: false,
+//     print: (data) => {},
+//   };
+//   // users
+//   testdb.exec(usersTable.generateSchema(config));
+//   const defaultUsers = [new User(1, 'host'), new User(2, 'Vhincent')];
+//   defaultUsers.forEach((user) => {
+//     const scheme = usersTable.tableScheme(user);
+//     console.log(usersTable.insertData(scheme, (user) => console.log(`Inserting id=${user.id} username=${user.username}`)));
+//   });
+//   testdb.exec(postsTable.generateSchema(config));
+// } catch (error) {
+//   console.log(error);
+// }
+
+// console.log(heartsTable.generateSchema({ dropExistingTables: true }));
+// testdb.exec(heartsTable.generateSchema({dropExistingTables: true}))
+
 try {
-  const print = false;
-  // users
-  testdb.exec(usersTable.generateSchema(true, print));
-  const defaultUsers = [new User(1, 'host'), new User(2, 'Vhincent')];
-  defaultUsers.forEach((user) => {
-    const scheme = usersTable.tableScheme(user);
-    console.log(usersTable.insertData(scheme, (user) => console.log(`Inserting id=${user.id} username=${user.username}`)));
-  });
-  testdb.exec(postsTable.generateSchema(false, print));
+  // heartsTable.heartPost(1, 1);
 } catch (error) {
   console.log(error);
 }
@@ -93,46 +107,42 @@ try {
 
 //   getResourceSize("http://127.0.0.1:3000/content/VHINCENT/700/s-l1200.webp");
 
-import { readJsonFile } from './src/database/json.database.ts';
-import SQLite3 from 'better-sqlite3';
-import { Post, PostStatus } from './src/model/Post.model.ts';
-const db = new SQLite3('./database/test.db');
+// import { Post, PostStatus } from './src/model/Post.model.ts';
+// const db = new SQLite3('./database/test.db');
 
-import User from './src/model/User.model.ts';
-import { SQLiteTable } from './src/model/Tables.model.ts';
-class PostsTable2 extends SQLiteTable<Post> {
-  mapRowToData(row: any): Post | null {
-    throw new Error('Method not implemented.');
-  }
-  version: number = 2;
-  tableName: string = 'posts';
-  tableScheme(post?: Post) {
-    const scheme: {
-      id: number | undefined;
-      user_id: number;
-      title: string;
-      content: string;
-      labels: string;
-      created_at: Date;
-      updated_at: Date;
-      category: number;
-      source: string;
-      status: PostStatus;
-    } = {
-      id: post?.id,
-      user_id: 2,
-      title: post?.title || '',
-      content: post?.content || '',
-      labels: post?.labels.toString() || '',
-      created_at: post?.date.published || new Date(),
-      updated_at: post?.date.updated || new Date(),
-      category: post?.category || 0,
-      source: post?.source?.url,
-      status: PostStatus.PUBLISHED,
-    };
-    return { ...scheme };
-  }
-}
+// class PostsTable2 extends SQLiteTable<Post> {
+//   mapRowToData(row: any): Post | null {
+//     throw new Error('Method not implemented.');
+//   }
+//   version: number = 2;
+//   tableName: string = 'posts';
+//   tableScheme(post?: Post) {
+//     const scheme: {
+//       id: number | undefined;
+//       user_id: number;
+//       title: string;
+//       content: string;
+//       labels: string;
+//       created_at: Date;
+//       updated_at: Date;
+//       category: number;
+//       source: string;
+//       status: PostStatus;
+//     } = {
+//       id: post?.id,
+//       user_id: 2,
+//       title: post?.title || '',
+//       content: post?.content || '',
+//       labels: post?.labels.toString() || '',
+//       created_at: post?.date.published || new Date(),
+//       updated_at: post?.date.updated || new Date(),
+//       category: post?.category || 0,
+//       source: post?.source?.url,
+//       status: PostStatus.PUBLISHED,
+//     };
+//     return { ...scheme };
+//   }
+// }
 
 // const t = new PostsTable(null);
 // console.log(t.tableScheme());
@@ -164,46 +174,46 @@ class PostsTable2 extends SQLiteTable<Post> {
 
 // importPosts();
 
-function getPost(id: number) {
-  const stmt = db.prepare('SELECT * FROM posts WHERE id = ?');
-  const row = stmt.get(id);
-  if (row) {
-    return JSON.parse(row.data);
-  } else {
-    return null;
-  }
-}
+// function getPost(id: number) {
+//   const stmt = db.prepare('SELECT * FROM posts WHERE id = ?');
+//   const row = stmt.get(id);
+//   if (row) {
+//     return JSON.parse(row.data);
+//   } else {
+//     return null;
+//   }
+// }
 
 // console.log(getPost(714));
 
-function savePost() {
-  const post = new Post(1000);
-  post.id = 1000;
-  post.title = 'title2';
-  post.content = 'content';
-  post.labels = ['label,label2'];
-  post.date = {
-    published: new Date(),
-    updated: new Date(),
-  };
-  post.category = 1;
-  post.author = 'VHINCENT';
-  post.status = PostStatus.PUBLISHED;
-  post.source = { url: 'https://example.com' };
+// function savePost() {
+//   const post = new Post(1000);
+//   post.id = 1000;
+//   post.title = 'title2';
+//   post.content = 'content';
+//   post.labels = ['label,label2'];
+//   post.date = {
+//     published: new Date(),
+//     updated: new Date(),
+//   };
+//   post.category = 1;
+//   post.author = 'VHINCENT';
+//   post.status = PostStatus.PUBLISHED;
+//   post.source = { url: 'https://example.com' };
 
-  const postTable = new PostsTable2(null);
-  // const schema = postTable.schemaTable(post);
+//   // const postTable = new PostsTable2(null);
+//   // const schema = postTable.schemaTable(post);
 
-  // const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?)`;
+//   // const query = `INSERT OR REPLACE INTO posts (id, data) VALUES (?, ?)`;
 
-  // // const statement = db.prepare(query).run(values.id, JSON.stringify(values));
-  // // return statement;
-  // const columns = Object.keys(schema).join(', ');
-  // // prettier-ignore
-  // const placeholders = Object.keys(schema).map((col) => `:${col}`).join(', ');
-  // const query2 = `INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders});`;
-  // console.log(query2);
-}
+//   // // const statement = db.prepare(query).run(values.id, JSON.stringify(values));
+//   // // return statement;
+//   // const columns = Object.keys(schema).join(', ');
+//   // // prettier-ignore
+//   // const placeholders = Object.keys(schema).map((col) => `:${col}`).join(', ');
+//   // const query2 = `INSERT OR REPLACE INTO posts (${columns}) VALUES (${placeholders});`;
+//   // console.log(query2);
+// }
 
 // console.log(savePost());
 // importPosts();
@@ -211,30 +221,30 @@ function savePost() {
 // const update = db.prepare(`UPDATE posts SET data = json_replace(data, '$.user_id', ?) WHERE id = ?`);
 // update.run(100, 1);
 
-function mapRowToPost(row) {
-  if (!row) return null;
-  const post = new Post(row.id);
-  post.title = row.title;
-  post.content = row.content;
-  post.labels = row.labels.split(',');
-  post.date = {
-    published: new Date(row.created_at),
-    updated: new Date(row.updated_at),
-  };
-  post.category = row.category;
+// function mapRowToPost(row) {
+//   if (!row) return null;
+//   const post = new Post(row.id);
+//   post.title = row.title;
+//   post.content = row.content;
+//   post.labels = row.labels.split(',');
+//   post.date = {
+//     published: new Date(row.created_at),
+//     updated: new Date(row.updated_at),
+//   };
+//   post.category = row.category;
 
-  // const user: User | null = this.findUserById(row.user_id);
-  // if (user) post.author = user.username;
-  post.author = 'VHINCENT';
+//   // const user: User | null = this.findUserById(row.user_id);
+//   // if (user) post.author = user.username;
+//   post.author = 'VHINCENT';
 
-  post.status = row.status;
-  post.source = row.source;
+//   post.status = row.status;
+//   post.source = row.source;
 
-  // const images = this.#mapMedia(row.id);
-  // if (images) post.media = { images: images };
+//   // const images = this.#mapMedia(row.id);
+//   // if (images) post.media = { images: images };
 
-  return post;
-}
+//   return post;
+// }
 
 // const statement = db.prepare('SELECT * FROM posts WHERE id = ?');
 // const row = statement.get(1000);
@@ -243,3 +253,82 @@ function mapRowToPost(row) {
 // const statement = db.prepare('SELECT * FROM posts ORDER BY id DESC'); //ASC - recent, DESC - oldest
 // const rows = statement.all();
 // const all = rows.map((row) => mapRowToPost(JSON.parse(row.data)));
+
+// const events: any = [
+//   { name: 'Event A', date: new Date('2023-01-01') },
+//   { name: 'Event B', date: new Date('2024-05-20') },
+//   { name: 'Event C', date: new Date('2025-12-19') },
+//   { name: 'Event D', date: new Date('2024-12-19') },
+//   { name: 'Event E', date: new Date('2024-12-19') },
+//   { name: 'Event F', date: new Date('2024-12-19') },
+// ];
+
+// // Sort the array in ascending order (oldest to newest)
+// events.sort((a, b) => a.date - b.date);
+
+// // The last element is now the most recent
+// const mostRecentEvent = events.at(-1);
+
+// console.log(events.slice(-2)); // Output: 'Event C'
+
+// import { postRepository } from './src/repository/index.accountRepository.ts';
+
+// const p = await postaccountRepository.findAllPostsAsync();
+// p.sort((a, b) => a.date.published - b.date.publish);
+// const p2 = p.slice(2)[0]
+// console.log(p2.title);
+
+const authenticate = async (username, password) => {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ username, password: btoa(password) }),
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    // console.log(data);
+    return data;
+  } catch (error) {
+    if (error instanceof Error) console.log('Error:', error.message);
+  }
+};
+
+
+const accessProtectedResource = async (token) => {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/auth/test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) console.log('Error:', error.message);
+  }
+};
+
+// const serviceResponse: any = await authenticate('user', 'passd');
+// const data = serviceResponse.responseObject;
+// console.log(data.token);
+// console.log(await accessProtectedResource(data.token))
+
+
+// import SimpBlog from './src/lib/simpblog.lib.js'
+// const s = new SimpBlog('', '')
+// s.authenticateInfo()
+
+const reqparams = {
+  test: 1,
+  test2: 2
+}
+console.log({referer: '',...reqparams})

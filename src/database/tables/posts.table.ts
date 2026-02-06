@@ -54,7 +54,7 @@ export class PostsTable extends SQLiteTable<Post> {
     // const user: User | null = this.findUserById(row.user_id);
     // if (user) post.author = user.username;
     const user = this.#usersTable.findById(row.user_id);
-    post.user_id = row.user_id
+    post.user_id = row.user_id;
     post.author = user?.username || '';
 
     post.status = row.status;
@@ -64,4 +64,10 @@ export class PostsTable extends SQLiteTable<Post> {
     // if (images) post.media = { images: images };
     return post;
   }
+
+  postStatus = (post, status) => {
+    const update = this.getDatabase().prepare(`UPDATE ${this.tableName} SET data = json_replace(data, "$.status", ?) WHERE id = ?`);
+    return update.run(status, post.id);
+  }; 
+  
 }

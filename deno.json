@@ -1,0 +1,13 @@
+{
+  "name": "@simpblog/app",
+  "version": "1.0.0",
+  "tasks": {
+    "start":"deno run --env-file=.env --allow-env --allow-read --allow-write --allow-net --allow-sys src/app.ts",
+    "start:dev": "deno run --env-file=.env --allow-env --allow-read --allow-write --allow-net --allow-sys --watch src/app.ts",
+    "setup":"deno run --allow-env --allow-read --allow-write --allow-net --allow-sys scripts/setup.ts"
+  },
+  "exports": [],
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1"
+  }
+}

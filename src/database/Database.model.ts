@@ -15,9 +15,7 @@ export class Database implements DatabaseI {
   findPostById(id: number): Post | null {
     throw new Error('Method not implemented.');
   }
-  heartPost() {
-    throw new Error('Method not implemented.');
-  }
+  heartPost = (id, user, value?) => this.db.heartPost(id, user, value);
 
   async load() {
     if (this.config.type == 'json') {
@@ -45,8 +43,8 @@ export class Database implements DatabaseI {
     this.db.importPosts(posts);
   }
 
-  setup(dropExistingTables?): void {
-    this.db.setup(dropExistingTables)
+  setup(config?): void {
+    this.db.setup(config);
     // throw new Error('Method not implemented.');
   }
 

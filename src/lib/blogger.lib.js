@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
 import { google } from 'googleapis';
 import fetch from 'node-fetch';
 import parser from 'node-html-parser';
@@ -54,7 +54,7 @@ export async function fetchAllBloggerPosts() {
 //TODO: unused
 async function downloadImage2(imageUrl, destPath) {
   try {
-    const response = await fetch(imageUrl);
+    const response = await fetch(imageUrl, {referrer: 'blogger.lib.js'});
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();

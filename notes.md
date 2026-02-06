@@ -116,3 +116,26 @@ Heavy computations
 Data processing algorithms
 Image or video manipulation
 Any task that requires significant CPU time and would otherwise block the main thread.
+
+# Import views from another project
+```
+const express = require('express');
+const path = require('path');
+const app = express();
+
+// Define paths to both view directories
+const project1Views = path.join(__dirname, 'views'); // Current project's views
+const project2Views = path.join(__dirname, '../another-project/views'); // Relative path to the other project's views
+
+// Set the 'views' setting to an array of paths
+app.set('views', [project1Views, project2Views]);
+
+// Set the view engine (e.g., 'ejs', 'pug')
+app.set('view engine', 'ejs');
+
+// Now you can render views from either directory
+app.get('/', (req, res) => {
+  // Renders 'index.ejs' from the first directory where it is found
+  res.render('index', { title: 'Hey', message: 'Hello there!' });
+});
+```

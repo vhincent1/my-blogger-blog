@@ -38,6 +38,66 @@
           element.style.display = 'none';
         }
       });
+
+    //       class NSFWContent extends HTMLElement {
+    //   constructor() {
+    //     super();
+    //     this.attachShadow({
+    //       mode: 'open'
+    //     }); // Sets up encapsulated DOM
+    //   }
+
+    //   connectedCallback() {
+    //     this.render();
+    //   }
+
+    //   render() {
+    //     // 1. Define Styles and HTML Structure
+    //     this.shadowRoot.innerHTML = `
+    //     <style>
+    //       :host {
+    //         display: block;
+    //         position: relative;
+    //       }
+    //       /* The sensitive content (hidden by default) */
+    //       #content {
+    //         display: none;
+    //       }
+    //     </style>
+
+    //     <div id="warning">I am 18+ years old or older<br/>
+    //       <button id="btn-yes">YES</button>
+    //       <button id="btn-no">NO</button>
+    //     </div>
+
+    //     <div id="content">
+    //       <slot></slot> 
+    //     </div>`;
+
+    //     // 2. Add Event Listeners
+    //     this.shadowRoot.getElementById('btn-yes').addEventListener('click', () => this.toggle(true));
+    //     this.shadowRoot.getElementById('btn-no').addEventListener('click', () => this.toggle(false));
+    //   }
+
+    //   toggle(allowed) {
+    //     const warning = this.shadowRoot.getElementById('warning');
+    //     const content = this.shadowRoot.getElementById('content');
+
+    //     if (allowed) {
+    //       // Hide warning, show content
+    //       warning.style.display = 'none';
+    //       content.style.display = 'block';
+    //     } else {
+    //       // Keep content hidden (or remove the element entirely if you prefer)
+    //       // Per your original code: content stays hidden, warning stays visible
+    //       content.style.display = 'none';
+    //     }
+    //   }
+    // }
+
+    // // 3. Register the component
+    // // Note: Custom elements MUST have a hyphen in the name.
+    // customElements.define('nsfw-content', NSFWContent);
     }
   };
 </script>

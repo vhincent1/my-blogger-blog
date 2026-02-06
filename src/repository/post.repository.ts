@@ -47,15 +47,18 @@ class PostRepository {
     }
     return new Gallery(entries);
   }
+  
+  async getGallery() {
+    // console.log('g:',await this.gallery)
+    return this.gallery;
+  }
 
   //unused
   async updatePosts() {
     this.posts = this.database.getAllBlogPosts();
   }
 
-  async findByIdAsync(id: number): Promise<Post | null> {
-    return this.posts.find((post) => post.id === id) || null;
-  }
+  findByIdAsync = async (id: number): Promise<Post | null> => this.posts.find((post) => post.id === id) || null;
 
   //searchPosts
   async findAllPostsAsync(parameters?: PostParameters): Promise<any> {
@@ -97,10 +100,9 @@ class PostRepository {
     return data;
   }
 
-  async getGallery() {
-    // console.log('g:',await this.gallery)
-    return this.gallery;
-  }
+  heartPost = (id, user) => {
+    this.database.heartPost(id, user);
+  };
 
   // // prettier-ignore
   // filterByYear = async (priorityYear?) => posts?.filter((post) => {
@@ -170,9 +172,5 @@ class PostRepository {
   //   const descendingOrder = this.blogPosts.sort((a, b) => b.id - a.id);
   // }
 }
-
-//test
-// const repo = new PostRepository()
-// console.log(await repo.getGallery())
 
 export default PostRepository;

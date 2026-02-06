@@ -20,7 +20,7 @@ src/
 ├── services/
 │   └── UserService.js
 ├── repositories/
-│   └── UserRepository.js
+│   └── UseraccountRepository.js
 ├── models/
 │   └── User.js
 ├── routes/

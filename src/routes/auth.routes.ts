@@ -3,14 +3,11 @@ import express from 'express';
 import authController from '../controller/auth.controller.ts';
 
 import { loginLimiter } from '../middleware/limiter.middleware.ts';
+import { StatusCodes } from 'http-status-codes';
 
 const route = express.Router();
 
-route.get('/', (req, res) => res.format({
-  'text/html': () => res.render('login', { errorMessage: '' }),
-  'application/json': () => res.json({ message: 'not logged in' }),
-  default: () => res.status(406).send('Not Acceptable'),
-}));
+route.get('/', authController.index);
 
 // Your login route
 // route.post('/', loginLimiter, async (req, res) => {

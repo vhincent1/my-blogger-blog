@@ -28,6 +28,25 @@ CREATE INDEX idx_posts_category ON posts (category);
 CREATE INDEX idx_posts_source ON posts (source);
 CREATE INDEX idx_posts_status ON posts (status);
 --- end of posts schema ---
-Done in 1.00s.
+--- auto-generated JSON schema for users table ---
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY,
+  data JSON
+);
+-- Alter table statements
+ALTER TABLE users ADD COLUMN username TEXT GENERATED ALWAYS AS (json_extract(data, '$.username')) VIRTUAL;
+ALTER TABLE users ADD COLUMN password TEXT GENERATED ALWAYS AS (json_extract(data, '$.password')) VIRTUAL;
+ALTER TABLE users ADD COLUMN email TEXT GENERATED ALWAYS AS (json_extract(data, '$.email')) VIRTUAL;
+ALTER TABLE users ADD COLUMN registration_date TEXT GENERATED ALWAYS AS (json_extract(data, '$.registration_date')) VIRTUAL;
+ALTER TABLE users ADD COLUMN role TEXT GENERATED ALWAYS AS (json_extract(data, '$.role')) VIRTUAL;
+-- Create indexes
+CREATE INDEX idx_users_username ON users (username);
+CREATE INDEX idx_users_password ON users (password);
+CREATE INDEX idx_users_email ON users (email);
+CREATE INDEX idx_users_registration_date ON users (registration_date);
+CREATE INDEX idx_users_role ON users (role);
+--- end of schema ---
+
 
 

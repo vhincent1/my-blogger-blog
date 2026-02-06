@@ -1,7 +1,7 @@
 import { Post } from '../model/Post.model.ts';
 
 import { ServiceResponse } from '../model/ServiceResponse.model.ts';
-import PostRepository  from '../repository/post.repository.ts';
+import PostRepository from '../repository/post.repository.ts';
 import { StatusCodes } from 'http-status-codes';
 
 import { filter, truncate } from '../utils/array.utils.ts';
@@ -22,11 +22,10 @@ class PostService {
       // if (parameters.meta) console.log('getPosts: ', parameters.meta);
       // if (parameters) parameters.meta = { source: 'getPosts' };
       const posts = this.repository.findAllPostsAsync(parameters);
-      // const posts = await this.repository.findAllPostsAsync(parameters);
       if (!posts) return ServiceResponse.failure('No Posts found', parameters, Promise.resolve(null), StatusCodes.NO_CONTENT);
       return ServiceResponse.success<Promise<Post[]>>('Posts found', parameters, posts);
-    } catch (ex) {
-      const errorMessage = `Error finding all posts: $${(ex as Error).message}`;
+    } catch (error) {
+      const errorMessage = `Error fetching posts: ${(error as Error).message}`;
       console.log(errorMessage);
       return ServiceResponse.failure('An error occurred while retrieving posts.', parameters, Promise.resolve(null), StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -38,8 +37,8 @@ class PostService {
       const post = await this.repository.findByIdAsync(id);
       if (post == null) return ServiceResponse.failure('Post not found', id, null, StatusCodes.NOT_FOUND);
       return ServiceResponse.success<Post>('Post found', id, post);
-    } catch (ex) {
-      const errorMessage = `Error finding post: ${id}: $${(ex as Error).message}`;
+    } catch (error) {
+      const errorMessage = `Error finding post: ${id}: ${(error as Error).message}`;
       console.log(errorMessage);
       return ServiceResponse.failure('An error occurred while retrieving a post.', id, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -126,12 +125,17 @@ class PostService {
     return ServiceResponse.failure('No results found', parameters, null, StatusCodes.NOT_FOUND);
   }
 
-  async heartPost(parameters): Promise<ServiceResponse<any>> {
+  async heartPost(id, userId, parameters?): Promise<ServiceResponse<any>> {
     if (parameters) parameters.meta = { source: 'heartPost' };
     // this.repository.heartPost(parameters);
 
-    const heart = new Heart(0, 0, 0);
-    return ServiceResponse.success<Heart>('Send heart', parameters, heart);
+    const heart = new Heart(id, userId, 0);
+    try {
+      this.repository.heartPost(id, userId);
+      return ServiceResponse.success<Heart>('Send heart', parameters, heart);
+    } catch (error) {
+      return ServiceResponse.failure<Heart>(`Heart error: ${error}`, parameters, heart);
+    }
   }
 
   async getArchive(parameters?: any) {
@@ -238,4 +242,4 @@ class PostService {
 // const service = new PostService(new PostRepository());
 // // const posts = await service.getPosts();
 // export default service;
-export default PostService
+export default PostService;

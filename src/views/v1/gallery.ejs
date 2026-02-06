@@ -67,6 +67,7 @@
   const statusDiv = document.getElementById('status')
   const myCheckbox = document.getElementById('myCheckbox');
 
+  // checkbox
   function getValues() {
     const selected = document.getElementsByName('select')
     const total = []
@@ -79,7 +80,7 @@
     console.log('selected values: ', total.length)
     statusDiv.innerHTML = 'Selected: ' + total
   }
-
+  // checkbox
   function clearSelection() {
     console.log('clear')
     const selected = document.getElementsByName('select')

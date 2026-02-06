@@ -1,4 +1,5 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
+
 interface IOResponse {
   success: boolean;
   error?: string;
@@ -21,11 +22,11 @@ export async function moveFile(source, destinationPath): Promise<IOResponse> {
   }
 }
 
-export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000){
+export async function downloadImage(imageUrl, savePath, retries = 5, delay = 1000) {
   // console.log('Downloading image');
   //prettier-ignore
   for (let i = 0; i < retries; i++) try { 
-      const response = await fetch(imageUrl);
+      const response = await fetch(imageUrl, {referrer: 'simpblog downloader'});
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();
@@ -35,9 +36,9 @@ export async function downloadImage(imageUrl, savePath, retries = 5, delay = 100
     } catch (error: any) {
       if (i < retries - 1) {
         await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
-        console.log('retrying')
+        // console.log('retrying')
       } else {
-        console.error(`Failed to download image after ${retries} attempts.`);
+        // console.error(`Failed to download image after ${retries} attempts.`);
         // throw error; // Re-throw if all retries fail
         // throw new Error( `Failed to download image after ${retries} attempts.`)
         return {success: false, error: `Failed to download image after ${retries} attempts.`};

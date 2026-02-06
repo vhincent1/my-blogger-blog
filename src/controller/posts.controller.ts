@@ -9,7 +9,7 @@ async function publishPost(req, res) {
   // console.log(serviceResponse)
 
   const postFound = serviceResponse.success;
-  console.log(postFound, postId);
+  // console.log(postFound, postId);
 
   const parameters: any = {
     post: postFound ? serviceResponse.responseObject : null,

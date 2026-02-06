@@ -75,8 +75,33 @@ test
     <!-- The folder list will be generated here by JavaScript -->
   </div>
 </div>
+<input type="file" accept="image/*" id="file-upload">
+<img src="#" alt="Image Preview" id="image-preview" style="max-width: 300px; max-height: 300px; display: none;">
 
 <script>
+
+  // Get references to the elements
+const fileUpload = document.getElementById('file-upload');
+const imagePreview = document.getElementById('image-preview');
+
+// Add an event listener to the file input
+fileUpload.addEventListener('change', function(event) {
+    const file = event.target.files[0]; // Get the first selected file
+
+    if (file) {
+        // Create a temporary URL for the file
+        const fileURL = URL.createObjectURL(file);
+
+        // Set the image source to the temporary URL
+        imagePreview.src = fileURL;
+        imagePreview.style.display = 'block'; // Make the image visible
+
+        // Optional: Free up memory after the image has loaded
+        imagePreview.onload = function() {
+            URL.revokeObjectURL(fileURL);
+        };
+    }
+});
   function validateUploadSize(files, limitMB) {
     let totalSize = 0;
     for (let i = 0; i < files.length; i++) totalSize += files[i].size;
@@ -113,6 +138,7 @@ test
     }
 
     updateStatus(files);
+    
   });
 
   function updateStatus(files) {

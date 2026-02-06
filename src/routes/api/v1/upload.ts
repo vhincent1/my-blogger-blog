@@ -1,11 +1,11 @@
 import express from 'express';
 import multer from 'multer';
-import { Worker } from 'worker_threads';
+import { Worker } from 'node:worker_threads';
 import { StatusCodes } from 'http-status-codes';
 
 const route = express.Router();
 
-import fs from 'fs';
+import fs from 'node:fs';
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

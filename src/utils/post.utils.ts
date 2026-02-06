@@ -3,7 +3,7 @@ import appConfig from '../app.config.ts';
 import { fileFormat, getFileSize, checkFileExistence } from './io.utils.ts';
 // content formatting
 import parser from 'node-html-parser';
-import path from 'path';
+import path from 'node:path';
 import type { GalleryEntry } from '../model/Gallery.model.ts';
 
 // generates size of post
@@ -45,8 +45,9 @@ export async function buildSizeTable(post) {
 }
 
 export function buildGallery(post) {
+  //TODO: sort posts
   const document = parser.parse(post.content);
-  const imagesInPost: any = [];
+  const imagesInPost: string[] = [];
   const img = document.querySelectorAll('img');
 
   const nsfw = document.querySelectorAll('nsfw'); //widget
@@ -54,7 +55,7 @@ export function buildGallery(post) {
 
   if (img.length > 0) {
     img.forEach((element) => {
-      const originalSource = element.getAttribute('src');
+      const originalSource: string | undefined = element.getAttribute('src');
       // if (isValidUrl(originalSource)) {
       //   const base = new URL(originalSource).pathname
       //   //decodeURIComponent
@@ -63,7 +64,7 @@ export function buildGallery(post) {
       //   const localPath = base.replace(fileName, '')
 
       //   // console.log(filename)
-      imagesInPost.push(originalSource);
+      if (originalSource) imagesInPost.push(originalSource);
       // } else {
       //   console.log('not valid')
       // }
@@ -110,7 +111,7 @@ export function format(post) {
 
 //import from folder
 
-import * as fs2 from 'fs/promises';
+import * as fs2 from 'node:fs/promises';
 import { Post, PostStatus, getPostStatusByName } from '../model/Post.model.ts';
 export async function importFolder(directoryPath) {
   async function readFolderContents(dirPath) {

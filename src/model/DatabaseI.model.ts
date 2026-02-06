@@ -2,7 +2,7 @@ import type Heart from "./Heart.model.ts";
 import type { Post } from "./Post.model.ts";
 
 export interface DatabaseI {
-  setup(dropExistingTables?): void;
+  setup(config?): void;
   load(): void;
   close(): void;
 
@@ -17,5 +17,5 @@ export interface DatabaseI {
   // savePost(post): void
 
   getHearts(): Heart[];
-  heartPost(id, user, value);
+  heartPost(id, user, value?);
 }

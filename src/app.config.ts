@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
@@ -10,9 +10,7 @@ const CONFIG = {
     blogId: '7847840505089960893',
 
     // where to save export data
-    exported: './public/dist/blogger-export.json', // ->
-    // converted posts
-    new: './public/dist/new.json',
+    exported: './public/dist/blogger-export.json', 
 
     // where to save/display exported media (updates <img src> tags)
     exportConfig: {
@@ -30,7 +28,7 @@ const CONFIG = {
 
   database: {
     type: 'sqlite', // storage type : json, sqlite
-    file: './public/dist/new.json', // blog posts data
+    file: './public/dist/posts.json', // blog posts data
     sqlite3: './database/test.db',
     /**
      * where content is stored (./public/content/AUTHOR/POST_ID)

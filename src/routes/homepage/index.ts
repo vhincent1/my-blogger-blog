@@ -12,7 +12,7 @@ const route = express.Router();
  */
 route.get('/', homepageController.getFrontPage);
 route.get('/index', homepageController.getIndex);
-route.get('/dashboard', /*authController.isAuthenticated,*/ dashboardController.index);
+route.get('/dashboard', authController.isAuthenticated, dashboardController.index);
 route.get('/gallery', galleryController.index);
 
 //wip
@@ -31,12 +31,16 @@ route.get('/search', async (req, res) => {
 route.get('/v2', async (req, res) => {
   res.render('v2/index', { theme: 1, limit: 5 });
 });
+
 route.get('/v2/index', async (req, res) => {
   const { limit, page } = req.query;
   // console.log(req.query)
   res.render('v2/index', { theme: 0, limit: 25 });
 });
 
+route.get('/heart', async (req, res) => {
+  res.render('v1/heart');
+});
 
 import jwt from 'jsonwebtoken';
 

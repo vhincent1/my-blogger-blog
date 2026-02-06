@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import path from 'path';
+import path from 'node:path';
 // color text
 import chalk from 'chalk';
 // express
@@ -14,7 +14,7 @@ import routes from './routes/app.routes.ts';
 //middleware
 import * as middlewares from './middleware/errorhandler.middleware.ts';
 import { handleShutdown } from './middleware/shutdown.middleware.ts';
-import expressStatusMonitorMiddleware from './middleware/express-status-monitor.middleware.ts';
+// import expressStatusMonitorMiddleware from './middleware/express-status-monitor.middleware.ts';
 
 const app = express();
 const port = process.env.PORT;
@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // Enable CORS for all routes (for development purposes, or if you want to allow all origins)
 app.use(cors());
-app.use(expressStatusMonitorMiddleware);
+// app.use(expressStatusMonitorMiddleware);
 
 // Or, configure CORS to allow specific origins:
 // app.use(cors({
@@ -61,6 +61,7 @@ app.use(
     secret: process.env.SESSION_SECRET!,
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
+    cookie: { maxAge: 1000 * 60 * 60 * 2 }, // Optional: session cookie expiration time (e.g., 2 hours)
   })
 );
 
@@ -70,7 +71,7 @@ app.use((req, res, next) => {
   // Get the remote IP address
   let remoteIp = req.ip || req.connection.remoteAddress; // Use req.ip if trust proxy is enabled
   // Store the IP address in the session if it's not already there
-  const session: any = req.session
+  const session: any = req.session;
   if (!session.remoteAddress) {
     session.remoteAddress = remoteIp;
   }

@@ -85,6 +85,7 @@ class JSONDatabase implements DatabaseI {
   getAllBlogPosts(): Post[] {
     // this.load()
     const posts: Post[] = this.blogPosts;
+    posts.sort((a: any, b: any) => a.date.published - b.date.published); //ascending order
     return posts.reverse();
   }
 

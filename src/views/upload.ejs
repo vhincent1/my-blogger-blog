@@ -20,6 +20,27 @@
   <%=message %>
   <img src='<%=imageUrl%>'>
   <% } %>
+
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" id="imageInput" accept="image/*" onchange="previewImage(event)">
+    <img id="imagePreview" src="#" alt="Image Preview" style="display: none; max-width: 200px; max-height: 200px;">
+    <button type="submit">Upload Image</button>
+  </form>
+
+  <script>
+    function previewImage(event) {
+      const [file] = event.target.files;
+      const preview = document.getElementById('imagePreview');
+      if (file) {
+        // Use URL.createObjectURL to create a local URL for the image file
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+        preview.src = '#';
+      }
+    }
+  </script>
 </body>
 
 </html>

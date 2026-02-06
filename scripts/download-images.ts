@@ -1,6 +1,8 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
+
 import parser from 'node-html-parser';
-import path from 'path';
+import path from 'node:path';
 
 import appConfig from '../src/app.config.ts';
 import type { Post } from '../src/model/Post.model.ts';
@@ -72,7 +74,7 @@ const downloadEntries = async (entries: PostEntry[], saveFolder: SavePathCallbac
       if (urlType == 'download') {
       }
 
-      const result: any = await Promise.resolve(downloadImage(entry.source, savePath));
+      const result: any = await downloadImage(entry.source, savePath);
 
       if (result) {
         const identifier: any = entry.post.id;
@@ -90,7 +92,7 @@ const downloadEntries = async (entries: PostEntry[], saveFolder: SavePathCallbac
             error: await result.error.toString(),
           };
           missingData.push(errorInfo);
-          console.log('Error downloading image:', await result.error);
+          // console.log('Error downloading image:', await result.error);
         }
       }
     } else {
@@ -150,6 +152,16 @@ const buildEntries = async (posts: Post[]): Promise<PostEntry[]> => {
 export { buildEntries, downloadEntries, type SavePathCallback, type PostEntry };
 
 const run = async () => {
+  // Blogger posts
+  const data = await fs.readFile(appConfig.blogger.exported, 'utf8');
+  const bloggerPosts: Post[] = convertBloggerPosts(JSON.parse(data));
+
+  // PostService
+  const serviceResponse = await postService.getPosts();
+  const posts = await serviceResponse.responseObject;
+
+  const entries = await buildEntries(bloggerPosts);
+
   /**
    *  Customize
    */
@@ -163,15 +175,24 @@ const run = async () => {
     return `${appConfig.blogger.exportConfig.uploadPath}/${post.user_id}/${post.id}/${fileName}`;
   };
 
-  // Blogger posts
-  const data = await fs.readFile(appConfig.blogger.exported, 'utf8');
-  const bloggerPosts: Post[] = convertBloggerPosts(JSON.parse(data));
+//   let counter = 0;
+//   const saveFolderBlob: SavePathCallback = (entry: PostEntry) => {
+//     const savePath = '~/Downloads/exported';
 
-  // PostService
-  const serviceResponse = await postService.getPosts();
-  const posts = await serviceResponse.responseObject;
+//     const post = entry.post;
+//     console.log('saveFolder', post);
+//     // const imagePath = new URL(entry.source).pathname;
+//     const imagePath = entry.source;
+//     let fileName = decodeURIComponent(path.basename(imagePath));
 
-  const entries = await buildEntries(bloggerPosts);
+//     const saveFullPath = `${savePath}/${fileName}`;
+
+//     if (fsSync.existsSync(saveFullPath)) {
+//       fileName = `${fileName}${counter++}`; //todo counter
+//     }
+//     // the callback path to save the pics
+//     return saveFullPath;
+//   };
 
   //download
   await Promise.resolve(downloadEntries(entries, saveFolder));

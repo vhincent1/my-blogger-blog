@@ -64,7 +64,7 @@ function getPostsByDate(month, year) {
 // console.log(postsByMonthYear)
 
 // ----------- Archive Menu -----------
-const archiveMenu = [];
+const archiveMenu: any = [];
 
 // load
 function buildMenu() {
@@ -74,7 +74,7 @@ function buildMenu() {
       // yearly
       const yearlyPostCount = postCountByYear[year];
       // console.log("--- " + year + " (" + yearlyPostCount + ") ----");
-      let YTD = { year: year, total: yearlyPostCount };
+      let YTD: any = { year: year, total: yearlyPostCount };
       let MTD: any = [];
       //monthly
       // key = "Month Year"

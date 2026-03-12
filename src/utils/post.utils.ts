@@ -4,6 +4,7 @@ import { fileFormat, getFileSize, checkFileExistence } from './io.utils.ts';
 // content formatting
 import parser from 'node-html-parser';
 import path from 'node:path';
+import { Buffer } from "node:buffer";
 import type { GalleryEntry } from '../model/Gallery.model.ts';
 
 // generates size of post

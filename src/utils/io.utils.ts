@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { Buffer } from "node:buffer";
 
 interface IOResponse {
   success: boolean;
@@ -26,7 +27,7 @@ export async function downloadImage(imageUrl, savePath, retries = 5, delay = 100
   // console.log('Downloading image');
   //prettier-ignore
   for (let i = 0; i < retries; i++) try { 
-      const response = await fetch(imageUrl, {referrer: 'simpblog downloader'});
+      const response = await fetch(imageUrl, {referrer: 'http://localhost/'});
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();
@@ -41,7 +42,7 @@ export async function downloadImage(imageUrl, savePath, retries = 5, delay = 100
         // console.error(`Failed to download image after ${retries} attempts.`);
         // throw error; // Re-throw if all retries fail
         // throw new Error( `Failed to download image after ${retries} attempts.`)
-        return {success: false, error: `Failed to download image after ${retries} attempts.`};
+        return {success: false, error: `Failed to download image after ${retries} attempts. ${error}`};
       }
       // console.error('Error downloading the image with fetch:', error);
       // throw error;

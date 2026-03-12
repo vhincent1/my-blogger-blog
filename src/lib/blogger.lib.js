@@ -52,60 +52,60 @@ export async function fetchAllBloggerPosts() {
 // -----------------------------------------------------------
 
 //TODO: unused
-async function downloadImage2(imageUrl, destPath) {
-  try {
-    const response = await fetch(imageUrl, {referrer: 'blogger.lib.js'});
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+// async function _downloadImage2(imageUrl, destPath) {
+//   try {
+//     const response = await fetch(imageUrl, { referrer: 'blogger.lib.js' });
+//     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+//     const blob = await response.blob();
+//     const arrayBuffer = await blob.arrayBuffer();
+//     const buffer = Buffer.from(arrayBuffer);
 
-    async function getImageHash(buffer, algorithm = 'md5') {
-      try {
-        // const fileBuffer = await fs.readFile(imagePath); // Asynchronously read the image file
-        const fileBuffer = buffer;
-        const hash = crypto.createHash(algorithm);
-        hash.update(fileBuffer);
-        return hash.digest('hex');
-      } catch (error) {
-        console.error(`Error generating hash for ${imagePath}:`, error);
-        throw error;
-      }
-    }
+//     async function getImageHash(buffer, algorithm = 'md5') {
+//       try {
+//         // const fileBuffer = await fs.readFile(imagePath); // Asynchronously read the image file
+//         const fileBuffer = buffer;
+//         const hash = crypto.createHash(algorithm);
+//         hash.update(fileBuffer);
+//         return hash.digest('hex');
+//       } catch (error) {
+//         console.error(`Error generating hash for ${imagePath}:`, error);
+//         throw error;
+//       }
+//     }
 
-    const hash = await getImageHash(buffer);
-    const savePath = path.resolve(destPath, hash);
+//     const hash = await getImageHash(buffer);
+//     const savePath = path.resolve(destPath, hash);
 
-    // dup
-    if (await checkFileExistence(savePath)) {
-      // const __dirname = path.resolve()
-      // const fileExtension = path.extname(fileName) || '';
-      // const fileNameWithoutExt = fileName.replace(fileExtension, '')
-      // // const hash = await getImageHash(savePath)
-      // // console.log('hash: ', hash)
-      // const oldFilePath = path.join(__dirname, 'public', fileName);
-      // //const newFileName = fileNameWithoutExt + '_' + hash + fileExtension
-      // const newFileName = hash
-      // const newFilePath = path.join(__dirname, 'public', newFileName);
-      // fs.rename(oldFilePath, newFilePath, (err) => {
-      //   if (err) {
-      //     console.error('Error renaming file:', err);
-      //     return;
-      //   }
-      //   console.log('File renamed successfully!');
-      // })
-      // result = { hash: hash, fileName: fileName }
-    } else {
-      await fs.writeFile(savePath, buffer);
-    }
-    const fileName = decodeURIComponent(path.basename(new URL(imageUrl).pathname));
-    return { status: 'OK', hash, fileName, savePath };
-  } catch (error) {
-    return { status: 'ERROR', error };
-    // console.error('Error downloading the image with fetch:', error);
-    // throw error;
-  }
-}
+//     // dup
+//     if (await checkFileExistence(savePath)) {
+//       // const __dirname = path.resolve()
+//       // const fileExtension = path.extname(fileName) || '';
+//       // const fileNameWithoutExt = fileName.replace(fileExtension, '')
+//       // // const hash = await getImageHash(savePath)
+//       // // console.log('hash: ', hash)
+//       // const oldFilePath = path.join(__dirname, 'public', fileName);
+//       // //const newFileName = fileNameWithoutExt + '_' + hash + fileExtension
+//       // const newFileName = hash
+//       // const newFilePath = path.join(__dirname, 'public', newFileName);
+//       // fs.rename(oldFilePath, newFilePath, (err) => {
+//       //   if (err) {
+//       //     console.error('Error renaming file:', err);
+//       //     return;
+//       //   }
+//       //   console.log('File renamed successfully!');
+//       // })
+//       // result = { hash: hash, fileName: fileName }
+//     } else {
+//       await fs.writeFile(savePath, buffer);
+//     }
+//     const fileName = decodeURIComponent(path.basename(new URL(imageUrl).pathname));
+//     return { status: 'OK', hash, fileName, savePath };
+//   } catch (error) {
+//     return { status: 'ERROR', error };
+//     // console.error('Error downloading the image with fetch:', error);
+//     // throw error;
+//   }
+// }
 // -----------------------------------------------------------
 
 /*
@@ -114,7 +114,7 @@ async function downloadImage2(imageUrl, destPath) {
  * hostPath:   'http://127.0.0.1:3000/images/'
  * }
  */
-export async function convertAndFormatBloggerPosts(exportedData, config) {
+export function convertAndFormatBloggerPosts(exportedData, config) {
   const bloggerData = exportedData.reverse();
   const convertedPosts = [];
 
@@ -150,7 +150,7 @@ export async function convertAndFormatBloggerPosts(exportedData, config) {
     const imageFiles = [];
     const imgElement = document.querySelectorAll('img');
     if (imgElement.length > 0) {
-      imgElement.forEach(async (img) => {
+      imgElement.forEach((img) => {
         const originalSource = img.getAttribute('src');
         const imagePath = new URL(originalSource).pathname;
         const baseFileName = path.basename(imagePath);
@@ -213,7 +213,7 @@ export function convertBloggerPosts(data) {
     // new format
     const post = new Post(startingIndex);
     post.author = bloggerPost.author.displayName;
-    post.user_id = 2
+    post.user_id = 2;
     post.title = bloggerPost.title;
     post.content = bloggerPost.content;
     if (bloggerPost.labels == undefined) {
@@ -228,7 +228,7 @@ export function convertBloggerPosts(data) {
     post.category = 0;
     convertedPosts.push(post);
   }
-  return {convertedPosts}
+  return { convertedPosts };
 }
 
 export async function checkFileExistence(folderPath) {
@@ -241,13 +241,15 @@ export async function checkFileExistence(folderPath) {
   }
 }
 
-async function inspectPosts(jsonData, id) {
+export async function inspectPosts(jsonData, id) {
   console.log('Posts size: ', jsonData.length);
   let data = jsonData;
   if (id) data = data.filter((post) => post.id == id);
   const imagePosts = [];
   const uploadedVideos = [];
   const videoPosts = [];
+  const youtubeVideos = [];
+
   data.forEach((post) => {
     // if (post.index != 5) { // 2 cat pics
     //   return;
@@ -260,15 +262,15 @@ async function inspectPosts(jsonData, id) {
       //   console.log(`Post ${post.index} has ${imageTags.length}`);
 
       const imageUrls = [];
-      imageTags.forEach(async (img) => {
+      imageTags.forEach( (img) => {
         const imgSrc = img.getAttribute('src');
         imageUrls.push(imgSrc);
-        console.log(imgSrc);
-        try {
-          const filename = path.basename(new URL(imgSrc).pathname);
-        } catch (err) {
-          console.log('error');
-        }
+        // console.log(imgSrc);
+        // try {
+        //   const filename = path.basename(new URL(imgSrc).pathname);
+        // } catch (err) {
+        //   console.log('error');
+        // }
       });
 
       const template = {
@@ -283,7 +285,24 @@ async function inspectPosts(jsonData, id) {
     // posts that has an uploaded video
     if (post.content.includes('BLOG_video_class')) {
       videoPosts.push(post);
-      if (post.content.includes('youtube.com')) return;
+
+      //youtube video posts
+      if (post.content.includes('youtube.com')) {
+        const iframes = document.querySelectorAll('iframe');
+
+        iframes.forEach((iframe) => {
+          const src = iframe.getAttribute('src');
+          youtubeVideos.push({ postId: post.id, src });
+          /*const regex = /\/embed\/([^/?#]+)/;
+          const match = url.match(regex);
+
+          if (match) {
+            const videoId = match[1];
+            console.log(videoId); // "iks1utuwuag"
+          }*/
+        });
+        return;
+      }
       uploadedVideos.push(post);
       // console.log(post.url);
     }
@@ -293,29 +312,20 @@ async function inspectPosts(jsonData, id) {
     // if (replies >= 1) {
     //   console.log(post.title);
     // }
-
-    // posts that has a youtube video
-    // const youtubeVideos = extractYoutubeVideoIds(post.content);
-    // if (youtubeVideos.length > 0) {
-    //   youtubePosts.push({
-    //     postId: post.index,
-    //     videos: youtubeVideos,
-    //   });
-    // }
-    console.log(post.content);
   });
 
   console.log('Total Media Posts: ' + imagePosts.length);
   console.log('Total Video Posts: ' + videoPosts.length);
   // needs to be downloaded manually
   console.log('Total Uploaded Media Posts : ' + uploadedVideos.length);
+  console.log('Total YouTube videos posts : ' + youtubeVideos.length);
 
   const exportInspect = parameters.exportConfig.inspectLog;
   if (exportInspect) {
     let manualDownloadInfo = [];
     uploadedVideos.forEach((post) => manualDownloadInfo.push({ postId: post.id, author: post.author, sourceUrl: post.source }));
     //todo toggle
-    console.log(exportInspect);
+    // console.log(exportInspect);
     await fs.writeFile(exportInspect, JSON.stringify(manualDownloadInfo, null, 1));
   }
   // misc
@@ -330,6 +340,8 @@ async function inspectPosts(jsonData, id) {
   imagePosts.forEach((p) => {
     if (!p.hasCorrectAmount) console.log(p);
   });
+
+  return { imagePosts, uploadedVideos, videoPosts, youtubeVideos };
 }
 
 import SQLiteDatabase from '../database/sqlite.database.ts';
@@ -337,7 +349,7 @@ import JSONDatabase from '../database/json.database.ts';
 
 async function convert() {
   if (await checkFileExistence(exportFile)) {
-    let data = await fs.readFile(exportFile, 'utf8');
+    const data = await fs.readFile(exportFile, 'utf8');
     const result = await convertAndFormatBloggerPosts(JSON.parse(data), parameters.exportConfig);
 
     const convertedData = result.convertedPosts;
@@ -381,11 +393,13 @@ async function run() {
       exportBlog();
       break;
     case 'inspect':
-      const inspectFile = parameters.new;
-      if (await checkFileExistence(inspectFile)) {
-        const data = await fs.readFile(inspectFile, 'utf8');
-        const postId = process.argv[3];
-        inspectPosts(JSON.parse(data), postId);
+      {
+        const inspectFile = parameters.new;
+        if (await checkFileExistence(inspectFile)) {
+          const data = await fs.readFile(inspectFile, 'utf8');
+          const postId = process.argv[3];
+          inspectPosts(JSON.parse(data), postId);
+        }
       }
       break;
     default:

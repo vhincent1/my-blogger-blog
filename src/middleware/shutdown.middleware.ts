@@ -7,9 +7,9 @@ const handleShutdown = (server, signal) => {
   database.close()
   server.close(() => {
     console.log('server closed');
-    process.exit();
+    process.exit(1);
   });
-  setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+  // setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
 };
 
 export { handleShutdown };

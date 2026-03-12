@@ -5,7 +5,7 @@ import appConfig from '../src/app.config.ts';
 import database from '../src/database/index.database.ts';
 import { writeJsonFile } from '../src/database/json.database.ts';
 import type { Post } from '../src/model/Post.model.ts';
-import { checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts } from '../src/lib/blogger.lib.js';
+import { checkFileExistence, fetchAllBloggerPosts, convertBloggerPosts, inspectPosts } from '../src/lib/blogger.lib.js';
 import { buildEntries, downloadEntries, type PostEntry, type SavePathCallback } from './download-images.ts';
 
 interface BloggerLibResults {
@@ -39,14 +39,23 @@ exportBlogger
   .then(
     (bloggerPosts: any) => {
       console.log('Posts fetched:', bloggerPosts.length);
-      const result: BloggerLibResults = convertBloggerPosts(bloggerPosts, appConfig.blogger.exportConfig);
+      const result: BloggerLibResults = convertBloggerPosts(bloggerPosts);
       return result;
     },
     (error) => {
       console.error('Failure:', error);
       throw new Error('Further error processing');
-    }
+    },
   )
+  /**
+   * Gather youtube videos
+   */
+  .then(async (processedResult: BloggerLibResults) => {
+    console.log('Gather YouTube videos to download...');
+    const { youtubeVideos } = await inspectPosts(processedResult.convertedPosts);
+    await fs.writeFile('./public/dist/youtube-videos.json', JSON.stringify(youtubeVideos, null, 2), 'utf8');
+    return processedResult;
+  })
   /**
    * Download pictures
    */
@@ -78,7 +87,7 @@ exportBlogger
    * Import to database
    */
   .then(async (processedResult: BloggerLibResults) => {
-    const result = await processedResult;
+    const result = processedResult;
 
     if (result.convertedPosts) {
       console.log('Importing to', appConfig.database.type);

@@ -8,15 +8,14 @@ import type { DatabaseI } from '../model/DatabaseI.model.ts';
 import { PostsTable } from './tables/posts.table.ts';
 import { UsersTable } from './tables/users.table.ts';
 
-import { PostStatus, Post } from '../model/Post.model.ts';
-import Heart from '../model/Heart.model.ts';
+import type { PostStatus, Post } from '../model/Post.model.ts';
+import type Heart from '../model/Heart.model.ts';
 import User from '../model/User.model.ts';
 import { HeartsTable } from './tables/hearts.table.ts';
 
 export class SQLiteDatabase implements DatabaseI {
   version = 2; //2 json
   #db;
-
   #postsTable: PostsTable;
   #usersTable: UsersTable;
   #heartsTable: HeartsTable;

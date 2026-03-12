@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { ServiceResponse } from '../model/ServiceResponse.model.ts';
 
+import { Buffer } from "node:buffer";
+
 function index(req, res) {
   return res.format({
     'text/html': () => res.render('login', { errorMessage: '' }),

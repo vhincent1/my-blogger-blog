@@ -32,6 +32,11 @@ class PostRepository {
       const post: any = this.posts[index];
       // post.id = startIndex++;
       post.size = await buildSizeTable(post);
+
+      // if(index == 262){
+      //   console.log('Size:')
+      //   console.log(post.size)
+      // }
     }
     // posts = posts.reverse();
   }

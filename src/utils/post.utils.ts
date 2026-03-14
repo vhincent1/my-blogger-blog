@@ -24,7 +24,7 @@ export async function buildSizeTable(post) {
     }
 
     // if(post.id ==262){
-    //   console.log(filename)
+    //   console.log(imagePath)
     // }
   }
 

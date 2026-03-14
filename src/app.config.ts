@@ -14,7 +14,7 @@ const CONFIG = {
 
     // where to save/display exported media (updates <img src> tags)
     exportConfig: {
-      uploadPath: './public/content/', // folder path
+      uploadPath: './public/content/', // upload path
       hostPath: '/content/', // img src tags
       // hostPath: 'http://127.0.0.1:3000/content/',
       // hostPath: 'http://192.168.40.220:3000/content/',
@@ -36,7 +36,7 @@ const CONFIG = {
     // uploaded media path
     uploadPath: process.cwd() + '/public/content/',
     // host: 'http://127.0.0.1:3000', // host
-    contentPath: (post) => CONFIG.database.uploadPath + post.author + '/' + post.id + '/', // SAME THING
+    contentPath: (post) => CONFIG.database.uploadPath + (post.author == 'Vhincent' ? 2 : 0) + '/' + post.id + '/', // SAME THING
   },
 
   // express config

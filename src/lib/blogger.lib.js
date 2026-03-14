@@ -262,7 +262,7 @@ export async function inspectPosts(jsonData, id) {
       //   console.log(`Post ${post.index} has ${imageTags.length}`);
 
       const imageUrls = [];
-      imageTags.forEach( (img) => {
+      imageTags.forEach((img) => {
         const imgSrc = img.getAttribute('src');
         imageUrls.push(imgSrc);
         // console.log(imgSrc);
@@ -292,7 +292,7 @@ export async function inspectPosts(jsonData, id) {
 
         iframes.forEach((iframe) => {
           const src = iframe.getAttribute('src');
-          youtubeVideos.push({ postId: post.id, src });
+          youtubeVideos.push({ author: post.author, postId: post.id, src });
           /*const regex = /\/embed\/([^/?#]+)/;
           const match = url.match(regex);
 

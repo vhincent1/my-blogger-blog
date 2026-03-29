@@ -14,7 +14,8 @@ interface BloggerLibResults {
 }
 
 const exportBlogger = new Promise(async (resolve, reject) => {
-  const file = appConfig.blogger.exported;
+  const file = appConfig.blogger.exported;//TODO: create directory first
+
   if (await checkFileExistence(file)) {
     console.log('Using exported data:', file);
     const data = await fs.readFile(file, 'utf8');

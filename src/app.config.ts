@@ -10,7 +10,7 @@ const CONFIG = {
     blogId: '7847840505089960893',
 
     // where to save export data
-    exported: './public/dist/blogger-export.json', 
+    exported: './public/dist/blogger-export.json', //TODO: create directory
 
     // where to save/display exported media (updates <img src> tags)
     exportConfig: {
